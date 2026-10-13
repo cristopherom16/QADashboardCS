@@ -71,16 +71,30 @@
       font-weight: 600;
     }
 
-    /* COLUMNA SCHEDULE CORTA */
+    /* COLUMNAS CON ANCHO COMPACTO/ACORTADO */
+    .cell-branch {
+      width: 100px;
+      max-width: 100px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .cell-leaders {
+      width: 110px;
+      max-width: 110px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
     .cell-schedule {
-      width: 130px;
-      max-width: 130px;
+      width: 120px;
+      max-width: 120px;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
     }
 
-    /* SECCIÓN DE COMENTARIOS: VISTA PREVIA Y HOVER FLOATING TOOLTIP */
+    /* SECCIÓN DE COMENTARIOS: CROP A 1 LÍNEA Y POPOVER DESPLEGABLE HACIA ABAJO CON SCROLL */
     .comment-container {
       position: relative;
       width: 200px;
@@ -101,7 +115,7 @@
     .comment-popover {
       display: none;
       position: absolute;
-      bottom: 110%;
+      top: 100%; /* Muestra el comentario hacia ABAJO */
       left: 0;
       width: 260px;
       max-height: 180px;
@@ -114,9 +128,9 @@
       font-size: 11px;
       white-space: pre-wrap;
       word-break: break-word;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      z-index: 50;
-      pointer-events: none;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      z-index: 100;
+      pointer-events: auto; /* Permite interactuar y hacer scroll dentro del cuadro */
     }
     .comment-container:hover .comment-popover {
       display: block;
@@ -546,7 +560,7 @@
     firebase.initializeApp(firebaseConfig);
     const rtdb = firebase.database();
 
-    // BASE DATASETS (SinDays Off)
+    // BASE DATASETS (Sin Days Off)
     const phonesGuaColData = [
       ["Acsa Esquivel", "Insurance phones", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM"],
       ["Alexander Alvarado", "Phones", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM"],
@@ -653,7 +667,6 @@
       document.body.removeChild(tempSpan);
     }
 
-    // Actualiza dinámicamente el texto del cuadro emergente (Tooltip)
     function updateCommentPopover(textarea) {
       const popover = textarea.nextElementSibling;
       if (popover) {
@@ -764,8 +777,8 @@
       tr.innerHTML = `
         <td class="p-2"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="autoResizeInput(this); renderTableChart('${tableId}')"></td>
         <td class="p-2"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
-        <td class="p-2"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
-        <td class="p-2"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
+        <td class="p-2"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text cell-branch text-slate-300"></td>
+        <td class="p-2"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text cell-leaders text-slate-300"></td>
         <td class="p-2"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text cell-schedule text-slate-400 text-[11px]"></td>
         
         <td class="p-2 text-center"><input type="number" value="${agent[5] || 0}" min="0" max="100" class="cell-input qa1 font-bold" oninput="updateCalculations(this)"></td>
@@ -811,7 +824,7 @@
 
       tbody.appendChild(tr);
 
-      tr.querySelectorAll('input[type="text"]:not(.cell-schedule)').forEach(input => autoResizeInput(input));
+      tr.querySelectorAll('input[type="text"]:not(.cell-schedule):not(.cell-branch):not(.cell-leaders)').forEach(input => autoResizeInput(input));
 
       // Apply conditional formatting
       applyConditionalFormatting(tr.querySelector('.qa1'), 'qa');
@@ -838,8 +851,8 @@
       tr.innerHTML = `
         <td class="p-2"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="autoResizeInput(this); renderTableChart('${tableId}')"></td>
         <td class="p-2"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
-        <td class="p-2"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
-        <td class="p-2"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
+        <td class="p-2"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text cell-branch text-slate-300"></td>
+        <td class="p-2"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text cell-leaders text-slate-300"></td>
         <td class="p-2"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text cell-schedule text-slate-400 text-[11px]"></td>
         
         <td class="p-2 text-center"><input type="number" value="${agent[5] || 0}" min="0" max="100" class="cell-input qaTotal font-bold" oninput="updateCasesCalculations(this)"></td>
@@ -883,7 +896,7 @@
 
       tbody.appendChild(tr);
 
-      tr.querySelectorAll('input[type="text"]:not(.cell-schedule)').forEach(input => autoResizeInput(input));
+      tr.querySelectorAll('input[type="text"]:not(.cell-schedule):not(.cell-branch):not(.cell-leaders)').forEach(input => autoResizeInput(input));
 
       // Apply conditional formatting for Cases
       applyConditionalFormatting(tr.querySelector('.qaTotal'), 'qa');
