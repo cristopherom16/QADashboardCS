@@ -10,7 +10,10 @@
   <!-- Chart.js Library -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Firebase Compat SDKs (App, Realtime Database, Firestore) -->
+  <!-- SheetJS Library (for Excel export) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Firebase Compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -104,36 +107,45 @@
   <div id="toast" class="toast-msg"><i class="fa-solid fa-check-circle mr-2"></i><span id="toast-text">Data Saved Successfully!</span></div>
 
   <!-- SIDEBAR NAVIGATION -->
-  <aside class="w-full md:w-64 bg-[#141824] border-r border-[#2a344d] flex flex-col flex-shrink-0">
-    <div class="p-5 border-b border-[#2a344d] flex items-center space-x-3">
-      <!-- Highway Yellow "H" Circular Logo SVG -->
-      <div class="w-11 h-11 bg-[#20283d] rounded-full flex items-center justify-center p-2 shadow-md border border-slate-700/60 flex-shrink-0">
-        <svg viewBox="0 0 260 180" class="w-full h-full text-[#ebbd31] fill-current">
-          <path d="M 52 0 L 98 0 L 46 180 L 0 180 Z M 162 0 L 208 0 L 260 180 L 214 180 Z M 70 80 L 188 80 L 181 120 L 59 120 Z" />
-        </svg>
+  <aside class="w-full md:w-64 bg-[#141824] border-r border-[#2a344d] flex flex-col flex-shrink-0 justify-between h-screen">
+    <div>
+      <div class="p-5 border-b border-[#2a344d] flex items-center space-x-3">
+        <!-- Highway Yellow "H" Circular Logo SVG -->
+        <div class="w-11 h-11 bg-[#20283d] rounded-full flex items-center justify-center p-2 shadow-md border border-slate-700/60 flex-shrink-0">
+          <svg viewBox="0 0 260 180" class="w-full h-full text-[#ebbd31] fill-current">
+            <path d="M 52 0 L 98 0 L 46 180 L 0 180 Z M 162 0 L 208 0 L 260 180 L 214 180 Z M 70 80 L 188 80 L 181 120 L 59 120 Z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg tracking-wide text-white">HIGHWAY</h1>
+          <p class="text-xs text-[#ebbd31] font-medium tracking-wider">QA DASHBOARD</p>
+        </div>
       </div>
-      <div>
-        <h1 class="font-bold text-lg tracking-wide text-white">HIGHWAY</h1>
-        <p class="text-xs text-[#ebbd31] font-medium tracking-wider">QA DASHBOARD</p>
-      </div>
+
+      <nav class="p-4 space-y-2">
+        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-2">Departments</div>
+        
+        <button onclick="switchTab('phones')" id="btn-tab-phones" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors bg-[#ebbd31] text-slate-950 font-semibold shadow-lg shadow-amber-500/10">
+          <i class="fa-solid fa-headset w-5 text-center"></i>
+          <span>Customer Support - Phones</span>
+        </button>
+
+        <button onclick="switchTab('cases')" id="btn-tab-cases" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400">
+          <i class="fa-solid fa-folder-open w-5 text-center"></i>
+          <span>Customer Support Cases</span>
+        </button>
+      </nav>
     </div>
 
-    <nav class="flex-1 p-4 space-y-2">
-      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-2">Departments</div>
-      
-      <button onclick="switchTab('phones')" id="btn-tab-phones" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors bg-[#ebbd31] text-slate-950 font-semibold shadow-lg shadow-amber-500/10">
-        <i class="fa-solid fa-headset w-5 text-center"></i>
-        <span>Customer Support - Phones</span>
+    <!-- EXPORT EXCEL BUTTON (BOTTOM LEFT OF SIDEBAR) -->
+    <div class="p-4 border-t border-[#2a344d] space-y-3">
+      <button onclick="exportToExcel()" class="w-full flex items-center justify-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-3 rounded-lg text-xs transition-colors shadow-md">
+        <i class="fa-solid fa-file-excel text-sm"></i>
+        <span>Download Excel Report</span>
       </button>
-
-      <button onclick="switchTab('cases')" id="btn-tab-cases" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400">
-        <i class="fa-solid fa-folder-open w-5 text-center"></i>
-        <span>Customer Support Cases</span>
-      </button>
-    </nav>
-
-    <div class="p-4 border-t border-[#2a344d] text-xs text-slate-500 text-center">
-      Highway QA System &copy; 2026
+      <div class="text-[11px] text-slate-500 text-center">
+        Highway QA System &copy; 2026
+      </div>
     </div>
   </aside>
 
@@ -236,7 +248,7 @@
         </div>
       </div>
 
-      <!-- SEARCH BAR & CHART METRIC SELECTOR -->
+      <!-- SEARCH BAR & THREE CHART CATEGORY SELECTOR -->
       <div class="flex flex-col md:flex-row justify-between items-center bg-[#1c2234] p-3 rounded-xl border border-[#2a344d] gap-4">
         <div class="relative w-full md:w-80">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
@@ -244,8 +256,9 @@
         </div>
 
         <div class="flex items-center space-x-2 w-full md:w-auto">
-          <label class="text-xs text-slate-400 font-medium whitespace-nowrap"><i class="fa-solid fa-chart-column text-[#ebbd31] mr-1"></i>CHART METRIC:</label>
+          <label class="text-xs text-slate-400 font-medium whitespace-nowrap"><i class="fa-solid fa-chart-column text-[#ebbd31] mr-1"></i>CHART CATEGORY:</label>
           <select id="chartMetricSelect" onchange="updateAllCharts()" class="bg-[#141824] border border-[#2a344d] text-[#ebbd31] text-xs font-semibold px-3 py-1.5 rounded-lg focus:outline-none cursor-pointer w-full md:w-auto">
+            <!-- Dynamically populated into 3 unified charts -->
           </select>
         </div>
       </div>
@@ -411,7 +424,7 @@
   </main>
 
   <script>
-    // FIREBASE INITIALIZATION WITH YOUR CREDENTIALS
+    // FIREBASE INITIALIZATION
     const firebaseConfig = {
       apiKey: "AIzaSyDDsFXl3H1eJwno67MSpBcpnik7vqPnyT4",
       authDomain: "qadashboardhighway.firebaseapp.com",
@@ -524,27 +537,15 @@
 
       if (currentTab === 'phones') {
         select.innerHTML = `
-          <option value="qa1">QA 1 Score</option>
-          <option value="qa2">QA 2 Score</option>
-          <option value="inbound">Inbound Calls</option>
-          <option value="outbound">Outbound Calls</option>
-          <option value="total">Total Calls</option>
-          <option value="avgDaily">Avg. Calls/Day</option>
-          <option value="abandon">Abandon on Hold</option>
-          <option value="declined">Declined Calls</option>
-          <option value="missed">Missed Calls</option>
+          <option value="group1">1. QA Performance (QA 1 vs QA 2)</option>
+          <option value="group2">2. Call Volumes & Handle Times (Inbound, Outbound, Total, Avg/Day & AHT)</option>
+          <option value="group3">3. Call Drops & Misses (Abnd on Hold, Declined & Missed)</option>
         `;
       } else {
         select.innerHTML = `
-          <option value="qaTotal">QA Total</option>
-          <option value="convReplied">Conversations replied to</option>
-          <option value="avgResponseTime">Average First response time mins</option>
-          <option value="slaMissed">SLA missed</option>
-          <option value="csat">Teammate CSAT score</option>
-          <option value="dsat">Teammate DSAT score</option>
-          <option value="surveyGood">survey count good</option>
-          <option value="surveyBad">survey count bad</option>
-          <option value="totalSurveys">Total surveys</option>
+          <option value="group1">1. QA Performance (QA Total)</option>
+          <option value="group2">2. Case Activity & CSAT/DSAT (Conversations, CSAT, DSAT & First Response Mins)</option>
+          <option value="group3">3. Surveys & SLA Misses (Good, Bad & Total Surveys)</option>
         `;
       }
     }
@@ -722,6 +723,51 @@
       saveAndProcessWeek();
     }
 
+    // EXPORT TABLES TO EXCEL
+    function exportToExcel() {
+      const month = document.getElementById('monthSelect').value;
+      const week = document.getElementById('weekSelect').value;
+      const wb = XLSX.utils.book_new();
+
+      const activeTables = currentTab === 'phones' 
+        ? ['table-gua-col', 'table-pan', 'table-mx-phones'] 
+        : ['table-cases-gua', 'table-cases-mx'];
+
+      activeTables.forEach(tableId => {
+        const table = document.getElementById(tableId);
+        if (!table) return;
+
+        const tableName = tableId.replace('table-', '').toUpperCase();
+        const rows = table.querySelectorAll('tr');
+        const sheetData = [];
+
+        rows.forEach((row, rIdx) => {
+          const rowData = [];
+          const cells = row.querySelectorAll('th, td');
+          
+          cells.forEach((cell, cIdx) => {
+            // Skip the Actions column (last column)
+            if (cIdx === cells.length - 1) return;
+
+            const input = cell.querySelector('input, select');
+            if (input) {
+              rowData.push(input.value);
+            } else {
+              rowData.push(cell.innerText.trim());
+            }
+          });
+          if (rowData.length > 0) sheetData.push(rowData);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(sheetData);
+        XLSX.utils.book_append_sheet(wb, ws, tableName.substring(0, 31));
+      });
+
+      const fileName = `Highway_QA_${currentTab.toUpperCase()}_${month}_Week_${week}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+      showToast(`Excel file downloaded: ${fileName}`);
+    }
+
     // SAVE & PROCESS WEEK TO FIREBASE REALTIME DATABASE
     async function saveAndProcessWeek() {
       const month = document.getElementById('monthSelect').value;
@@ -775,7 +821,6 @@
           updateAllCharts();
           showToast(`Loaded Cloud Data for Week ${week} (${month})`);
         } else {
-          // If no cloud data exists yet, initialize defaults
           if (currentTab === 'phones') {
             renderPhonesTable('table-gua-col', phonesGuaColData);
             renderPhonesTable('table-pan', phonesPanData);
@@ -898,68 +943,108 @@
       }
     }
 
-    // CHART GENERATION FUNCTIONS
+    // MULTI-METRIC GROUPED CHART GENERATION
     function renderTableChart(tableId) {
       const chartCanvasId = tableId.replace('table-', 'chart-');
       const ctx = document.getElementById(chartCanvasId);
       if (!ctx) return;
 
-      const metric = document.getElementById('chartMetricSelect').value;
+      const groupOption = document.getElementById('chartMetricSelect').value;
       const rows = document.querySelectorAll(`#${tableId} tbody tr`);
 
       const labels = [];
-      const dataValues = [];
+      const datasetsMap = [];
 
       rows.forEach(row => {
         const nameInput = row.querySelector('.cell-input-name');
         const name = nameInput ? nameInput.value : 'Agent';
         labels.push(name);
-
-        let val = 0;
-        if (currentTab === 'phones') {
-          if (metric === 'qa1') val = parseFloat(row.querySelector('.qa1')?.value) || 0;
-          else if (metric === 'qa2') val = parseFloat(row.querySelector('.qa2')?.value) || 0;
-          else if (metric === 'inbound') val = parseFloat(row.querySelector('.inbound')?.value) || 0;
-          else if (metric === 'outbound') val = parseFloat(row.querySelector('.outbound')?.value) || 0;
-          else if (metric === 'total') val = parseFloat(row.querySelector('.total-calls')?.innerText) || 0;
-          else if (metric === 'avgDaily') val = parseFloat(row.querySelector('.avg-daily')?.innerText) || 0;
-          else if (metric === 'abandon') val = parseFloat(row.querySelector('.abandon')?.value) || 0;
-          else if (metric === 'declined') val = parseFloat(row.querySelector('.declined')?.value) || 0;
-          else if (metric === 'missed') val = parseFloat(row.querySelector('.missed')?.value) || 0;
-        } else {
-          if (metric === 'qaTotal') val = parseFloat(row.querySelector('.qaTotal')?.value) || 0;
-          else if (metric === 'convReplied') val = parseFloat(row.querySelector('.convReplied')?.value) || 0;
-          else if (metric === 'avgResponseTime') val = parseFloat(row.querySelector('.avgResponseTime')?.value) || 0;
-          else if (metric === 'slaMissed') val = parseFloat(row.querySelector('.slaMissed')?.value) || 0;
-          else if (metric === 'csat') val = parseFloat(row.querySelector('.csat')?.value) || 0;
-          else if (metric === 'dsat') val = parseFloat(row.querySelector('.dsat')?.value) || 0;
-          else if (metric === 'surveyGood') val = parseFloat(row.querySelector('.surveyGood')?.value) || 0;
-          else if (metric === 'surveyBad') val = parseFloat(row.querySelector('.surveyBad')?.value) || 0;
-          else if (metric === 'totalSurveys') val = parseFloat(row.querySelector('.totalSurveys')?.innerText) || 0;
-        }
-
-        dataValues.push(val);
       });
+
+      if (currentTab === 'phones') {
+        if (groupOption === 'group1') {
+          // 1. QA Performance (QA 1, QA 2)
+          const qa1Data = [], qa2Data = [];
+          rows.forEach(r => {
+            qa1Data.push(parseFloat(r.querySelector('.qa1')?.value) || 0);
+            qa2Data.push(parseFloat(r.querySelector('.qa2')?.value) || 0);
+          });
+          datasetsMap.push({ label: 'QA 1 Score', data: qa1Data, backgroundColor: '#ebbd31' });
+          datasetsMap.push({ label: 'QA 2 Score', data: qa2Data, backgroundColor: '#38bdf8' });
+        } else if (groupOption === 'group2') {
+          // 2. Call Volumes & Handle Times
+          const inData = [], outData = [], totData = [], avgDData = [];
+          rows.forEach(r => {
+            inData.push(parseFloat(r.querySelector('.inbound')?.value) || 0);
+            outData.push(parseFloat(r.querySelector('.outbound')?.value) || 0);
+            totData.push(parseFloat(r.querySelector('.total-calls')?.innerText) || 0);
+            avgDData.push(parseFloat(r.querySelector('.avg-daily')?.innerText) || 0);
+          });
+          datasetsMap.push({ label: 'Inbound Calls', data: inData, backgroundColor: '#38bdf8' });
+          datasetsMap.push({ label: 'Outbound Calls', data: outData, backgroundColor: '#818cf8' });
+          datasetsMap.push({ label: 'Total Calls', data: totData, backgroundColor: '#ebbd31' });
+          datasetsMap.push({ label: 'AVG. Calls/Day', data: avgDData, backgroundColor: '#34d399' });
+        } else {
+          // 3. Call Drops & Misses
+          const abndData = [], decData = [], missData = [];
+          rows.forEach(r => {
+            abndData.push(parseFloat(r.querySelector('.abandon')?.value) || 0);
+            decData.push(parseFloat(r.querySelector('.declined')?.value) || 0);
+            missData.push(parseFloat(r.querySelector('.missed')?.value) || 0);
+          });
+          datasetsMap.push({ label: 'Abnd on Hold', data: abndData, backgroundColor: '#f87171' });
+          datasetsMap.push({ label: 'Declined Calls', data: decData, backgroundColor: '#fb923c' });
+          datasetsMap.push({ label: 'Missed Calls', data: missData, backgroundColor: '#f43f5e' });
+        }
+      } else {
+        if (groupOption === 'group1') {
+          // 1. QA Performance (QA Total)
+          const qaTotData = [];
+          rows.forEach(r => qaTotData.push(parseFloat(r.querySelector('.qaTotal')?.value) || 0));
+          datasetsMap.push({ label: 'QA Total', data: qaTotData, backgroundColor: '#ebbd31' });
+        } else if (groupOption === 'group2') {
+          // 2. Case Activity & CSAT/DSAT
+          const convData = [], csatData = [], dsatData = [], respData = [];
+          rows.forEach(r => {
+            convData.push(parseFloat(r.querySelector('.convReplied')?.value) || 0);
+            csatData.push(parseFloat(r.querySelector('.csat')?.value) || 0);
+            dsatData.push(parseFloat(r.querySelector('.dsat')?.value) || 0);
+            respData.push(parseFloat(r.querySelector('.avgResponseTime')?.value) || 0);
+          });
+          datasetsMap.push({ label: 'Conversations Replied', data: convData, backgroundColor: '#38bdf8' });
+          datasetsMap.push({ label: 'CSAT Score', data: csatData, backgroundColor: '#34d399' });
+          datasetsMap.push({ label: 'DSAT Score', data: dsatData, backgroundColor: '#f87171' });
+          datasetsMap.push({ label: 'Avg First Resp Time (m)', data: respData, backgroundColor: '#a78bfa' });
+        } else {
+          // 3. Surveys & SLA Misses
+          const gData = [], bData = [], tData = [], slaData = [];
+          rows.forEach(r => {
+            gData.push(parseFloat(r.querySelector('.surveyGood')?.value) || 0);
+            bData.push(parseFloat(r.querySelector('.surveyBad')?.value) || 0);
+            tData.push(parseFloat(r.querySelector('.totalSurveys')?.innerText) || 0);
+            slaData.push(parseFloat(r.querySelector('.slaMissed')?.value) || 0);
+          });
+          datasetsMap.push({ label: 'Survey Good', data: gData, backgroundColor: '#34d399' });
+          datasetsMap.push({ label: 'Survey Bad', data: bData, backgroundColor: '#f87171' });
+          datasetsMap.push({ label: 'Total Surveys', data: tData, backgroundColor: '#ebbd31' });
+          datasetsMap.push({ label: 'SLA Missed', data: slaData, backgroundColor: '#fb923c' });
+        }
+      }
 
       if (chartInstances[chartCanvasId]) {
         chartInstances[chartCanvasId].destroy();
       }
 
-      const selectElem = document.getElementById('chartMetricSelect');
-      const selectedOptionText = selectElem && selectElem.selectedIndex >= 0 ? selectElem.options[selectElem.selectedIndex].text : 'Metric';
-
       chartInstances[chartCanvasId] = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: labels,
-          datasets: [{
-            label: selectedOptionText,
-            data: dataValues,
-            backgroundColor: '#ebbd31',
-            borderColor: '#d1a320',
-            borderWidth: 1,
-            borderRadius: 4
-          }]
+          datasets: datasetsMap.map(ds => ({
+            label: ds.label,
+            data: ds.data,
+            backgroundColor: ds.backgroundColor,
+            borderRadius: 3
+          }))
         },
         options: {
           responsive: true,
