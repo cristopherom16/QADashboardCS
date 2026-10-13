@@ -10,6 +10,10 @@
   <!-- Chart.js Library -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+  <!-- Firebase Compat SDKs (App, Realtime Database, Firestore) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
   <style>
     :root {
       --navy-bg: #141824;
@@ -171,8 +175,8 @@
         </div>
 
         <!-- SAVE & PROCESS WEEK BUTTON -->
-        <button onclick="saveAndProcessWeek()" class="inline-flex items-center space-x-2 bg-[#ebbd31] hover:bg-[#d1a320] text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs transition-all shadow-md amber-glow">
-          <i class="fa-solid fa-floppy-disk text-slate-950"></i>
+        <button onclick="saveAndProcessWeek()" class="inline-flex items-center space-x-2 bg-[#ebbd31] hover:bg-[#d1a320] text-slate-950 font-bold px-3.5 py-1.5 rounded-lg text-xs transition-all shadow-md amber-glow">
+          <i class="fa-solid fa-cloud-arrow-up text-slate-950"></i>
           <span>Save & Process Week</span>
         </button>
       </div>
@@ -248,7 +252,6 @@
 
       <!-- VIEW 1: PHONES TAB -->
       <div id="view-phones" class="space-y-8">
-        
         <!-- Table 1: GUA / COL -->
         <div class="bg-[#1c2234] rounded-xl border border-[#2a344d] overflow-hidden shadow-xl">
           <div class="p-4 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
@@ -261,11 +264,9 @@
               <span class="text-xs bg-[#2a344d] text-slate-300 px-2.5 py-1 rounded-full font-mono agent-count">20 Agents</span>
             </div>
           </div>
-
           <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
             <canvas id="chart-gua-col"></canvas>
           </div>
-
           <div class="overflow-x-auto custom-scrollbar">
             <table class="w-full text-xs text-left text-slate-300" id="table-gua-col">
               <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
@@ -294,11 +295,9 @@
               <span class="text-xs bg-[#2a344d] text-slate-300 px-2.5 py-1 rounded-full font-mono agent-count">16 Agents</span>
             </div>
           </div>
-
           <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
             <canvas id="chart-pan"></canvas>
           </div>
-
           <div class="overflow-x-auto custom-scrollbar">
             <table class="w-full text-xs text-left text-slate-300" id="table-pan">
               <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
@@ -327,11 +326,9 @@
               <span class="text-xs bg-[#2a344d] text-slate-300 px-2.5 py-1 rounded-full font-mono agent-count">7 Agents</span>
             </div>
           </div>
-
           <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
             <canvas id="chart-mx-phones"></canvas>
           </div>
-
           <div class="overflow-x-auto custom-scrollbar">
             <table class="w-full text-xs text-left text-slate-300" id="table-mx-phones">
               <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
@@ -351,7 +348,6 @@
 
       <!-- VIEW 2: CASES TAB -->
       <div id="view-cases" class="space-y-8 hidden">
-        
         <!-- Table 1: GUA / COL / PHI CASES -->
         <div class="bg-[#1c2234] rounded-xl border border-[#2a344d] overflow-hidden shadow-xl">
           <div class="p-4 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
@@ -364,11 +360,9 @@
               <span class="text-xs bg-[#2a344d] text-slate-300 px-2.5 py-1 rounded-full font-mono agent-count">27 Agents</span>
             </div>
           </div>
-
           <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
             <canvas id="chart-cases-gua"></canvas>
           </div>
-
           <div class="overflow-x-auto custom-scrollbar">
             <table class="w-full text-xs text-left text-slate-300" id="table-cases-gua">
               <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
@@ -395,11 +389,9 @@
               <span class="text-xs bg-[#2a344d] text-slate-300 px-2.5 py-1 rounded-full font-mono agent-count">3 Agents</span>
             </div>
           </div>
-
           <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
             <canvas id="chart-cases-mx"></canvas>
           </div>
-
           <div class="overflow-x-auto custom-scrollbar">
             <table class="w-full text-xs text-left text-slate-300" id="table-cases-mx">
               <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
@@ -419,7 +411,22 @@
   </main>
 
   <script>
-    // DATASETS
+    // FIREBASE INITIALIZATION WITH YOUR CREDENTIALS
+    const firebaseConfig = {
+      apiKey: "AIzaSyDDsFXl3H1eJwno67MSpBcpnik7vqPnyT4",
+      authDomain: "qadashboardhighway.firebaseapp.com",
+      databaseURL: "https://qadashboardhighway-default-rtdb.firebaseio.com",
+      projectId: "qadashboardhighway",
+      storageBucket: "qadashboardhighway.firebasestorage.app",
+      messagingSenderId: "1052597531279",
+      appId: "1:1052597531279:web:8968dd441e2aba41f676fa",
+      measurementId: "G-PBMX4ZPVLR"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const rtdb = firebase.database();
+
+    // BASE DATASETS
     const phonesGuaColData = [
       ["Acsa Esquivel", "Insurance phones", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM", "Sat-Sun"],
       ["Alexander Alvarado", "Phones", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM", "SAT-SUN"],
@@ -578,6 +585,7 @@
       }
       calculateGlobalKPIs();
       updateAllCharts();
+      loadWeekFromFirebase();
     }
 
     function renderPhonesTable(tableId, rawData) {
@@ -600,29 +608,29 @@
         <td class="p-2"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text text-slate-400 text-[11px]"></td>
         <td class="p-2"><input type="text" value="${agent[5] || 'Days Off'}" class="cell-input cell-input-text text-slate-400 text-[11px]"></td>
         
-        <td class="p-2 text-center"><input type="number" value="0" min="0" max="100" class="cell-input qa1 font-bold text-[#ebbd31]" oninput="updateCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="0" min="0" max="100" class="cell-input qa2 font-bold text-[#ebbd31]" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[6] || 0}" min="0" max="100" class="cell-input qa1 font-bold text-[#ebbd31]" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[7] || 0}" min="0" max="100" class="cell-input qa2 font-bold text-[#ebbd31]" oninput="updateCalculations(this)"></td>
         
-        <td class="p-2 text-center"><input type="number" value="0" class="cell-input inbound" oninput="updateCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="0" class="cell-input outbound" oninput="updateCalculations(this)"></td>
-        <td class="p-3 text-center font-bold text-white total-calls">0</td>
-        <td class="p-2 text-center"><input type="text" value="00:00:00" class="cell-input text-center font-mono"></td>
-        <td class="p-3 text-center font-bold text-[#ebbd31]/90 avg-daily">0</td>
-        <td class="p-2 text-center"><input type="number" value="0" class="cell-input abandon" oninput="updateCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="0" class="cell-input declined" oninput="updateCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="0" class="cell-input missed" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[8] || 0}" class="cell-input inbound" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[9] || 0}" class="cell-input outbound" oninput="updateCalculations(this)"></td>
+        <td class="p-3 text-center font-bold text-white total-calls">${(parseInt(agent[8]||0) + parseInt(agent[9]||0))}</td>
+        <td class="p-2 text-center"><input type="text" value="${agent[10] || '00:00:00'}" class="cell-input text-center font-mono"></td>
+        <td class="p-3 text-center font-bold text-[#ebbd31]/90 avg-daily">${((parseInt(agent[8]||0) + parseInt(agent[9]||0))/5).toFixed(1)}</td>
+        <td class="p-2 text-center"><input type="number" value="${agent[11] || 0}" class="cell-input abandon" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[12] || 0}" class="cell-input declined" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[13] || 0}" class="cell-input missed" oninput="updateCalculations(this)"></td>
 
         <td class="p-2 text-center">
           <select class="cell-input text-[#ebbd31] font-medium text-xs">
-            <option value="N/A">N/A</option>
-            <option value="Coaching">Coaching</option>
-            <option value="Feedback">Feedback</option>
-            <option value="Accountability Session">Accountability Session</option>
-            <option value="Disciplinary Action">Disciplinary Action</option>
+            <option value="N/A" ${agent[14] === 'N/A' ? 'selected' : ''}>N/A</option>
+            <option value="Coaching" ${agent[14] === 'Coaching' ? 'selected' : ''}>Coaching</option>
+            <option value="Feedback" ${agent[14] === 'Feedback' ? 'selected' : ''}>Feedback</option>
+            <option value="Accountability Session" ${agent[14] === 'Accountability Session' ? 'selected' : ''}>Accountability Session</option>
+            <option value="Disciplinary Action" ${agent[14] === 'Disciplinary Action' ? 'selected' : ''}>Disciplinary Action</option>
           </select>
         </td>
 
-        <td class="p-2"><input type="text" placeholder="Add comments..." class="cell-input cell-input-text text-slate-300"></td>
+        <td class="p-2"><input type="text" value="${agent[15] || ''}" placeholder="Add comments..." class="cell-input cell-input-text text-slate-300"></td>
         
         <td class="p-2 text-center">
           <div class="flex items-center justify-center space-x-2">
@@ -659,27 +667,27 @@
         <td class="p-2"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text text-slate-400 text-[11px]"></td>
         <td class="p-2"><input type="text" value="${agent[5] || 'Days Off'}" class="cell-input cell-input-text text-slate-400 text-[11px]"></td>
         
-        <td class="p-2 text-center"><input type="number" value="0" min="0" max="100" class="cell-input qaTotal font-bold text-[#ebbd31]" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="0" class="cell-input convReplied font-semibold text-white" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="0" class="cell-input avgResponseTime" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="0" class="cell-input slaMissed" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="0" class="cell-input csat text-emerald-400 font-bold" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="0" class="cell-input dsat text-rose-400 font-bold" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="0" class="cell-input surveyGood" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="0" class="cell-input surveyBad" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-3 text-center font-bold text-white totalSurveys">0</td>
+        <td class="p-2 text-center"><input type="number" value="${agent[6] || 0}" min="0" max="100" class="cell-input qaTotal font-bold text-[#ebbd31]" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[7] || 0}" class="cell-input convReplied font-semibold text-white" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[8] || 0}" class="cell-input avgResponseTime" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[9] || 0}" class="cell-input slaMissed" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[10] || 0}" class="cell-input csat text-emerald-400 font-bold" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[11] || 0}" class="cell-input dsat text-rose-400 font-bold" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[12] || 0}" class="cell-input surveyGood" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[13] || 0}" class="cell-input surveyBad" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-3 text-center font-bold text-white totalSurveys">${(parseInt(agent[12]||0) + parseInt(agent[13]||0))}</td>
 
         <td class="p-2 text-center">
           <select class="cell-input text-[#ebbd31] font-medium text-xs">
-            <option value="N/A">N/A</option>
-            <option value="Coaching">Coaching</option>
-            <option value="Feedback">Feedback</option>
-            <option value="Accountability Session">Accountability Session</option>
-            <option value="Disciplinary Action">Disciplinary Action</option>
+            <option value="N/A" ${agent[14] === 'N/A' ? 'selected' : ''}>N/A</option>
+            <option value="Coaching" ${agent[14] === 'Coaching' ? 'selected' : ''}>Coaching</option>
+            <option value="Feedback" ${agent[14] === 'Feedback' ? 'selected' : ''}>Feedback</option>
+            <option value="Accountability Session" ${agent[14] === 'Accountability Session' ? 'selected' : ''}>Accountability Session</option>
+            <option value="Disciplinary Action" ${agent[14] === 'Disciplinary Action' ? 'selected' : ''}>Disciplinary Action</option>
           </select>
         </td>
 
-        <td class="p-2"><input type="text" placeholder="Add comments..." class="cell-input cell-input-text text-slate-300"></td>
+        <td class="p-2"><input type="text" value="${agent[15] || ''}" placeholder="Add comments..." class="cell-input cell-input-text text-slate-300"></td>
         
         <td class="p-2 text-center">
           <div class="flex items-center justify-center space-x-2">
@@ -711,11 +719,77 @@
     }
 
     function saveRow(btn) {
-      showToast();
+      saveAndProcessWeek();
     }
 
-    function saveAndProcessWeek() {
-      showToast('Week Saved & Processed Successfully!');
+    // SAVE & PROCESS WEEK TO FIREBASE REALTIME DATABASE
+    async function saveAndProcessWeek() {
+      const month = document.getElementById('monthSelect').value;
+      const week = document.getElementById('weekSelect').value;
+      const key = `${month}_Week_${week}`;
+
+      const activeTables = currentTab === 'phones' 
+        ? ['table-gua-col', 'table-pan', 'table-mx-phones'] 
+        : ['table-cases-gua', 'table-cases-mx'];
+
+      const payload = {};
+
+      activeTables.forEach(tableId => {
+        const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+        payload[tableId] = [];
+        
+        rows.forEach(row => {
+          const inputs = row.querySelectorAll('input, select');
+          const agentArr = [];
+          inputs.forEach(ip => agentArr.push(ip.value));
+          payload[tableId].push(agentArr);
+        });
+      });
+
+      try {
+        await rtdb.ref(`qa_data/${currentTab}/${key}`).set(payload);
+        showToast(`Week ${week} (${month}) Saved to Firebase!`);
+      } catch (err) {
+        console.error("Firebase Error: ", err);
+        showToast("Error saving to Firebase!");
+      }
+    }
+
+    // LOAD WEEK DATA FROM FIREBASE REALTIME DATABASE
+    function loadWeekFromFirebase() {
+      const month = document.getElementById('monthSelect').value;
+      const week = document.getElementById('weekSelect').value;
+      const key = `${month}_Week_${week}`;
+
+      rtdb.ref(`qa_data/${currentTab}/${key}`).once('value').then(snapshot => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          Object.keys(data).forEach(tableId => {
+            if (currentTab === 'phones') {
+              renderPhonesTable(tableId, data[tableId]);
+            } else {
+              renderCasesTable(tableId, data[tableId]);
+            }
+          });
+          calculateGlobalKPIs();
+          updateAllCharts();
+          showToast(`Loaded Cloud Data for Week ${week} (${month})`);
+        } else {
+          // If no cloud data exists yet, initialize defaults
+          if (currentTab === 'phones') {
+            renderPhonesTable('table-gua-col', phonesGuaColData);
+            renderPhonesTable('table-pan', phonesPanData);
+            renderPhonesTable('table-mx-phones', phonesMxData);
+          } else {
+            renderCasesTable('table-cases-gua', casesGuaColPhiData);
+            renderCasesTable('table-cases-mx', casesMxData);
+          }
+          calculateGlobalKPIs();
+          updateAllCharts();
+        }
+      }).catch(err => {
+        console.error("Firebase read error:", err);
+      });
     }
 
     function deleteAgentRow(btn, tableId) {
@@ -921,11 +995,11 @@
       t.style.display = 'block';
       setTimeout(() => {
         t.style.display = 'none';
-      }, 2000);
+      }, 2500);
     }
 
     function changePeriod() {
-      initAllTables();
+      loadWeekFromFirebase();
     }
 
     function filterTables() {
@@ -939,13 +1013,7 @@
 
     function initAllTables() {
       updateMetricSelectOptions();
-      renderPhonesTable('table-gua-col', phonesGuaColData);
-      renderPhonesTable('table-pan', phonesPanData);
-      renderPhonesTable('table-mx-phones', phonesMxData);
-      renderCasesTable('table-cases-gua', casesGuaColPhiData);
-      renderCasesTable('table-cases-mx', casesMxData);
-      calculateGlobalKPIs();
-      updateAllCharts();
+      loadWeekFromFirebase();
     }
 
     window.onload = () => {
