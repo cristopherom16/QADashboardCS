@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Highway QA Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js Library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --navy-bg: #141824;
+      --navy-card: #1c2234;
+      --navy-border: #2a344d;
+      --amber-main: #ebbd31;
+      --amber-hover: #d1a320;
+    }
+    body {
+      background-color: var(--navy-bg);
+      color: #f8fafc;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .amber-glow {
+      box-shadow: 0 0 15px rgba(235, 189, 49, 0.25);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #1c2234;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #2a344d;
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #ebbd31;
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .cell-input {
+      background: transparent;
+      border: 1px solid transparent;
+      color: inherit;
+      width: 100%;
+      text-align: center;
+      padding: 3px 6px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    .cell-input-text {
+      text-align: left;
+    }
+    .cell-input-name {
+      text-align: left;
+      min-width: 180px;
+      font-weight: 600;
+    }
+    .cell-input:hover {
+      border-color: #3b486b;
+      background: rgba(28, 34, 52, 0.8);
+    }
+    .cell-input:focus {
+      outline: none;
+      border-color: #ebbd31;
+      background: #141824;
+      box-shadow: 0 0 0 2px rgba(235, 189, 49, 0.25);
+    }
+    select.cell-input {
+      cursor: pointer;
+    }
+    select.cell-input option {
+      background-color: #1c2234;
+      color: #f8fafc;
+    }
+    .toast-msg {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #ebbd31;
+      color: #0f172a;
+      font-weight: bold;
+      padding: 10px 18px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 100;
+      display: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row antialiased">
+
+  <div id="toast" class="toast-msg"><i class="fa-solid fa-check-circle mr-2"></i><span id="toast-text">Data Saved Successfully!</span></div>
+
+  <!-- SIDEBAR NAVIGATION -->
+  <aside class="w-full md:w-64 bg-[#141824] border-r border-[#2a344d] flex flex-col flex-shrink-0">
+    <div class="p-5 border-b border-[#2a344d] flex items-center space-x-3">
+      <!-- Highway Yellow "H" Circular Logo SVG -->
+      <div class="w-11 h-11 bg-[#20283d] rounded-full flex items-center justify-center p-2 shadow-md border border-slate-700/60 flex-shrink-0">
+        <svg viewBox="0 0 260 180" class="w-full h-full text-[#ebbd31] fill-current">
+          <path d="M 52 0 L 98 0 L 46 180 L 0 180 Z M 162 0 L 208 0 L 260 180 L 214 180 Z M 70 80 L 188 80 L 181 120 L 59 120 Z" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="font-bold text-lg tracking-wide text-white">HIGHWAY</h1>
+        <p class="text-xs text-[#ebbd31] font-medium tracking-wider">QA DASHBOARD</p>
+      </div>
+    </div>
+
+    <nav class="flex-1 p-4 space-y-2">
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-2">Departments</div>
+      
+      <button onclick="switchTab('phones')" id="btn-tab-phones" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors bg-[#ebbd31] text-slate-950 font-semibold shadow-lg shadow-amber-500/10">
+        <i class="fa-solid fa-headset w-5 text-center"></i>
+        <span>Customer Support - Phones</span>
+      </button>
+
+      <button onclick="switchTab('cases')" id="btn-tab-cases" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400">
+        <i class="fa-solid fa-folder-open w-5 text-center"></i>
+        <span>Customer Support Cases</span>
+      </button>
+    </nav>
+
+    <div class="p-4 border-t border-[#2a344d] text-xs text-slate-500 text-center">
+      Highway QA System &copy; 2026
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <main class="flex-1 flex flex-col h-screen overflow-y-auto custom-scrollbar">
+    
+    <!-- TOP HEADER / CONTROL BAR -->
+    <header class="bg-[#1c2234] border-b border-[#2a344d] p-4 sticky top-0 z-20 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Date Controls & Save & Process Week Button -->
+      <div class="flex items-center space-x-3 flex-wrap">
+        <div class="flex items-center space-x-2 bg-[#141824] px-3 py-1.5 rounded-lg border border-[#2a344d]">
+          <label class="text-xs text-slate-400 font-medium">MONTH:</label>
+          <select id="monthSelect" onchange="changePeriod()" class="bg-transparent text-[#ebbd31] text-sm font-semibold focus:outline-none cursor-pointer">
+            <option value="January" class="bg-[#1c2234] text-white">January</option>
+            <option value="February" class="bg-[#1c2234] text-white">February</option>
+            <option value="March" class="bg-[#1c2234] text-white">March</option>
+            <option value="April" class="bg-[#1c2234] text-white">April</option>
+            <option value="May" class="bg-[#1c2234] text-white">May</option>
+            <option value="June" class="bg-[#1c2234] text-white">June</option>
+            <option value="July" class="bg-[#1c2234] text-white">July</option>
+            <option value="August" class="bg-[#1c2234] text-white">August</option>
+            <option value="September" class="bg-[#1c2234] text-white">September</option>
+            <option value="October" class="bg-[#1c2234] text-white" selected>October</option>
+            <option value="November" class="bg-[#1c2234] text-white">November</option>
+            <option value="December" class="bg-[#1c2234] text-white">December</option>
+          </select>
+        </div>
+
+        <div class="flex items-center space-x-2 bg-[#141824] px-3 py-1.5 rounded-lg border border-[#2a344d]">
+          <label class="text-xs text-slate-400 font-medium">WEEK:</label>
+          <select id="weekSelect" onchange="changePeriod()" class="bg-transparent text-[#ebbd31] text-sm font-semibold focus:outline-none cursor-pointer">
+            <option value="1" class="bg-[#1c2234] text-white">1</option>
+            <option value="2" class="bg-[#1c2234] text-white">2</option>
+            <option value="3" class="bg-[#1c2234] text-white" selected>3</option>
+            <option value="4" class="bg-[#1c2234] text-white">4</option>
+            <option value="5" class="bg-[#1c2234] text-white">5</option>
+          </select>
+        </div>
+
+        <!-- SAVE & PROCESS WEEK BUTTON -->
+        <button onclick="saveAndProcessWeek()" class="inline-flex items-center space-x-2 bg-[#ebbd31] hover:bg-[#d1a320] text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs transition-all shadow-md amber-glow">
+          <i class="fa-solid fa-floppy-disk text-slate-950"></i>
+          <span>Save & Process Week</span>
+        </button>
+      </div>
+
+      <!-- Action Button (Form Link) -->
+      <div>
+        <a id="evaluationFormBtn" href="https://docs.google.com/forms/d/e/1FAIpQLSfRjVZUd6TyQHCQgiuL6VVuZFDtL1GPHmMFxETpyCEBjgiaHg/viewform" target="_blank" class="inline-flex items-center space-x-2 bg-[#ebbd31] hover:bg-[#d1a320] text-slate-950 font-bold px-4 py-2 rounded-lg text-sm transition-all shadow-lg shadow-amber-500/20 amber-glow">
+          <i class="fa-solid fa-pen-to-square"></i>
+          <span id="formBtnText">NEW QA PHONES EVALUATION</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- DASHBOARD BODY -->
+    <div class="p-6 space-y-6">
+
+      <!-- GLOBAL KPIS -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-400 font-medium">Avg. QA Score</p>
+            <h3 id="kpi-qa1" class="text-2xl font-bold text-[#ebbd31] mt-1">0</h3>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-amber-500/10 text-[#ebbd31] flex items-center justify-center">
+            <i class="fa-solid fa-chart-line text-lg"></i>
+          </div>
+        </div>
+
+        <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-400 font-medium" id="kpi-label-2">Avg. QA 2 Score</p>
+            <h3 id="kpi-qa2" class="text-2xl font-bold text-[#ebbd31] mt-1">0</h3>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-amber-500/10 text-[#ebbd31] flex items-center justify-center">
+            <i class="fa-solid fa-award text-lg"></i>
+          </div>
+        </div>
+
+        <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-400 font-medium" id="kpi-label-3">Total Volume</p>
+            <h3 id="kpi-total" class="text-2xl font-bold text-white mt-1">0</h3>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
+            <i class="fa-solid fa-folder text-lg"></i>
+          </div>
+        </div>
+
+        <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-400 font-medium" id="kpi-label-4">Avg. Calls / Day</p>
+            <h3 id="kpi-daily" class="text-2xl font-bold text-white mt-1">0</h3>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+            <i class="fa-solid fa-calculator text-lg"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEARCH BAR & CHART METRIC SELECTOR -->
+      <div class="flex flex-col md:flex-row justify-between items-center bg-[#1c2234] p-3 rounded-xl border border-[#2a344d] gap-4">
+        <div class="relative w-full md:w-80">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+          <input type="text" id="searchInput" onkeyup="filterTables()" placeholder="Search agent, leader, task, branch..." class="w-full bg-[#141824] border border-[#2a344d] rounded-lg pl-9 pr-4 py-1.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#ebbd31]">
+        </div>
+
+        <div class="flex items-center space-x-2 w-full md:w-auto">
+          <label class="text-xs text-slate-400 font-medium whitespace-nowrap"><i class="fa-solid fa-chart-column text-[#ebbd31] mr-1"></i>CHART METRIC:</label>
+          <select id="chartMetricSelect" onchange="updateAllCharts()" class="bg-[#141824] border border-[#2a344d] text-[#ebbd31] text-xs font-semibold px-3 py-1.5 rounded-lg focus:outline-none cursor-pointer w-full md:w-auto">
+          </select>
+        </div>
+      </div>
+
+      <!-- VIEW 1: PHONES TAB -->
+      <div id="view-phones" class="space-y-8">
+        
+        <!-- Table 1: GUA / COL -->
+        <div class="bg-[#1c2234] rounded-xl border border-[#2a344d] overflow-hidden shadow-xl">
+          <div class="p-4 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
+            <h2 class="text-sm font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - GUA / COL</h2>
+            <div class="flex items-center space-x-3">
+              <button onclick="addAgentRow('table-gua-col')" class="px-2.5 py-1 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-lg text-xs font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
+                <i class="fa-solid fa-plus text-[10px]"></i>
+                <span>Add Agent</span>
+              </button>
+              <span class="text-xs bg-[#2a344d] text-slate-300 px-2.5 py-1 rounded-full font-mono agent-count">20 Agents</span>
+            </div>
+          </div>
+
+          <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
+            <canvas id="chart-gua-col"></canvas>
+          </div>
+
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-xs text-left text-slate-300" id="table-gua-col">
+              <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
+                <tr>
+                  <th class="p-3 min-w-[200px]">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
+                  <th class="p-3 text-center text-[#ebbd31]">QA 1</th><th class="p-3 text-center text-[#ebbd31]">QA 2</th>
+                  <th class="p-3 text-center">Inbound Calls</th><th class="p-3 text-center">Outbound Calls</th><th class="p-3 text-center">Total Calls</th><th class="p-3 text-center">Avg. Handle Time</th><th class="p-3 text-center">Avg. Calls/Day</th>
+                  <th class="p-3 text-center">Abandon on hold</th><th class="p-3 text-center">Declined calls</th><th class="p-3 text-center">Missed Calls</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#2a344d]/50"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Table 2: PAN -->
+        <div class="bg-[#1c2234] rounded-xl border border-[#2a344d] overflow-hidden shadow-xl">
+          <div class="p-4 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
+            <h2 class="text-sm font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - PAN</h2>
+            <div class="flex items-center space-x-3">
+              <button onclick="addAgentRow('table-pan')" class="px-2.5 py-1 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-lg text-xs font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
+                <i class="fa-solid fa-plus text-[10px]"></i>
+                <span>Add Agent</span>
+              </button>
+              <span class="text-xs bg-[#2a344d] text-slate-300 px-2.5 py-1 rounded-full font-mono agent-count">16 Agents</span>
+            </div>
+          </div>
+
+          <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
+            <canvas id="chart-pan"></canvas>
+          </div>
+
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-xs text-left text-slate-300" id="table-pan">
+              <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
+                <tr>
+                  <th class="p-3 min-w-[200px]">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
+                  <th class="p-3 text-center text-[#ebbd31]">QA 1</th><th class="p-3 text-center text-[#ebbd31]">QA 2</th>
+                  <th class="p-3 text-center">Inbound Calls</th><th class="p-3 text-center">Outbound Calls</th><th class="p-3 text-center">Total Calls</th><th class="p-3 text-center">Avg. Handle Time</th><th class="p-3 text-center">Avg. Calls/Day</th>
+                  <th class="p-3 text-center">Abandon on hold</th><th class="p-3 text-center">Declined calls</th><th class="p-3 text-center">Missed Calls</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#2a344d]/50"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Table 3: MX - PHONES -->
+        <div class="bg-[#1c2234] rounded-xl border border-[#2a344d] overflow-hidden shadow-xl">
+          <div class="p-4 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
+            <h2 class="text-sm font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - MX - Phones</h2>
+            <div class="flex items-center space-x-3">
+              <button onclick="addAgentRow('table-mx-phones')" class="px-2.5 py-1 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-lg text-xs font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
+                <i class="fa-solid fa-plus text-[10px]"></i>
+                <span>Add Agent</span>
+              </button>
+              <span class="text-xs bg-[#2a344d] text-slate-300 px-2.5 py-1 rounded-full font-mono agent-count">7 Agents</span>
+            </div>
+          </div>
+
+          <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
+            <canvas id="chart-mx-phones"></canvas>
+          </div>
+
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-xs text-left text-slate-300" id="table-mx-phones">
+              <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
+                <tr>
+                  <th class="p-3 min-w-[200px]">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
+                  <th class="p-3 text-center text-[#ebbd31]">QA 1</th><th class="p-3 text-center text-[#ebbd31]">QA 2</th>
+                  <th class="p-3 text-center">Inbound Calls</th><th class="p-3 text-center">Outbound Calls</th><th class="p-3 text-center">Total Calls</th><th class="p-3 text-center">Avg. Handle Time</th><th class="p-3 text-center">Avg. Calls/Day</th>
+                  <th class="p-3 text-center">Abandon on hold</th><th class="p-3 text-center">Declined calls</th><th class="p-3 text-center">Missed Calls</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#2a344d]/50"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: CASES TAB -->
+      <div id="view-cases" class="space-y-8 hidden">
+        
+        <!-- Table 1: GUA / COL / PHI CASES -->
+        <div class="bg-[#1c2234] rounded-xl border border-[#2a344d] overflow-hidden shadow-xl">
+          <div class="p-4 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
+            <h2 class="text-sm font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - GUA / COL / PHI</h2>
+            <div class="flex items-center space-x-3">
+              <button onclick="addCasesRow('table-cases-gua')" class="px-2.5 py-1 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-lg text-xs font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
+                <i class="fa-solid fa-plus text-[10px]"></i>
+                <span>Add Agent</span>
+              </button>
+              <span class="text-xs bg-[#2a344d] text-slate-300 px-2.5 py-1 rounded-full font-mono agent-count">27 Agents</span>
+            </div>
+          </div>
+
+          <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
+            <canvas id="chart-cases-gua"></canvas>
+          </div>
+
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-xs text-left text-slate-300" id="table-cases-gua">
+              <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
+                <tr>
+                  <th class="p-3 min-w-[200px]">Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
+                  <th class="p-3 text-center text-[#ebbd31]">QA Total</th><th class="p-3 text-center">Conversations replied to</th><th class="p-3 text-center">Average First response time mins</th><th class="p-3 text-center">SLA missed</th><th class="p-3 text-center">Teammate CSAT score</th><th class="p-3 text-center">Teammate DSAT score</th><th class="p-3 text-center">survey count good</th><th class="p-3 text-center">survey count bad</th><th class="p-3 text-center">Total surveys</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#2a344d]/50"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Table 2: MX CASES -->
+        <div class="bg-[#1c2234] rounded-xl border border-[#2a344d] overflow-hidden shadow-xl">
+          <div class="p-4 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
+            <h2 class="text-sm font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - MX - CASES</h2>
+            <div class="flex items-center space-x-3">
+              <button onclick="addCasesRow('table-cases-mx')" class="px-2.5 py-1 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-lg text-xs font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
+                <i class="fa-solid fa-plus text-[10px]"></i>
+                <span>Add Agent</span>
+              </button>
+              <span class="text-xs bg-[#2a344d] text-slate-300 px-2.5 py-1 rounded-full font-mono agent-count">3 Agents</span>
+            </div>
+          </div>
+
+          <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
+            <canvas id="chart-cases-mx"></canvas>
+          </div>
+
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-xs text-left text-slate-300" id="table-cases-mx">
+              <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
+                <tr>
+                  <th class="p-3 min-w-[200px]">Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
+                  <th class="p-3 text-center text-[#ebbd31]">QA Total</th><th class="p-3 text-center">Conversations replied to</th><th class="p-3 text-center">Average First response time mins</th><th class="p-3 text-center">SLA missed</th><th class="p-3 text-center">Teammate CSAT score</th><th class="p-3 text-center">Teammate DSAT score</th><th class="p-3 text-center">survey count good</th><th class="p-3 text-center">survey count bad</th><th class="p-3 text-center">Total surveys</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#2a344d]/50"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // DATASETS
+    const phonesGuaColData = [
+      ["Acsa Esquivel", "Insurance phones", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM", "Sat-Sun"],
+      ["Alexander Alvarado", "Phones", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM", "SAT-SUN"],
+      ["Ana Melendez", "Insurance phones", "Guatemala", "Kevin Lopez", "Mon-Fri 6:00:00 AM 3:00:00 PM", "SAT-SUN"],
+      ["Andrea Gonzalez", "Phones", "Colombia", "Nury", "Mon-Fri 8:00:00 AM 5:00:00 PM", "SAT-SUN"],
+      ["Cesar Lopez", "Insurance phones", "Guatemala", "Kevin Lopez", "Mon-Fri 9:00:00 AM 6:00:00 PM", "SAT-SUN"],
+      ["Esvin Gomez", "ELD cases", "Guatemala", "Diego Gonzalez", "Mon-Fri 7:00:00 AM 4:00:00 PM", "SAT-SUN"],
+      ["Froy Gonzalez", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 9:00:00 AM 6:00:00 PM", "Sat-Sun"],
+      ["Gustavo Lopez", "Insurance phones", "Guatemala", "Andrea", "Mon-Fri 6:00:00 AM 3:00:00 PM", "SAT-SUN"],
+      ["Iverth Anthony Monterroso", "ELD cases", "Guatemala", "Jonathan", "8:00:00 AM 5:00:00 PM", "Sat-Sun"],
+      ["Kener Lee", "Insurance", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM", "Sat-Sun"],
+      ["Kevin Acabal", "ELD phones", "Guatemala", "Diego Gonzalez", "Mon-Fri 6:00:00 AM 3:00:00 PM", "SAT-SUN"],
+      ["Kevin Durango", "Phones", "Colombia", "Nury", "Mon-Fri 8:00:00 AM 5:00:00 PM", "SAT-SUN"],
+      ["Luis Ajche", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 8:00:00 AM 5:00:00 PM", "SAT-SUN"],
+      ["Luis Gonzalez", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 8:00:00 AM 5:00:00 PM", "SAT-SUN"],
+      ["Manfredo Monterroso", "Insurance phones", "Guatemala", "Andrea", "Mon-Fri 6:00:00 AM 3:00:00 PM", "SAT-SUN"],
+      ["Melanie Garcia", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 8:00:00 AM 5:00:00 PM", "SAT-SUN"],
+      ["Samantha Chinchilla", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 6:00:00 AM 3:00:00 PM", "SAT-SUN"],
+      ["Sebastian Quiñonez", "ELD cases", "Guatemala", "Jonathan", "7:00:00 AM 4:00:00 PM", "Sat-Sun"],
+      ["Sergio Chiguil", "ELD phones", "Guatemala", "Diego Gonzales", "Mon-Fri 5:00:00 AM 2:00:00 PM", "SAT-SUN"],
+      ["Sharon Olivares", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 6:00:00 AM 3:00:00 PM", "SAT-SUN"]
+    ];
+
+    const phonesPanData = [
+      ["Alexander Santamaria", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 6:00:00 AM 3:30:00 PM", "Thrusday and Sunday"],
+      ["Benneth Smith", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 6:30:00 AM - 4:00:00 PM", "Thrusday and Sunday"],
+      ["Dana Redwood", "Insurance", "Panama", "Daniela Cerezo", "Mon-Fri 7:00:00 AM - 4:30:00 PM", "Saturday and Sunday"],
+      ["Dean Spencer", "Phones", "Panama", "Daniela Cerezo", "5:00:00 AM - 2:30:00 PM", "Saturday and Sunday"],
+      ["Felix Torres", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 8:30:00 AM - 6:00:00 PM", "Wednesday and Sunday"],
+      ["Jesus Rios", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 7:00:00 AM - 4:30:00 PM", "Wednesday and Sunday"],
+      ["Jose Rodriguez", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 8:30:00 AM - 6:00:00 PM", "Saturday and Sunday"],
+      ["Kellyneth Estrada", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 5:30:00 AM - 3:00:00 PM", "Tuesday and Sunday"],
+      ["Kevin Williams", "Phones", "Panama", "Eduardo Bellamy", "Mon-Fri 8:30:00 AM - 6:00:00 PM", "Saturday and Sunday"],
+      ["Keyren Fuertes", "Insurance", "Panama", "Daniela Cerezo", "Mon-Fri 5:00:00 AM - 2:30:00 PM", "Saturday and Sunday"],
+      ["Marcos Botello", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 8:30:00 AM - 6:00:00 PM", "Saturday and Sunday"],
+      ["Marie Claire Perez", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 7:30:00 AM - 5:00:00 PM", "Saturday and Sunday"],
+      ["Marielys Tejada", "Insurance", "Panama", "Daniela Cerezo", "Mon-Fri 8:30:00 AM - 6:00:00 PM", "Saturday and Sunday"],
+      ["Sonia Jimenez", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 8:30:00 AM - 6:00:00 PM", "Saturday and Sunday"],
+      ["Stephanie Temple", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 6:00:00 AM - 3:30:00 PM", "Saturday and Sunday"],
+      ["Zinedine Moscote", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 7:00:00 AM - 4:30:00 PM", "Saturday and Sunday"]
+    ];
+
+    const phonesMxData = [
+      ["Cesar Larios", "Phones", "Mexico", "Carlos Rios", "Sun-Thrus 7:00:00 AM 4:00:00 PM", "Sunday-Thursday"],
+      ["Danae Fergoso", "Phones", "Mexico", "Sabdy Alvarez", "Mon-Fri 8:00:00 AM 5:00:00 PM", "Saturday-Sunday"],
+      ["Daniel Pelayo", "Phones", "Mexico", "Sabdy Alvarez", "Mon-Fri 9:00:00 AM 6:00:00 PM", "Saturday-Sunday"],
+      ["Israel Arias", "Phones", "Mexico", "Carlos Rios", "Mon-Fri 7:00 AM 4:00 PM", "Saturday-Sunday"],
+      ["Kevin Ibarra", "Phones", "Mexico", "Carlos Rios", "Mon-Fri 7:00 AM 4:00 PM", "Saturday-Sunday"],
+      ["Omar Jimenez", "Phones", "Mexico", "Carlos Rios", "Tues-Sat 9:00 AM 6:00PM", "Tuesday- Saturday"],
+      ["Raul Torne", "Phones", "Mexico", "Sabdy Alvarez", "Mon-Fri 8:00AM 5:00PM", "Saturday-Sunday"]
+    ];
+
+    const casesGuaColPhiData = [
+      ["Alejandra Manco", "Cases", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM", "Sat-Sun"],
+      ["Ann Jules Dayuta", "Cases", "Philipines", "Jennifer J", "11:00:00 AM 8:00:00 PM", "SAT-SUN"],
+      ["Ariel Mazate", "Insurance cases", "Guatemala", "Andrea", "6:00:00 AM 3:00:00 PM", "Fri-Sat"],
+      ["Brandon Vasquez", "ELD cases", "Guatemala", "Jonathan", "8:00:00 AM 5:00:00 PM", "Sat-Sun"],
+      ["Celina Franco", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 6:00:00 AM 3:00:00 PM", "SAT-SUN"],
+      ["Diana Orozco", "Cases", "Guatemala", "Karen", "6:00:00 AM 3:00:00 PM", "Sat-Sun"],
+      ["Edgar Linares", "ELD cases", "Guatemala", "Jonathan", "7:00:00 AM 4:00:00 PM", "Sat-Sun"],
+      ["Emely Hernandez", "Cases", "Guatemala", "Karen", "6:00:00 AM 3:00:00 PM", "Sat-Sun"],
+      ["Emilia Chajon", "Cases", "Guatemala", "Karen", "5:00:00 AM 2:00:00 PM", "Fri-Mon"],
+      ["Eunice Sir", "Insurance cases", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM", "Sat-Sun"],
+      ["Jorge Najera", "ELD cases", "Guatemala", "Jonathan", "Mon-Fri 9:00:00 AM 6:00:00 PM", "SAT-SUN"],
+      ["Jorge Saban", "Phones", "Guatemala", "Karen", "7:00:00 AM 4:00:00 PM", "Sat-Sun"],
+      ["Josue Sucuc", "ELD cases", "Guatemala", "Jonathan", "6:00:00 AM 3:00:00 PM", "Sat-Sun"],
+      ["Juan Carlos Avedaño", "Insurance cases", "Guatemala", "Andrea", "7:00:00 AM 4:00:00 PM", "Sat-Sun"],
+      ["Kathering Santos", "Insurance cases", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM", "Sat-Sun"],
+      ["Kyle Abad", "Cases", "Philipines", "Jennifer J", "10:00:00 PM 7:00:00 AM", "Fri-Sat"],
+      ["Lucia Herrera", "Cases", "Guatemala", "Karen", "7:00:00 AM 4:00:00 PM", "Sat-Sun"],
+      ["Luis Alexander Leon", "Insurance", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM", "SAT-SUN"],
+      ["Lynda Escobedo", "Insurance cases", "Guatemala", "Kevin Lopez", "Mon-Fri 6:00:00 AM 3:00:00 PM", "SAT-SUN"],
+      ["Marco Lopez", "Insurance cases", "Guatemala", "Kevin Lopez", "7:00:00 AM 4:00:00 PM", "Sat-Sun"],
+      ["Marianne Abigaile", "Cases", "Philipines", "Jennifer J", "5:00:00 PM 2:00:00 AM", "Mon-Tue"],
+      ["Michelle Marquez", "Insurance", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM", "SAT-SUN"],
+      ["Mary Joy Rafols", "Cases", "Philipines", "Jennifer J", "10:00:00 PM 7:00:00 AM", "Wed-Thu"],
+      ["Monica Prado", "Insurance cases", "Guatemala", "Kevin Lopez", "6:00:00 AM 3:00:00 PM", "Sat-Sun"],
+      ["Otto de la Cruz", "Insurance cases", "Guatemala", "Andrea", "6:00:00 AM 3:00:00 PM", "Sat-Sun"],
+      ["Pablo Saquilmer", "Cases", "Guatemala", "Karen", "6:00:00 AM 3:00:00 PM", "Sat-Sun"],
+      ["Rudy Herrera", "Cases", "Guatemala", "Karen", "10:00:00 AM 7:00:00 PM", "Sat-Sun"]
+    ];
+
+    const casesMxData = [
+      ["Galilea Gutierrez", "Cases", "Mexico", "Carlos Rios", "Mon–Fri, 7:00–16:00 PM", "Sat- Sun"],
+      ["Joseth Huerta", "Cases", "Mexico", "Carlos Rios", "Mon–Fri, 6:00–15:00 PM", "Sat- Sun"],
+      ["Alondra Mendoza", "Cases", "Mexico", "Sabdy Alvarez", "Mon–Fri, 9:00–18:00 PM", "Sat- Sun"]
+    ];
+
+    let currentTab = 'phones';
+    const chartInstances = {};
+
+    function updateMetricSelectOptions() {
+      const select = document.getElementById('chartMetricSelect');
+      select.innerHTML = '';
+
+      if (currentTab === 'phones') {
+        select.innerHTML = `
+          <option value="qa1">QA 1 Score</option>
+          <option value="qa2">QA 2 Score</option>
+          <option value="inbound">Inbound Calls</option>
+          <option value="outbound">Outbound Calls</option>
+          <option value="total">Total Calls</option>
+          <option value="avgDaily">Avg. Calls/Day</option>
+          <option value="abandon">Abandon on Hold</option>
+          <option value="declined">Declined Calls</option>
+          <option value="missed">Missed Calls</option>
+        `;
+      } else {
+        select.innerHTML = `
+          <option value="qaTotal">QA Total</option>
+          <option value="convReplied">Conversations replied to</option>
+          <option value="avgResponseTime">Average First response time mins</option>
+          <option value="slaMissed">SLA missed</option>
+          <option value="csat">Teammate CSAT score</option>
+          <option value="dsat">Teammate DSAT score</option>
+          <option value="surveyGood">survey count good</option>
+          <option value="surveyBad">survey count bad</option>
+          <option value="totalSurveys">Total surveys</option>
+        `;
+      }
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      const btnPhones = document.getElementById('btn-tab-phones');
+      const btnCases = document.getElementById('btn-tab-cases');
+      const viewPhones = document.getElementById('view-phones');
+      const viewCases = document.getElementById('view-cases');
+      const formBtnText = document.getElementById('formBtnText');
+      const evalBtn = document.getElementById('evaluationFormBtn');
+
+      updateMetricSelectOptions();
+
+      if (tab === 'phones') {
+        btnPhones.className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors bg-[#ebbd31] text-slate-950 font-semibold shadow-lg shadow-amber-500/10";
+        btnCases.className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400";
+        viewPhones.classList.remove('hidden');
+        viewCases.classList.add('hidden');
+        formBtnText.innerText = "NEW QA PHONES EVALUATION";
+        evalBtn.href = "https://docs.google.com/forms/d/e/1FAIpQLSfRjVZUd6TyQHCQgiuL6VVuZFDtL1GPHmMFxETpyCEBjgiaHg/viewform";
+        
+        document.getElementById('kpi-label-2').innerText = 'Avg. QA 2 Score';
+        document.getElementById('kpi-label-3').innerText = 'Total Volume';
+        document.getElementById('kpi-label-4').innerText = 'Avg. Calls / Day';
+      } else {
+        btnCases.className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors bg-[#ebbd31] text-slate-950 font-semibold shadow-lg shadow-amber-500/10";
+        btnPhones.className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400";
+        viewCases.classList.remove('hidden');
+        viewPhones.classList.add('hidden');
+        formBtnText.innerText = "NEW QA CASES EVALUATION";
+        evalBtn.href = "https://docs.google.com/forms/d/e/1FAIpQLSdNqvd20SHKNrkyLi4IgxmyCfZQW0dde0xV7RzcIpOinKOMTg/viewform";
+
+        document.getElementById('kpi-label-2').innerText = 'Avg. CSAT Score';
+        document.getElementById('kpi-label-3').innerText = 'Total Conversations';
+        document.getElementById('kpi-label-4').innerText = 'Avg. Response Time';
+      }
+      calculateGlobalKPIs();
+      updateAllCharts();
+    }
+
+    function renderPhonesTable(tableId, rawData) {
+      const tbody = document.querySelector(`#${tableId} tbody`);
+      tbody.innerHTML = '';
+      rawData.forEach((agent) => appendPhoneRowToTable(tableId, agent));
+      updateAgentCount(tableId);
+    }
+
+    function appendPhoneRowToTable(tableId, agent = ["New Agent", "Task", "Branch", "Leader", "Schedule", "Days Off"]) {
+      const tbody = document.querySelector(`#${tableId} tbody`);
+      const tr = document.createElement('tr');
+      tr.className = "hover:bg-slate-800/40 transition-colors border-b border-[#2a344d]/30";
+
+      tr.innerHTML = `
+        <td class="p-2"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="renderTableChart('${tableId}')"></td>
+        <td class="p-2"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text text-slate-300"></td>
+        <td class="p-2"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text text-slate-300"></td>
+        <td class="p-2"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text text-slate-300"></td>
+        <td class="p-2"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text text-slate-400 text-[11px]"></td>
+        <td class="p-2"><input type="text" value="${agent[5] || 'Days Off'}" class="cell-input cell-input-text text-slate-400 text-[11px]"></td>
+        
+        <td class="p-2 text-center"><input type="number" value="0" min="0" max="100" class="cell-input qa1 font-bold text-[#ebbd31]" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="0" min="0" max="100" class="cell-input qa2 font-bold text-[#ebbd31]" oninput="updateCalculations(this)"></td>
+        
+        <td class="p-2 text-center"><input type="number" value="0" class="cell-input inbound" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="0" class="cell-input outbound" oninput="updateCalculations(this)"></td>
+        <td class="p-3 text-center font-bold text-white total-calls">0</td>
+        <td class="p-2 text-center"><input type="text" value="00:00:00" class="cell-input text-center font-mono"></td>
+        <td class="p-3 text-center font-bold text-[#ebbd31]/90 avg-daily">0</td>
+        <td class="p-2 text-center"><input type="number" value="0" class="cell-input abandon" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="0" class="cell-input declined" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="0" class="cell-input missed" oninput="updateCalculations(this)"></td>
+
+        <td class="p-2 text-center">
+          <select class="cell-input text-[#ebbd31] font-medium text-xs">
+            <option value="N/A">N/A</option>
+            <option value="Coaching">Coaching</option>
+            <option value="Feedback">Feedback</option>
+            <option value="Accountability Session">Accountability Session</option>
+            <option value="Disciplinary Action">Disciplinary Action</option>
+          </select>
+        </td>
+
+        <td class="p-2"><input type="text" placeholder="Add comments..." class="cell-input cell-input-text text-slate-300"></td>
+        
+        <td class="p-2 text-center">
+          <div class="flex items-center justify-center space-x-2">
+            <button onclick="saveRow(this)" class="text-amber-400 hover:text-amber-300 p-1 transition-colors" title="Save Row">
+              <i class="fa-solid fa-floppy-disk"></i>
+            </button>
+            <button onclick="deleteAgentRow(this, '${tableId}')" class="text-rose-400 hover:text-rose-300 p-1 transition-colors" title="Delete Agent">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    }
+
+    function renderCasesTable(tableId, rawData) {
+      const tbody = document.querySelector(`#${tableId} tbody`);
+      tbody.innerHTML = '';
+      rawData.forEach((agent) => appendCasesRowToTable(tableId, agent));
+      updateAgentCount(tableId);
+    }
+
+    function appendCasesRowToTable(tableId, agent = ["New Agent", "Task", "Branch", "Leader", "Schedule", "Days Off"]) {
+      const tbody = document.querySelector(`#${tableId} tbody`);
+      const tr = document.createElement('tr');
+      tr.className = "hover:bg-slate-800/40 transition-colors border-b border-[#2a344d]/30";
+
+      tr.innerHTML = `
+        <td class="p-2"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="renderTableChart('${tableId}')"></td>
+        <td class="p-2"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text text-slate-300"></td>
+        <td class="p-2"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text text-slate-300"></td>
+        <td class="p-2"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text text-slate-300"></td>
+        <td class="p-2"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text text-slate-400 text-[11px]"></td>
+        <td class="p-2"><input type="text" value="${agent[5] || 'Days Off'}" class="cell-input cell-input-text text-slate-400 text-[11px]"></td>
+        
+        <td class="p-2 text-center"><input type="number" value="0" min="0" max="100" class="cell-input qaTotal font-bold text-[#ebbd31]" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="0" class="cell-input convReplied font-semibold text-white" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="0" class="cell-input avgResponseTime" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="0" class="cell-input slaMissed" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="0" class="cell-input csat text-emerald-400 font-bold" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="0" class="cell-input dsat text-rose-400 font-bold" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="0" class="cell-input surveyGood" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="0" class="cell-input surveyBad" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-3 text-center font-bold text-white totalSurveys">0</td>
+
+        <td class="p-2 text-center">
+          <select class="cell-input text-[#ebbd31] font-medium text-xs">
+            <option value="N/A">N/A</option>
+            <option value="Coaching">Coaching</option>
+            <option value="Feedback">Feedback</option>
+            <option value="Accountability Session">Accountability Session</option>
+            <option value="Disciplinary Action">Disciplinary Action</option>
+          </select>
+        </td>
+
+        <td class="p-2"><input type="text" placeholder="Add comments..." class="cell-input cell-input-text text-slate-300"></td>
+        
+        <td class="p-2 text-center">
+          <div class="flex items-center justify-center space-x-2">
+            <button onclick="saveRow(this)" class="text-amber-400 hover:text-amber-300 p-1 transition-colors" title="Save Row">
+              <i class="fa-solid fa-floppy-disk"></i>
+            </button>
+            <button onclick="deleteAgentRow(this, '${tableId}')" class="text-rose-400 hover:text-rose-300 p-1 transition-colors" title="Delete Agent">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    }
+
+    function addAgentRow(tableId) {
+      appendPhoneRowToTable(tableId);
+      updateAgentCount(tableId);
+      calculateGlobalKPIs();
+      renderTableChart(tableId);
+    }
+
+    function addCasesRow(tableId) {
+      appendCasesRowToTable(tableId);
+      updateAgentCount(tableId);
+      calculateGlobalKPIs();
+      renderTableChart(tableId);
+    }
+
+    function saveRow(btn) {
+      showToast();
+    }
+
+    function saveAndProcessWeek() {
+      showToast('Week Saved & Processed Successfully!');
+    }
+
+    function deleteAgentRow(btn, tableId) {
+      const tr = btn.closest('tr');
+      tr.remove();
+      updateAgentCount(tableId);
+      calculateGlobalKPIs();
+      renderTableChart(tableId);
+    }
+
+    function updateAgentCount(tableId) {
+      const count = document.querySelectorAll(`#${tableId} tbody tr`).length;
+      const countBadge = document.querySelector(`#${tableId}`).closest('.overflow-hidden').querySelector('.agent-count');
+      if (countBadge) {
+        countBadge.innerText = `${count} Agents`;
+      }
+    }
+
+    function updateCalculations(input) {
+      const tr = input.closest('tr');
+      const inbound = parseInt(tr.querySelector('.inbound')?.value) || 0;
+      const outbound = parseInt(tr.querySelector('.outbound')?.value) || 0;
+      
+      const total = inbound + outbound;
+      const avgDaily = (total / 5).toFixed(1);
+
+      if (tr.querySelector('.total-calls')) tr.querySelector('.total-calls').innerText = total;
+      if (tr.querySelector('.avg-daily')) tr.querySelector('.avg-daily').innerText = avgDaily;
+
+      calculateGlobalKPIs();
+      
+      const table = tr.closest('table');
+      if (table) {
+        renderTableChart(table.id);
+      }
+    }
+
+    function updateCasesCalculations(input) {
+      const tr = input.closest('tr');
+      const good = parseInt(tr.querySelector('.surveyGood')?.value) || 0;
+      const bad = parseInt(tr.querySelector('.surveyBad')?.value) || 0;
+      
+      const total = good + bad;
+
+      if (tr.querySelector('.totalSurveys')) tr.querySelector('.totalSurveys').innerText = total;
+
+      calculateGlobalKPIs();
+      
+      const table = tr.closest('table');
+      if (table) {
+        renderTableChart(table.id);
+      }
+    }
+
+    function calculateGlobalKPIs() {
+      let activeTables = [];
+      if (currentTab === 'phones') {
+        activeTables = ['table-gua-col', 'table-pan', 'table-mx-phones'];
+        let qa1Sum = 0, qa1Count = 0;
+        let qa2Sum = 0, qa2Count = 0;
+        let totalCalls = 0;
+
+        activeTables.forEach(tableId => {
+          const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+          rows.forEach(row => {
+            const v1 = parseFloat(row.querySelector('.qa1')?.value) || 0;
+            const v2 = parseFloat(row.querySelector('.qa2')?.value) || 0;
+            const tot = parseInt(row.querySelector('.total-calls')?.innerText) || 0;
+
+            if (v1 > 0) { qa1Sum += v1; qa1Count++; }
+            if (v2 > 0) { qa2Sum += v2; qa2Count++; }
+            totalCalls += tot;
+          });
+        });
+
+        document.getElementById('kpi-qa1').innerText = qa1Count ? (qa1Sum / qa1Count).toFixed(1) : '0';
+        document.getElementById('kpi-qa2').innerText = qa2Count ? (qa2Sum / qa2Count).toFixed(1) : '0';
+        document.getElementById('kpi-total').innerText = totalCalls.toLocaleString();
+        document.getElementById('kpi-daily').innerText = (totalCalls / 5).toFixed(1);
+      } else {
+        activeTables = ['table-cases-gua', 'table-cases-mx'];
+        let qaSum = 0, qaCount = 0;
+        let csatSum = 0, csatCount = 0;
+        let totalConvs = 0;
+        let totalRespTime = 0, respTimeCount = 0;
+
+        activeTables.forEach(tableId => {
+          const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+          rows.forEach(row => {
+            const qaVal = parseFloat(row.querySelector('.qaTotal')?.value) || 0;
+            const csatVal = parseFloat(row.querySelector('.csat')?.value) || 0;
+            const convs = parseInt(row.querySelector('.convReplied')?.value) || 0;
+            const respTime = parseFloat(row.querySelector('.avgResponseTime')?.value) || 0;
+
+            if (qaVal > 0) { qaSum += qaVal; qaCount++; }
+            if (csatVal > 0) { csatSum += csatVal; csatCount++; }
+            if (respTime > 0) { totalRespTime += respTime; respTimeCount++; }
+            totalConvs += convs;
+          });
+        });
+
+        document.getElementById('kpi-qa1').innerText = qaCount ? (qaSum / qaCount).toFixed(1) : '0';
+        document.getElementById('kpi-qa2').innerText = csatCount ? (csatSum / csatCount).toFixed(1) : '0';
+        document.getElementById('kpi-total').innerText = totalConvs.toLocaleString();
+        document.getElementById('kpi-daily').innerText = respTimeCount ? (totalRespTime / respTimeCount).toFixed(1) + ' min' : '0 min';
+      }
+    }
+
+    // CHART GENERATION FUNCTIONS
+    function renderTableChart(tableId) {
+      const chartCanvasId = tableId.replace('table-', 'chart-');
+      const ctx = document.getElementById(chartCanvasId);
+      if (!ctx) return;
+
+      const metric = document.getElementById('chartMetricSelect').value;
+      const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+
+      const labels = [];
+      const dataValues = [];
+
+      rows.forEach(row => {
+        const nameInput = row.querySelector('.cell-input-name');
+        const name = nameInput ? nameInput.value : 'Agent';
+        labels.push(name);
+
+        let val = 0;
+        if (currentTab === 'phones') {
+          if (metric === 'qa1') val = parseFloat(row.querySelector('.qa1')?.value) || 0;
+          else if (metric === 'qa2') val = parseFloat(row.querySelector('.qa2')?.value) || 0;
+          else if (metric === 'inbound') val = parseFloat(row.querySelector('.inbound')?.value) || 0;
+          else if (metric === 'outbound') val = parseFloat(row.querySelector('.outbound')?.value) || 0;
+          else if (metric === 'total') val = parseFloat(row.querySelector('.total-calls')?.innerText) || 0;
+          else if (metric === 'avgDaily') val = parseFloat(row.querySelector('.avg-daily')?.innerText) || 0;
+          else if (metric === 'abandon') val = parseFloat(row.querySelector('.abandon')?.value) || 0;
+          else if (metric === 'declined') val = parseFloat(row.querySelector('.declined')?.value) || 0;
+          else if (metric === 'missed') val = parseFloat(row.querySelector('.missed')?.value) || 0;
+        } else {
+          if (metric === 'qaTotal') val = parseFloat(row.querySelector('.qaTotal')?.value) || 0;
+          else if (metric === 'convReplied') val = parseFloat(row.querySelector('.convReplied')?.value) || 0;
+          else if (metric === 'avgResponseTime') val = parseFloat(row.querySelector('.avgResponseTime')?.value) || 0;
+          else if (metric === 'slaMissed') val = parseFloat(row.querySelector('.slaMissed')?.value) || 0;
+          else if (metric === 'csat') val = parseFloat(row.querySelector('.csat')?.value) || 0;
+          else if (metric === 'dsat') val = parseFloat(row.querySelector('.dsat')?.value) || 0;
+          else if (metric === 'surveyGood') val = parseFloat(row.querySelector('.surveyGood')?.value) || 0;
+          else if (metric === 'surveyBad') val = parseFloat(row.querySelector('.surveyBad')?.value) || 0;
+          else if (metric === 'totalSurveys') val = parseFloat(row.querySelector('.totalSurveys')?.innerText) || 0;
+        }
+
+        dataValues.push(val);
+      });
+
+      if (chartInstances[chartCanvasId]) {
+        chartInstances[chartCanvasId].destroy();
+      }
+
+      const selectElem = document.getElementById('chartMetricSelect');
+      const selectedOptionText = selectElem && selectElem.selectedIndex >= 0 ? selectElem.options[selectElem.selectedIndex].text : 'Metric';
+
+      chartInstances[chartCanvasId] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: selectedOptionText,
+            data: dataValues,
+            backgroundColor: '#ebbd31',
+            borderColor: '#d1a320',
+            borderWidth: 1,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#94a3b8', font: { size: 11, weight: '600' } }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#94a3b8', font: { size: 10 } },
+              grid: { color: 'rgba(42, 52, 77, 0.4)' }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: '#94a3b8', font: { size: 10 } },
+              grid: { color: 'rgba(42, 52, 77, 0.4)' }
+            }
+          }
+        }
+      });
+    }
+
+    function updateAllCharts() {
+      const allTableIds = ['table-gua-col', 'table-pan', 'table-mx-phones', 'table-cases-gua', 'table-cases-mx'];
+      allTableIds.forEach(id => renderTableChart(id));
+    }
+
+    function showToast(msg = 'Data Saved Successfully!') {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-text').innerText = msg;
+      t.style.display = 'block';
+      setTimeout(() => {
+        t.style.display = 'none';
+      }, 2000);
+    }
+
+    function changePeriod() {
+      initAllTables();
+    }
+
+    function filterTables() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const rows = document.querySelectorAll('tbody tr');
+      rows.forEach(r => {
+        const text = r.innerText.toLowerCase();
+        r.style.display = text.includes(q) ? '' : 'none';
+      });
+    }
+
+    function initAllTables() {
+      updateMetricSelectOptions();
+      renderPhonesTable('table-gua-col', phonesGuaColData);
+      renderPhonesTable('table-pan', phonesPanData);
+      renderPhonesTable('table-mx-phones', phonesMxData);
+      renderCasesTable('table-cases-gua', casesGuaColPhiData);
+      renderCasesTable('table-cases-mx', casesMxData);
+      calculateGlobalKPIs();
+      updateAllCharts();
+    }
+
+    window.onload = () => {
+      initAllTables();
+    };
+  </script>
+</body>
+</html>
