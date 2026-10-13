@@ -68,30 +68,44 @@
     }
     .cell-input-name {
       text-align: left;
-      min-width: 180px;
       font-weight: 600;
     }
+
+    /* ESTILO COMPACTO Y EXPANDIBLE PARA COMENTARIOS */
     .cell-comment-area {
       text-align: left;
-      min-width: 220px;
+      width: 220px;
+      max-width: 220px;
+      height: 32px;
+      max-height: 32px;
       resize: none;
-      overflow-y: hidden;
-      white-space: pre-wrap;
-      word-break: break-word;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
       line-height: 1.4;
-      min-height: 32px;
       display: block;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
     }
     .cell-input:hover, .cell-comment-area:hover {
       border-color: #3b486b;
       background: rgba(28, 34, 52, 0.8);
     }
-    .cell-input:focus, .cell-comment-area:focus {
+    /* Al hacer clic (focus), la celda de comentarios se expande mostrando todo el texto */
+    .cell-comment-area:focus {
       outline: none;
       border-color: #ebbd31;
       background: #141824;
       box-shadow: 0 0 0 2px rgba(235, 189, 49, 0.25);
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-y: auto;
+      height: auto;
+      max-height: 160px;
+      position: relative;
+      z-index: 10;
     }
+
     select.cell-input {
       cursor: pointer;
     }
@@ -147,10 +161,12 @@
       border-collapse: separate;
       border-spacing: 0;
       border: 1px solid var(--amber-grid);
+      white-space: nowrap;
     }
     table.data-table th {
       border-right: 1px solid var(--amber-grid);
       border-bottom: 2px solid var(--amber-main);
+      white-space: nowrap;
     }
     table.data-table th:last-child {
       border-right: none;
@@ -158,9 +174,14 @@
     table.data-table td {
       border-right: 1px solid var(--amber-grid);
       border-bottom: 1px solid rgba(235, 189, 49, 0.2);
+      white-space: nowrap;
     }
     table.data-table td:last-child {
       border-right: none;
+    }
+    table.data-table td:has(.cell-comment-area),
+    table.data-table th.col-comment {
+      white-space: normal;
     }
     table.data-table tbody tr:hover td {
       background-color: rgba(235, 189, 49, 0.05);
@@ -348,11 +369,11 @@
             <table class="w-full text-xs text-left text-slate-300 data-table" id="table-gua-col">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-3 min-w-[200px]">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
-                  <th class="p-3 text-center text-[#ebbd31] min-w-[70px]">QA 1</th><th class="p-3 text-center text-[#ebbd31] min-w-[70px]">QA 2</th>
+                  <th class="p-3">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
+                  <th class="p-3 text-center text-[#ebbd31]">QA 1</th><th class="p-3 text-center text-[#ebbd31]">QA 2</th>
                   <th class="p-3 text-center">Inbound Calls</th><th class="p-3 text-center">Outbound Calls</th><th class="p-3 text-center">Total Calls</th><th class="p-3 text-center">Avg. Handle Time</th><th class="p-3 text-center">Avg. Calls/Day</th>
                   <th class="p-3 text-center">Abandon on hold</th><th class="p-3 text-center">Declined calls</th><th class="p-3 text-center">Missed Calls</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center col-comment">Comments</th><th class="p-3 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -379,11 +400,11 @@
             <table class="w-full text-xs text-left text-slate-300 data-table" id="table-pan">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-3 min-w-[200px]">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
-                  <th class="p-3 text-center text-[#ebbd31] min-w-[70px]">QA 1</th><th class="p-3 text-center text-[#ebbd31] min-w-[70px]">QA 2</th>
+                  <th class="p-3">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
+                  <th class="p-3 text-center text-[#ebbd31]">QA 1</th><th class="p-3 text-center text-[#ebbd31]">QA 2</th>
                   <th class="p-3 text-center">Inbound Calls</th><th class="p-3 text-center">Outbound Calls</th><th class="p-3 text-center">Total Calls</th><th class="p-3 text-center">Avg. Handle Time</th><th class="p-3 text-center">Avg. Calls/Day</th>
                   <th class="p-3 text-center">Abandon on hold</th><th class="p-3 text-center">Declined calls</th><th class="p-3 text-center">Missed Calls</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center col-comment">Comments</th><th class="p-3 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -410,11 +431,11 @@
             <table class="w-full text-xs text-left text-slate-300 data-table" id="table-mx-phones">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-3 min-w-[200px]">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
-                  <th class="p-3 text-center text-[#ebbd31] min-w-[70px]">QA 1</th><th class="p-3 text-center text-[#ebbd31] min-w-[70px]">QA 2</th>
+                  <th class="p-3">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
+                  <th class="p-3 text-center text-[#ebbd31]">QA 1</th><th class="p-3 text-center text-[#ebbd31]">QA 2</th>
                   <th class="p-3 text-center">Inbound Calls</th><th class="p-3 text-center">Outbound Calls</th><th class="p-3 text-center">Total Calls</th><th class="p-3 text-center">Avg. Handle Time</th><th class="p-3 text-center">Avg. Calls/Day</th>
                   <th class="p-3 text-center">Abandon on hold</th><th class="p-3 text-center">Declined calls</th><th class="p-3 text-center">Missed Calls</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center col-comment">Comments</th><th class="p-3 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -444,9 +465,9 @@
             <table class="w-full text-xs text-left text-slate-300 data-table" id="table-cases-gua">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-3 min-w-[200px]">Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
-                  <th class="p-3 text-center text-[#ebbd31] min-w-[80px]">QA Total</th><th class="p-3 text-center">Conversations replied to</th><th class="p-3 text-center">Average First response time mins</th><th class="p-3 text-center">SLA missed</th><th class="p-3 text-center">Teammate CSAT score</th><th class="p-3 text-center">Teammate DSAT score</th><th class="p-3 text-center">survey count good</th><th class="p-3 text-center">survey count bad</th><th class="p-3 text-center">Total surveys</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
+                  <th class="p-3">Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
+                  <th class="p-3 text-center text-[#ebbd31]">QA Total</th><th class="p-3 text-center">Conversations replied to</th><th class="p-3 text-center">Average First response time mins</th><th class="p-3 text-center">SLA missed</th><th class="p-3 text-center">Teammate CSAT score</th><th class="p-3 text-center">Teammate DSAT score</th><th class="p-3 text-center">survey count good</th><th class="p-3 text-center">survey count bad</th><th class="p-3 text-center">Total surveys</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center col-comment">Comments</th><th class="p-3 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -473,9 +494,9 @@
             <table class="w-full text-xs text-left text-slate-300 data-table" id="table-cases-mx">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-3 min-w-[200px]">Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
-                  <th class="p-3 text-center text-[#ebbd31] min-w-[80px]">QA Total</th><th class="p-3 text-center">Conversations replied to</th><th class="p-3 text-center">Average First response time mins</th><th class="p-3 text-center">SLA missed</th><th class="p-3 text-center">Teammate CSAT score</th><th class="p-3 text-center">Teammate DSAT score</th><th class="p-3 text-center">survey count good</th><th class="p-3 text-center">survey count bad</th><th class="p-3 text-center">Total surveys</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
+                  <th class="p-3">Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
+                  <th class="p-3 text-center text-[#ebbd31]">QA Total</th><th class="p-3 text-center">Conversations replied to</th><th class="p-3 text-center">Average First response time mins</th><th class="p-3 text-center">SLA missed</th><th class="p-3 text-center">Teammate CSAT score</th><th class="p-3 text-center">Teammate DSAT score</th><th class="p-3 text-center">survey count good</th><th class="p-3 text-center">survey count bad</th><th class="p-3 text-center">Total surveys</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center col-comment">Comments</th><th class="p-3 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -595,10 +616,26 @@
     let currentTab = 'phones';
     const chartInstances = {};
 
-    function autoExpandTextarea(element) {
-      if (!element) return;
-      element.style.height = 'auto';
-      element.style.height = element.scrollHeight + 'px';
+    function autoResizeInput(input) {
+      if (!input || input.tagName !== 'INPUT' || input.type !== 'text') return;
+      const tempSpan = document.createElement('span');
+      tempSpan.style.visibility = 'hidden';
+      tempSpan.style.position = 'absolute';
+      tempSpan.style.whiteSpace = 'pre';
+      tempSpan.style.font = window.getComputedStyle(input).font;
+      tempSpan.textContent = input.value || input.placeholder || '';
+      document.body.appendChild(tempSpan);
+      
+      const newWidth = Math.max(tempSpan.offsetWidth + 20, 60);
+      input.style.width = newWidth + 'px';
+      document.body.removeChild(tempSpan);
+    }
+
+    // Selecciona todo el texto automáticamente al hacer clic en el comentario
+    function handleCommentFocus(textarea) {
+      setTimeout(() => {
+        textarea.select();
+      }, 50);
     }
 
     // CONDITIONAL FORMATTING FUNCTIONS
@@ -695,12 +732,12 @@
       const avgDailyCalls = Math.round(totalCalls / 5);
 
       tr.innerHTML = `
-        <td class="p-2"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="renderTableChart('${tableId}')"></td>
-        <td class="p-2"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text text-slate-300"></td>
-        <td class="p-2"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text text-slate-300"></td>
-        <td class="p-2"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text text-slate-300"></td>
-        <td class="p-2"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text text-slate-400 text-[11px]"></td>
-        <td class="p-2"><input type="text" value="${agent[5] || 'Days Off'}" class="cell-input cell-input-text text-slate-400 text-[11px]"></td>
+        <td class="p-2"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="autoResizeInput(this); renderTableChart('${tableId}')"></td>
+        <td class="p-2"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
+        <td class="p-2"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
+        <td class="p-2"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
+        <td class="p-2"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text text-slate-400 text-[11px]" oninput="autoResizeInput(this)"></td>
+        <td class="p-2"><input type="text" value="${agent[5] || 'Days Off'}" class="cell-input cell-input-text text-slate-400 text-[11px]" oninput="autoResizeInput(this)"></td>
         
         <td class="p-2 text-center"><input type="number" value="${agent[6] || 0}" min="0" max="100" class="cell-input qa1 font-bold" oninput="updateCalculations(this)"></td>
         <td class="p-2 text-center"><input type="number" value="${agent[7] || 0}" min="0" max="100" class="cell-input qa2 font-bold" oninput="updateCalculations(this)"></td>
@@ -708,7 +745,7 @@
         <td class="p-2 text-center"><input type="number" value="${agent[8] || 0}" class="cell-input inbound" oninput="updateCalculations(this)"></td>
         <td class="p-2 text-center"><input type="number" value="${agent[9] || 0}" class="cell-input outbound" oninput="updateCalculations(this)"></td>
         <td class="p-3 text-center font-bold text-white total-calls">${totalCalls}</td>
-        <td class="p-2 text-center"><input type="text" value="${agent[10] || '00:00:00'}" class="cell-input text-center font-mono"></td>
+        <td class="p-2 text-center"><input type="text" value="${agent[10] || '00:00:00'}" class="cell-input text-center font-mono" oninput="autoResizeInput(this)"></td>
         <td class="p-3 text-center font-bold text-[#ebbd31]/90 avg-daily">${avgDailyCalls}</td>
         <td class="p-2 text-center"><input type="number" value="${agent[11] || 0}" class="cell-input abandon" oninput="updateCalculations(this)"></td>
         <td class="p-2 text-center"><input type="number" value="${agent[12] || 0}" class="cell-input declined" oninput="updateCalculations(this)"></td>
@@ -725,7 +762,7 @@
         </td>
 
         <td class="p-2">
-          <textarea placeholder="Add comments..." class="cell-input cell-comment-area text-slate-300" oninput="autoExpandTextarea(this)">${agent[15] || ''}</textarea>
+          <textarea placeholder="Add comments..." class="cell-input cell-comment-area text-slate-300" onfocus="handleCommentFocus(this)" title="Haz clic para ver/copiar todo el texto">${agent[15] || ''}</textarea>
         </td>
         
         <td class="p-2 text-center">
@@ -742,15 +779,14 @@
 
       tbody.appendChild(tr);
 
+      tr.querySelectorAll('input[type="text"]').forEach(input => autoResizeInput(input));
+
       // Apply conditional formatting
       applyConditionalFormatting(tr.querySelector('.qa1'), 'qa');
       applyConditionalFormatting(tr.querySelector('.qa2'), 'qa');
       applyConditionalFormatting(tr.querySelector('.abandon'), 'abandonOrMissed');
       applyConditionalFormatting(tr.querySelector('.missed'), 'abandonOrMissed');
       applyConditionalFormatting(tr.querySelector('.declined'), 'declined');
-
-      const txt = tr.querySelector('.cell-comment-area');
-      if (txt) autoExpandTextarea(txt);
     }
 
     function renderCasesTable(tableId, rawData) {
@@ -766,12 +802,12 @@
       tr.className = "hover:bg-slate-800/40 transition-colors";
 
       tr.innerHTML = `
-        <td class="p-2"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="renderTableChart('${tableId}')"></td>
-        <td class="p-2"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text text-slate-300"></td>
-        <td class="p-2"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text text-slate-300"></td>
-        <td class="p-2"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text text-slate-300"></td>
-        <td class="p-2"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text text-slate-400 text-[11px]"></td>
-        <td class="p-2"><input type="text" value="${agent[5] || 'Days Off'}" class="cell-input cell-input-text text-slate-400 text-[11px]"></td>
+        <td class="p-2"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="autoResizeInput(this); renderTableChart('${tableId}')"></td>
+        <td class="p-2"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
+        <td class="p-2"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
+        <td class="p-2"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
+        <td class="p-2"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text text-slate-400 text-[11px]" oninput="autoResizeInput(this)"></td>
+        <td class="p-2"><input type="text" value="${agent[5] || 'Days Off'}" class="cell-input cell-input-text text-slate-400 text-[11px]" oninput="autoResizeInput(this)"></td>
         
         <td class="p-2 text-center"><input type="number" value="${agent[6] || 0}" min="0" max="100" class="cell-input qaTotal font-bold" oninput="updateCasesCalculations(this)"></td>
         <td class="p-2 text-center"><input type="number" value="${agent[7] || 0}" class="cell-input convReplied font-semibold text-white" oninput="updateCasesCalculations(this)"></td>
@@ -794,7 +830,7 @@
         </td>
 
         <td class="p-2">
-          <textarea placeholder="Add comments..." class="cell-input cell-comment-area text-slate-300" oninput="autoExpandTextarea(this)">${agent[15] || ''}</textarea>
+          <textarea placeholder="Add comments..." class="cell-input cell-comment-area text-slate-300" onfocus="handleCommentFocus(this)" title="Haz clic para ver/copiar todo el texto">${agent[15] || ''}</textarea>
         </td>
         
         <td class="p-2 text-center">
@@ -811,11 +847,10 @@
 
       tbody.appendChild(tr);
 
+      tr.querySelectorAll('input[type="text"]').forEach(input => autoResizeInput(input));
+
       // Apply conditional formatting for Cases
       applyConditionalFormatting(tr.querySelector('.qaTotal'), 'qa');
-
-      const txt = tr.querySelector('.cell-comment-area');
-      if (txt) autoExpandTextarea(txt);
     }
 
     function addAgentRow(tableId) {
