@@ -59,7 +59,7 @@
       color: inherit;
       width: 100%;
       text-align: center;
-      padding: 2px 4px;
+      padding: 2px 3px;
       border-radius: 4px;
       transition: all 0.2s;
     }
@@ -69,23 +69,24 @@
     .cell-input-name {
       text-align: left;
       font-weight: 600;
+      width: 130px;
       max-width: 130px;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
     }
 
-    /* COLUMNAS ACORTADAS / ULTRA-COMPACTAS PARA EVITAR SCROLL HORIZONTAL */
+    /* COLUMNAS CON ANCHO OPTIMIZADO */
     .cell-task {
-      width: 90px;
-      max-width: 90px;
+      width: 85px;
+      max-width: 85px;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
     }
     .cell-branch {
-      width: 80px;
-      max-width: 80px;
+      width: 75px;
+      max-width: 75px;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
@@ -98,18 +99,36 @@
       white-space: nowrap;
     }
     .cell-schedule {
-      width: 95px;
-      max-width: 95px;
+      width: 90px;
+      max-width: 90px;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
     }
 
-    /* SECCIÓN DE COMENTARIOS CON HOVER DESPLEGABLE HACIA ABAJO CON SCROLL */
+    /* CELDAS NUMÉRICAS Y AHT */
+    .col-qa {
+      min-width: 52px;
+      max-width: 58px;
+    }
+    .col-num {
+      min-width: 55px;
+      max-width: 62px; /* Permite hasta 4 dígitos visiblemente */
+    }
+    .col-aht {
+      min-width: 78px; /* Tamaño exacto para formato 00:00:00 */
+      max-width: 82px;
+    }
+    .col-drop {
+      min-width: 52px;
+      max-width: 58px;
+    }
+
+    /* COMENTARIOS Y POPOVER */
     .comment-container {
       position: relative;
-      width: 120px;
-      max-width: 120px;
+      width: 130px;
+      max-width: 130px;
     }
     .cell-comment-area {
       text-align: left;
@@ -127,9 +146,9 @@
       display: none;
       position: absolute;
       top: 100%;
-      right: 0;
+      left: 0;
       width: 240px;
-      max-height: 180px;
+      max-height: 160px;
       overflow-y: auto;
       background-color: #0f172a;
       color: #f8fafc;
@@ -201,27 +220,20 @@
       font-weight: 800 !important;
     }
     
-    /* QA numbers styling */
-    .qa1, .qa2, .qaTotal {
-      min-width: 50px;
-      padding-left: 2px;
-      padding-right: 2px;
-    }
-
     /* ENHANCED AMBER GRIDLINES FOR TABLES */
     table.data-table {
       border-collapse: separate;
       border-spacing: 0;
       border: 1px solid var(--amber-grid);
+      white-space: nowrap;
       width: 100%;
-      table-layout: auto;
     }
     table.data-table th {
       border-right: 1px solid var(--amber-grid);
       border-bottom: 2px solid var(--amber-main);
       white-space: nowrap;
-      font-size: 11px;
-      padding: 6px 4px;
+      padding: 6px 4px !important;
+      font-size: 10px;
     }
     table.data-table th:last-child {
       border-right: none;
@@ -230,8 +242,7 @@
       border-right: 1px solid var(--amber-grid);
       border-bottom: 1px solid rgba(235, 189, 49, 0.2);
       white-space: nowrap;
-      padding: 3px 2px;
-      font-size: 11px;
+      padding: 2px 3px !important;
     }
     table.data-table td:last-child {
       border-right: none;
@@ -248,39 +259,39 @@
   <!-- MAIN CONTENT AREA -->
   <main class="flex-1 flex flex-col h-screen overflow-y-auto custom-scrollbar">
     
-    <!-- TOP HEADER / CONTROL BAR (Sin sidebar, todo integrado arriba) -->
+    <!-- TOP HEADER / CONTROL BAR -->
     <header class="bg-[#1c2234] border-b border-[#2a344d] p-3 sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3">
       
-      <!-- LOGO -->
-      <div class="flex items-center space-x-2">
+      <!-- LOGO & BRANDING -->
+      <div class="flex items-center space-x-3">
         <div class="w-9 h-9 bg-[#20283d] rounded-full flex items-center justify-center p-1.5 shadow-md border border-slate-700/60 flex-shrink-0">
           <svg viewBox="0 0 260 180" class="w-full h-full text-[#ebbd31] fill-current">
             <path d="M 52 0 L 98 0 L 46 180 L 0 180 Z M 162 0 L 208 0 L 260 180 L 214 180 Z M 70 80 L 188 80 L 181 120 L 59 120 Z" />
           </svg>
         </div>
         <div>
-          <h1 class="font-bold text-sm tracking-wide text-white leading-none">HIGHWAY</h1>
-          <p class="text-[10px] text-[#ebbd31] font-medium tracking-wider leading-none mt-0.5">QA DASHBOARD</p>
+          <h1 class="font-bold text-base tracking-wide text-white leading-tight">HIGHWAY</h1>
+          <p class="text-[10px] text-[#ebbd31] font-medium tracking-wider">QA DASHBOARD</p>
         </div>
       </div>
 
-      <!-- DEPARTMENTS BUTTONS (En medio en la parte superior) -->
+      <!-- CENTER DEPARTMENTS NAVIGATION -->
       <div class="flex items-center bg-[#141824] p-1 rounded-xl border border-[#2a344d] space-x-1">
-        <button onclick="switchTab('phones')" id="btn-tab-phones" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs transition-colors bg-[#ebbd31] text-slate-950 font-bold shadow-md">
-          <i class="fa-solid fa-headset"></i>
-          <span>Phones</span>
+        <button onclick="switchTab('phones')" id="btn-tab-phones" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors bg-[#ebbd31] text-slate-950 shadow-md">
+          <i class="fa-solid fa-headset text-xs"></i>
+          <span>Customer Support - Phones</span>
         </button>
 
-        <button onclick="switchTab('cases')" id="btn-tab-cases" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400 font-medium">
-          <i class="fa-solid fa-folder-open"></i>
-          <span>Cases</span>
+        <button onclick="switchTab('cases')" id="btn-tab-cases" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400">
+          <i class="fa-solid fa-folder-open text-xs"></i>
+          <span>Customer Support Cases</span>
         </button>
       </div>
 
-      <!-- Date Controls & Save & Process Week Button -->
+      <!-- Date Controls & Save Button -->
       <div class="flex items-center space-x-2 flex-wrap">
-        <div class="flex items-center space-x-1 bg-[#141824] px-2.5 py-1 rounded-lg border border-[#2a344d]">
-          <label class="text-[11px] text-slate-400 font-medium">MONTH:</label>
+        <div class="flex items-center space-x-1.5 bg-[#141824] px-2.5 py-1 rounded-lg border border-[#2a344d]">
+          <label class="text-[10px] text-slate-400 font-medium">MONTH:</label>
           <select id="monthSelect" onchange="changePeriod()" class="bg-transparent text-[#ebbd31] text-xs font-semibold focus:outline-none cursor-pointer">
             <option value="January" class="bg-[#1c2234] text-white">January</option>
             <option value="February" class="bg-[#1c2234] text-white">February</option>
@@ -297,8 +308,8 @@
           </select>
         </div>
 
-        <div class="flex items-center space-x-1 bg-[#141824] px-2.5 py-1 rounded-lg border border-[#2a344d]">
-          <label class="text-[11px] text-slate-400 font-medium">WEEK:</label>
+        <div class="flex items-center space-x-1.5 bg-[#141824] px-2.5 py-1 rounded-lg border border-[#2a344d]">
+          <label class="text-[10px] text-slate-400 font-medium">WEEK:</label>
           <select id="weekSelect" onchange="changePeriod()" class="bg-transparent text-[#ebbd31] text-xs font-semibold focus:outline-none cursor-pointer">
             <option value="1" class="bg-[#1c2234] text-white">1</option>
             <option value="2" class="bg-[#1c2234] text-white">2</option>
@@ -308,23 +319,20 @@
           </select>
         </div>
 
-        <!-- SAVE & PROCESS WEEK BUTTON -->
-        <button onclick="saveAndProcessWeek()" class="inline-flex items-center space-x-1.5 bg-[#ebbd31] hover:bg-[#d1a320] text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs transition-all shadow-md amber-glow">
+        <button onclick="saveAndProcessWeek()" class="inline-flex items-center space-x-1.5 bg-[#ebbd31] hover:bg-[#d1a320] text-slate-950 font-bold px-3 py-1 rounded-lg text-xs transition-all shadow-md amber-glow">
           <i class="fa-solid fa-cloud-arrow-up text-slate-950"></i>
           <span>Save Week</span>
         </button>
       </div>
 
-      <!-- Action Button & Download Excel integrated small below -->
+      <!-- Action Button (Form Link & Excel Export Combo) -->
       <div class="flex flex-col items-end space-y-1">
         <a id="evaluationFormBtn" href="https://docs.google.com/forms/d/e/1FAIpQLSfRjVZUd6TyQHCQgiuL6VVuZFDtL1GPHmMFxETpyCEBjgiaHg/viewform" target="_blank" class="inline-flex items-center space-x-1.5 bg-[#ebbd31] hover:bg-[#d1a320] text-slate-950 font-bold px-3 py-1 rounded-lg text-xs transition-all shadow-md amber-glow">
           <i class="fa-solid fa-pen-to-square"></i>
           <span id="formBtnText">NEW QA PHONES EVALUATION</span>
         </a>
-
-        <!-- Excel Export Button Pequeno abajo del boton de New Evaluation -->
-        <button onclick="exportToExcel()" class="inline-flex items-center space-x-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-0.5 px-2 rounded text-[10px] transition-colors shadow">
-          <i class="fa-solid fa-file-excel text-[11px]"></i>
+        <button onclick="exportToExcel()" class="inline-flex items-center space-x-1 text-emerald-400 hover:text-emerald-300 font-semibold text-[10px] transition-colors">
+          <i class="fa-solid fa-file-excel"></i>
           <span>Download Excel Report</span>
         </button>
       </div>
@@ -334,7 +342,7 @@
     <div class="p-4 space-y-5">
 
       <!-- GLOBAL KPIS -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-3 flex items-center justify-between">
           <div>
             <p class="text-[11px] text-slate-400 font-medium">Avg. QA Score</p>
@@ -377,15 +385,15 @@
       </div>
 
       <!-- SEARCH BAR & THREE CHART CATEGORY SELECTOR -->
-      <div class="flex flex-col sm:flex-row justify-between items-center bg-[#1c2234] p-2.5 rounded-xl border border-[#2a344d] gap-3">
-        <div class="relative w-full sm:w-72">
+      <div class="flex flex-col md:flex-row justify-between items-center bg-[#1c2234] p-2.5 rounded-xl border border-[#2a344d] gap-3">
+        <div class="relative w-full md:w-72">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-          <input type="text" id="searchInput" onkeyup="filterTables()" placeholder="Search agent, leader, task..." class="w-full bg-[#141824] border border-[#2a344d] rounded-lg pl-8 pr-3 py-1 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#ebbd31]">
+          <input type="text" id="searchInput" onkeyup="filterTables()" placeholder="Search agent, leader, task, branch..." class="w-full bg-[#141824] border border-[#2a344d] rounded-lg pl-8 pr-3 py-1 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#ebbd31]">
         </div>
 
-        <div class="flex items-center space-x-2 w-full sm:w-auto">
-          <label class="text-xs text-slate-400 font-medium whitespace-nowrap"><i class="fa-solid fa-chart-column text-[#ebbd31] mr-1"></i>CHART CATEGORY:</label>
-          <select id="chartMetricSelect" onchange="updateAllCharts()" class="bg-[#141824] border border-[#2a344d] text-[#ebbd31] text-xs font-semibold px-2.5 py-1 rounded-lg focus:outline-none cursor-pointer w-full sm:w-auto">
+        <div class="flex items-center space-x-2 w-full md:w-auto">
+          <label class="text-[11px] text-slate-400 font-medium whitespace-nowrap"><i class="fa-solid fa-chart-column text-[#ebbd31] mr-1"></i>CHART CATEGORY:</label>
+          <select id="chartMetricSelect" onchange="updateAllCharts()" class="bg-[#141824] border border-[#2a344d] text-[#ebbd31] text-xs font-semibold px-2.5 py-1 rounded-lg focus:outline-none cursor-pointer w-full md:w-auto">
           </select>
         </div>
       </div>
@@ -401,21 +409,21 @@
                 <i class="fa-solid fa-plus text-[9px]"></i>
                 <span>Add Agent</span>
               </button>
-              <span class="text-[11px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">20 Agents</span>
+              <span class="text-[10px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">20 Agents</span>
             </div>
           </div>
           <div class="p-3 border-b border-[#2a344d] bg-[#141824]/40 h-52 relative">
             <canvas id="chart-gua-col"></canvas>
           </div>
           <div class="overflow-x-auto custom-scrollbar p-1">
-            <table class="data-table" id="table-gua-col">
+            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-gua-col">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th>Agent Name</th><th>Task</th><th>Branch</th><th>Leaders</th><th>Schedule</th>
-                  <th class="text-center text-[#ebbd31]">QA 1</th><th class="text-center text-[#ebbd31]">QA 2</th>
-                  <th class="text-center">Inbound</th><th class="text-center">Outbound</th><th class="text-center">Total</th><th class="text-center">AHT</th><th class="text-center">Calls/Day</th>
-                  <th class="text-center">Abnd Hold</th><th class="text-center">Declined</th><th class="text-center">Missed</th>
-                  <th class="text-center text-[#ebbd31]">Action Plan</th><th class="text-center">Comments</th><th class="text-center">Actions</th>
+                  <th class="p-2 min-w-[130px]">Agent Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
+                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA 1</th><th class="p-2 text-center text-[#ebbd31] col-qa">QA 2</th>
+                  <th class="p-2 text-center col-num">Inbound</th><th class="p-2 text-center col-num">Outbound</th><th class="p-2 text-center col-num">Total</th><th class="p-2 text-center col-aht">AHT</th><th class="p-2 text-center col-num">Avg/Day</th>
+                  <th class="p-2 text-center col-drop">Abnd Hold</th><th class="p-2 text-center col-drop">Declined</th><th class="p-2 text-center col-drop">Missed</th>
+                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[60px]">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -432,21 +440,21 @@
                 <i class="fa-solid fa-plus text-[9px]"></i>
                 <span>Add Agent</span>
               </button>
-              <span class="text-[11px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">16 Agents</span>
+              <span class="text-[10px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">16 Agents</span>
             </div>
           </div>
           <div class="p-3 border-b border-[#2a344d] bg-[#141824]/40 h-52 relative">
             <canvas id="chart-pan"></canvas>
           </div>
           <div class="overflow-x-auto custom-scrollbar p-1">
-            <table class="data-table" id="table-pan">
+            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-pan">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th>Agent Name</th><th>Task</th><th>Branch</th><th>Leaders</th><th>Schedule</th>
-                  <th class="text-center text-[#ebbd31]">QA 1</th><th class="text-center text-[#ebbd31]">QA 2</th>
-                  <th class="text-center">Inbound</th><th class="text-center">Outbound</th><th class="text-center">Total</th><th class="text-center">AHT</th><th class="text-center">Calls/Day</th>
-                  <th class="text-center">Abnd Hold</th><th class="text-center">Declined</th><th class="text-center">Missed</th>
-                  <th class="text-center text-[#ebbd31]">Action Plan</th><th class="text-center">Comments</th><th class="text-center">Actions</th>
+                  <th class="p-2 min-w-[130px]">Agent Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
+                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA 1</th><th class="p-2 text-center text-[#ebbd31] col-qa">QA 2</th>
+                  <th class="p-2 text-center col-num">Inbound</th><th class="p-2 text-center col-num">Outbound</th><th class="p-2 text-center col-num">Total</th><th class="p-2 text-center col-aht">AHT</th><th class="p-2 text-center col-num">Avg/Day</th>
+                  <th class="p-2 text-center col-drop">Abnd Hold</th><th class="p-2 text-center col-drop">Declined</th><th class="p-2 text-center col-drop">Missed</th>
+                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[60px]">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -463,21 +471,21 @@
                 <i class="fa-solid fa-plus text-[9px]"></i>
                 <span>Add Agent</span>
               </button>
-              <span class="text-[11px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">7 Agents</span>
+              <span class="text-[10px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">7 Agents</span>
             </div>
           </div>
           <div class="p-3 border-b border-[#2a344d] bg-[#141824]/40 h-52 relative">
             <canvas id="chart-mx-phones"></canvas>
           </div>
           <div class="overflow-x-auto custom-scrollbar p-1">
-            <table class="data-table" id="table-mx-phones">
+            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-mx-phones">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th>Agent Name</th><th>Task</th><th>Branch</th><th>Leaders</th><th>Schedule</th>
-                  <th class="text-center text-[#ebbd31]">QA 1</th><th class="text-center text-[#ebbd31]">QA 2</th>
-                  <th class="text-center">Inbound</th><th class="text-center">Outbound</th><th class="text-center">Total</th><th class="text-center">AHT</th><th class="text-center">Calls/Day</th>
-                  <th class="text-center">Abnd Hold</th><th class="text-center">Declined</th><th class="text-center">Missed</th>
-                  <th class="text-center text-[#ebbd31]">Action Plan</th><th class="text-center">Comments</th><th class="text-center">Actions</th>
+                  <th class="p-2 min-w-[130px]">Agent Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
+                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA 1</th><th class="p-2 text-center text-[#ebbd31] col-qa">QA 2</th>
+                  <th class="p-2 text-center col-num">Inbound</th><th class="p-2 text-center col-num">Outbound</th><th class="p-2 text-center col-num">Total</th><th class="p-2 text-center col-aht">AHT</th><th class="p-2 text-center col-num">Avg/Day</th>
+                  <th class="p-2 text-center col-drop">Abnd Hold</th><th class="p-2 text-center col-drop">Declined</th><th class="p-2 text-center col-drop">Missed</th>
+                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[60px]">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -497,19 +505,19 @@
                 <i class="fa-solid fa-plus text-[9px]"></i>
                 <span>Add Agent</span>
               </button>
-              <span class="text-[11px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">27 Agents</span>
+              <span class="text-[10px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">27 Agents</span>
             </div>
           </div>
           <div class="p-3 border-b border-[#2a344d] bg-[#141824]/40 h-52 relative">
             <canvas id="chart-cases-gua"></canvas>
           </div>
           <div class="overflow-x-auto custom-scrollbar p-1">
-            <table class="data-table" id="table-cases-gua">
+            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-cases-gua">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th>Name</th><th>Task</th><th>Branch</th><th>Leaders</th><th>Schedule</th>
-                  <th class="text-center text-[#ebbd31]">QA Total</th><th class="text-center">Convs Replied</th><th class="text-center">Avg FRT (m)</th><th class="text-center">SLA Missed</th><th class="text-center">CSAT</th><th class="text-center">DSAT</th><th class="text-center">Good Surv.</th><th class="text-center">Bad Surv.</th><th class="text-center">Total Surv.</th>
-                  <th class="text-center text-[#ebbd31]">Action Plan</th><th class="text-center">Comments</th><th class="text-center">Actions</th>
+                  <th class="p-2 min-w-[130px]">Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
+                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA Total</th><th class="p-2 text-center col-num">Convs</th><th class="p-2 text-center col-num">Resp Time</th><th class="p-2 text-center col-num">SLA Missed</th><th class="p-2 text-center col-num">CSAT</th><th class="p-2 text-center col-num">DSAT</th><th class="p-2 text-center col-num">Good</th><th class="p-2 text-center col-num">Bad</th><th class="p-2 text-center col-num">Total Surv</th>
+                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[60px]">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -526,19 +534,19 @@
                 <i class="fa-solid fa-plus text-[9px]"></i>
                 <span>Add Agent</span>
               </button>
-              <span class="text-[11px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">3 Agents</span>
+              <span class="text-[10px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">3 Agents</span>
             </div>
           </div>
           <div class="p-3 border-b border-[#2a344d] bg-[#141824]/40 h-52 relative">
             <canvas id="chart-cases-mx"></canvas>
           </div>
           <div class="overflow-x-auto custom-scrollbar p-1">
-            <table class="data-table" id="table-cases-mx">
+            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-cases-mx">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th>Name</th><th>Task</th><th>Branch</th><th>Leaders</th><th>Schedule</th>
-                  <th class="text-center text-[#ebbd31]">QA Total</th><th class="text-center">Convs Replied</th><th class="text-center">Avg FRT (m)</th><th class="text-center">SLA Missed</th><th class="text-center">CSAT</th><th class="text-center">DSAT</th><th class="text-center">Good Surv.</th><th class="text-center">Bad Surv.</th><th class="text-center">Total Surv.</th>
-                  <th class="text-center text-[#ebbd31]">Action Plan</th><th class="text-center">Comments</th><th class="text-center">Actions</th>
+                  <th class="p-2 min-w-[130px]">Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
+                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA Total</th><th class="p-2 text-center col-num">Convs</th><th class="p-2 text-center col-num">Resp Time</th><th class="p-2 text-center col-num">SLA Missed</th><th class="p-2 text-center col-num">CSAT</th><th class="p-2 text-center col-num">DSAT</th><th class="p-2 text-center col-num">Good</th><th class="p-2 text-center col-num">Bad</th><th class="p-2 text-center col-num">Total Surv</th>
+                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[60px]">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -568,91 +576,91 @@
 
     // BASE DATASETS
     const phonesGuaColData = [
-      ["Acsa Esquivel", "Insurance phones", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM"],
-      ["Alexander Alvarado", "Phones", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM"],
-      ["Ana Melendez", "Insurance phones", "Guatemala", "Kevin Lopez", "Mon-Fri 6:00:00 AM 3:00:00 PM"],
-      ["Andrea Gonzalez", "Phones", "Colombia", "Nury", "Mon-Fri 8:00:00 AM 5:00:00 PM"],
-      ["Cesar Lopez", "Insurance phones", "Guatemala", "Kevin Lopez", "Mon-Fri 9:00:00 AM 6:00:00 PM"],
-      ["Esvin Gomez", "ELD cases", "Guatemala", "Diego Gonzalez", "Mon-Fri 7:00:00 AM 4:00:00 PM"],
-      ["Froy Gonzalez", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 9:00:00 AM 6:00:00 PM"],
-      ["Gustavo Lopez", "Insurance phones", "Guatemala", "Andrea", "Mon-Fri 6:00:00 AM 3:00:00 PM"],
-      ["Iverth Anthony Monterroso", "ELD cases", "Guatemala", "Jonathan", "8:00:00 AM 5:00:00 PM"],
-      ["Kener Lee", "Insurance", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM"],
-      ["Kevin Acabal", "ELD phones", "Guatemala", "Diego Gonzalez", "Mon-Fri 6:00:00 AM 3:00:00 PM"],
-      ["Kevin Durango", "Phones", "Colombia", "Nury", "Mon-Fri 8:00:00 AM 5:00:00 PM"],
-      ["Luis Ajche", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 8:00:00 AM 5:00:00 PM"],
-      ["Luis Gonzalez", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 8:00:00 AM 5:00:00 PM"],
-      ["Manfredo Monterroso", "Insurance phones", "Guatemala", "Andrea", "Mon-Fri 6:00:00 AM 3:00:00 PM"],
-      ["Melanie Garcia", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 8:00:00 AM 5:00:00 PM"],
-      ["Samantha Chinchilla", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 6:00:00 AM 3:00:00 PM"],
-      ["Sebastian Quiñonez", "ELD cases", "Guatemala", "Jonathan", "7:00:00 AM 4:00:00 PM"],
-      ["Sergio Chiguil", "ELD phones", "Guatemala", "Diego Gonzales", "Mon-Fri 5:00:00 AM 2:00:00 PM"],
-      ["Sharon Olivares", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 6:00:00 AM 3:00:00 PM"]
+      ["Acsa Esquivel", "Insurance phones", "Guatemala", "Andrea", "8:00 AM - 5:00 PM"],
+      ["Alexander Alvarado", "Phones", "Colombia", "Nury", "8:00 AM - 5:00 PM"],
+      ["Ana Melendez", "Insurance phones", "Guatemala", "Kevin Lopez", "6:00 AM - 3:00 PM"],
+      ["Andrea Gonzalez", "Phones", "Colombia", "Nury", "8:00 AM - 5:00 PM"],
+      ["Cesar Lopez", "Insurance phones", "Guatemala", "Kevin Lopez", "9:00 AM - 6:00 PM"],
+      ["Esvin Gomez", "ELD cases", "Guatemala", "Diego Gonzalez", "7:00 AM - 4:00 PM"],
+      ["Froy Gonzalez", "ELD phones", "Guatemala", "Jonathan", "9:00 AM - 6:00 PM"],
+      ["Gustavo Lopez", "Insurance phones", "Guatemala", "Andrea", "6:00 AM - 3:00 PM"],
+      ["Iverth Anthony Monterroso", "ELD cases", "Guatemala", "Jonathan", "8:00 AM - 5:00 PM"],
+      ["Kener Lee", "Insurance", "Guatemala", "Andrea", "8:00 AM - 5:00 PM"],
+      ["Kevin Acabal", "ELD phones", "Guatemala", "Diego Gonzalez", "6:00 AM - 3:00 PM"],
+      ["Kevin Durango", "Phones", "Colombia", "Nury", "8:00 AM - 5:00 PM"],
+      ["Luis Ajche", "ELD phones", "Guatemala", "Jonathan", "8:00 AM - 5:00 PM"],
+      ["Luis Gonzalez", "ELD phones", "Guatemala", "Jonathan", "8:00 AM - 5:00 PM"],
+      ["Manfredo Monterroso", "Insurance phones", "Guatemala", "Andrea", "6:00 AM - 3:00 PM"],
+      ["Melanie Garcia", "ELD phones", "Guatemala", "Jonathan", "8:00 AM - 5:00 PM"],
+      ["Samantha Chinchilla", "ELD phones", "Guatemala", "Jonathan", "6:00 AM - 3:00 PM"],
+      ["Sebastian Quiñonez", "ELD cases", "Guatemala", "Jonathan", "7:00 AM - 4:00 PM"],
+      ["Sergio Chiguil", "ELD phones", "Guatemala", "Diego Gonzales", "5:00 AM - 2:00 PM"],
+      ["Sharon Olivares", "ELD phones", "Guatemala", "Jonathan", "6:00 AM - 3:00 PM"]
     ];
 
     const phonesPanData = [
-      ["Alexander Santamaria", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 6:00:00 AM 3:30:00 PM"],
-      ["Benneth Smith", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 6:30:00 AM - 4:00:00 PM"],
-      ["Dana Redwood", "Insurance", "Panama", "Daniela Cerezo", "Mon-Fri 7:00:00 AM - 4:30:00 PM"],
-      ["Dean Spencer", "Phones", "Panama", "Daniela Cerezo", "5:00:00 AM - 2:30:00 PM"],
-      ["Felix Torres", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 8:30:00 AM - 6:00:00 PM"],
-      ["Jesus Rios", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 7:00:00 AM - 4:30:00 PM"],
-      ["Jose Rodriguez", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 8:30:00 AM - 6:00:00 PM"],
-      ["Kellyneth Estrada", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 5:30:00 AM - 3:00:00 PM"],
-      ["Kevin Williams", "Phones", "Panama", "Eduardo Bellamy", "Mon-Fri 8:30:00 AM - 6:00:00 PM"],
-      ["Keyren Fuertes", "Insurance", "Panama", "Daniela Cerezo", "Mon-Fri 5:00:00 AM - 2:30:00 PM"],
-      ["Marcos Botello", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 8:30:00 AM - 6:00:00 PM"],
-      ["Marie Claire Perez", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 7:30:00 AM - 5:00:00 PM"],
-      ["Marielys Tejada", "Insurance", "Panama", "Daniela Cerezo", "Mon-Fri 8:30:00 AM - 6:00:00 PM"],
-      ["Sonia Jimenez", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 8:30:00 AM - 6:00:00 PM"],
-      ["Stephanie Temple", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 6:00:00 AM - 3:30:00 PM"],
-      ["Zinedine Moscote", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 7:00:00 AM - 4:30:00 PM"]
+      ["Alexander Santamaria", "Phones", "Panama", "Daniela Cerezo", "6:00 AM - 3:30 PM"],
+      ["Benneth Smith", "ELD phones", "Panama", "Eduardo Bellamy", "6:30 AM - 4:00 PM"],
+      ["Dana Redwood", "Insurance", "Panama", "Daniela Cerezo", "7:00 AM - 4:30 PM"],
+      ["Dean Spencer", "Phones", "Panama", "Daniela Cerezo", "5:00 AM - 2:30 PM"],
+      ["Felix Torres", "Phones", "Panama", "Daniela Cerezo", "8:30 AM - 6:00 PM"],
+      ["Jesus Rios", "ELD phones", "Panama", "Eduardo Bellamy", "7:00 AM - 4:30 PM"],
+      ["Jose Rodriguez", "ELD phones", "Panama", "Eduardo Bellamy", "8:30 AM - 6:00 PM"],
+      ["Kellyneth Estrada", "Phones", "Panama", "Daniela Cerezo", "5:30 AM - 3:00 PM"],
+      ["Kevin Williams", "Phones", "Panama", "Eduardo Bellamy", "8:30 AM - 6:00 PM"],
+      ["Keyren Fuertes", "Insurance", "Panama", "Daniela Cerezo", "5:00 AM - 2:30 PM"],
+      ["Marcos Botello", "ELD phones", "Panama", "Eduardo Bellamy", "8:30 AM - 6:00 PM"],
+      ["Marie Claire Perez", "ELD phones", "Panama", "Eduardo Bellamy", "7:30 AM - 5:00 PM"],
+      ["Marielys Tejada", "Insurance", "Panama", "Daniela Cerezo", "8:30 AM - 6:00 PM"],
+      ["Sonia Jimenez", "ELD phones", "Panama", "Eduardo Bellamy", "8:30 AM - 6:00 PM"],
+      ["Stephanie Temple", "Phones", "Panama", "Daniela Cerezo", "6:00 AM - 3:30 PM"],
+      ["Zinedine Moscote", "Phones", "Panama", "Daniela Cerezo", "7:00 AM - 4:30 PM"]
     ];
 
     const phonesMxData = [
-      ["Cesar Larios", "Phones", "Mexico", "Carlos Rios", "Sun-Thrus 7:00:00 AM 4:00:00 PM"],
-      ["Danae Fergoso", "Phones", "Mexico", "Sabdy Alvarez", "Mon-Fri 8:00:00 AM 5:00:00 PM"],
-      ["Daniel Pelayo", "Phones", "Mexico", "Sabdy Alvarez", "Mon-Fri 9:00:00 AM 6:00:00 PM"],
-      ["Israel Arias", "Phones", "Mexico", "Carlos Rios", "Mon-Fri 7:00 AM 4:00 PM"],
-      ["Kevin Ibarra", "Phones", "Mexico", "Carlos Rios", "Mon-Fri 7:00 AM 4:00 PM"],
-      ["Omar Jimenez", "Phones", "Mexico", "Carlos Rios", "Tues-Sat 9:00 AM 6:00PM"],
-      ["Raul Torne", "Phones", "Mexico", "Sabdy Alvarez", "Mon-Fri 8:00AM 5:00PM"]
+      ["Cesar Larios", "Phones", "Mexico", "Carlos Rios", "7:00 AM - 4:00 PM"],
+      ["Danae Fergoso", "Phones", "Mexico", "Sabdy Alvarez", "8:00 AM - 5:00 PM"],
+      ["Daniel Pelayo", "Phones", "Mexico", "Sabdy Alvarez", "9:00 AM - 6:00 PM"],
+      ["Israel Arias", "Phones", "Mexico", "Carlos Rios", "7:00 AM - 4:00 PM"],
+      ["Kevin Ibarra", "Phones", "Mexico", "Carlos Rios", "7:00 AM - 4:00 PM"],
+      ["Omar Jimenez", "Phones", "Mexico", "Carlos Rios", "9:00 AM - 6:00 PM"],
+      ["Raul Torne", "Phones", "Mexico", "Sabdy Alvarez", "8:00 AM - 5:00 PM"]
     ];
 
     const casesGuaColPhiData = [
-      ["Alejandra Manco", "Cases", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM"],
-      ["Ann Jules Dayuta", "Cases", "Philipines", "Jennifer J", "11:00:00 AM 8:00:00 PM"],
-      ["Ariel Mazate", "Insurance cases", "Guatemala", "Andrea", "6:00:00 AM 3:00:00 PM"],
-      ["Brandon Vasquez", "ELD cases", "Guatemala", "Jonathan", "8:00:00 AM 5:00:00 PM"],
-      ["Celina Franco", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 6:00:00 AM 3:00:00 PM"],
-      ["Diana Orozco", "Cases", "Guatemala", "Karen", "6:00:00 AM 3:00:00 PM"],
-      ["Edgar Linares", "ELD cases", "Guatemala", "Jonathan", "7:00:00 AM 4:00:00 PM"],
-      ["Emely Hernandez", "Cases", "Guatemala", "Karen", "6:00:00 AM 3:00:00 PM"],
-      ["Emilia Chajon", "Cases", "Guatemala", "Karen", "5:00:00 AM 2:00:00 PM"],
-      ["Eunice Sir", "Insurance cases", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM"],
-      ["Jorge Najera", "ELD cases", "Guatemala", "Jonathan", "Mon-Fri 9:00:00 AM 6:00:00 PM"],
-      ["Jorge Saban", "Phones", "Guatemala", "Karen", "7:00:00 AM 4:00:00 PM"],
-      ["Josue Sucuc", "ELD cases", "Guatemala", "Jonathan", "6:00:00 AM 3:00:00 PM"],
-      ["Juan Carlos Avedaño", "Insurance cases", "Guatemala", "Andrea", "7:00:00 AM 4:00:00 PM"],
-      ["Kathering Santos", "Insurance cases", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM"],
-      ["Kyle Abad", "Cases", "Philipines", "Jennifer J", "10:00:00 PM 7:00:00 AM"],
-      ["Lucia Herrera", "Cases", "Guatemala", "Karen", "7:00:00 AM 4:00:00 PM"],
-      ["Luis Alexander Leon", "Insurance", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM"],
-      ["Lynda Escobedo", "Insurance cases", "Guatemala", "Kevin Lopez", "Mon-Fri 6:00:00 AM 3:00:00 PM"],
-      ["Marco Lopez", "Insurance cases", "Guatemala", "Kevin Lopez", "7:00:00 AM 4:00:00 PM"],
-      ["Marianne Abigaile", "Cases", "Philipines", "Jennifer J", "5:00:00 PM 2:00:00 AM"],
-      ["Michelle Marquez", "Insurance", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM"],
-      ["Mary Joy Rafols", "Cases", "Philipines", "Jennifer J", "10:00:00 PM 7:00:00 AM"],
-      ["Monica Prado", "Insurance cases", "Guatemala", "Kevin Lopez", "6:00:00 AM 3:00:00 PM"],
-      ["Otto de la Cruz", "Insurance cases", "Guatemala", "Andrea", "6:00:00 AM 3:00:00 PM"],
-      ["Pablo Saquilmer", "Cases", "Guatemala", "Karen", "6:00:00 AM 3:00:00 PM"],
-      ["Rudy Herrera", "Cases", "Guatemala", "Karen", "10:00:00 AM 7:00:00 PM"]
+      ["Alejandra Manco", "Cases", "Colombia", "Nury", "8:00 AM - 5:00 PM"],
+      ["Ann Jules Dayuta", "Cases", "Philipines", "Jennifer J", "11:00 AM - 8:00 PM"],
+      ["Ariel Mazate", "Insurance cases", "Guatemala", "Andrea", "6:00 AM - 3:00 PM"],
+      ["Brandon Vasquez", "ELD cases", "Guatemala", "Jonathan", "8:00 AM - 5:00 PM"],
+      ["Celina Franco", "ELD phones", "Guatemala", "Jonathan", "6:00 AM - 3:00 PM"],
+      ["Diana Orozco", "Cases", "Guatemala", "Karen", "6:00 AM - 3:00 PM"],
+      ["Edgar Linares", "ELD cases", "Guatemala", "Jonathan", "7:00 AM - 4:00 PM"],
+      ["Emely Hernandez", "Cases", "Guatemala", "Karen", "6:00 AM - 3:00 PM"],
+      ["Emilia Chajon", "Cases", "Guatemala", "Karen", "5:00 AM - 2:00 PM"],
+      ["Eunice Sir", "Insurance cases", "Guatemala", "Andrea", "8:00 AM - 5:00 PM"],
+      ["Jorge Najera", "ELD cases", "Guatemala", "Jonathan", "9:00 AM - 6:00 PM"],
+      ["Jorge Saban", "Phones", "Guatemala", "Karen", "7:00 AM - 4:00 PM"],
+      ["Josue Sucuc", "ELD cases", "Guatemala", "Jonathan", "6:00 AM - 3:00 PM"],
+      ["Juan Carlos Avedaño", "Insurance cases", "Guatemala", "Andrea", "7:00 AM - 4:00 PM"],
+      ["Kathering Santos", "Insurance cases", "Guatemala", "Andrea", "8:00 AM - 5:00 PM"],
+      ["Kyle Abad", "Cases", "Philipines", "Jennifer J", "10:00 PM - 7:00 AM"],
+      ["Lucia Herrera", "Cases", "Guatemala", "Karen", "7:00 AM - 4:00 PM"],
+      ["Luis Alexander Leon", "Insurance", "Colombia", "Nury", "8:00 AM - 5:00 PM"],
+      ["Lynda Escobedo", "Insurance cases", "Guatemala", "Kevin Lopez", "6:00 AM - 3:00 PM"],
+      ["Marco Lopez", "Insurance cases", "Guatemala", "Kevin Lopez", "7:00 AM - 4:00 PM"],
+      ["Marianne Abigaile", "Cases", "Philipines", "Jennifer J", "5:00 PM - 2:00 AM"],
+      ["Michelle Marquez", "Insurance", "Colombia", "Nury", "8:00 AM - 5:00 PM"],
+      ["Mary Joy Rafols", "Cases", "Philipines", "Jennifer J", "10:00 PM - 7:00 AM"],
+      ["Monica Prado", "Insurance cases", "Guatemala", "Kevin Lopez", "6:00 AM - 3:00 PM"],
+      ["Otto de la Cruz", "Insurance cases", "Guatemala", "Andrea", "6:00 AM - 3:00 PM"],
+      ["Pablo Saquilmer", "Cases", "Guatemala", "Karen", "6:00 AM - 3:00 PM"],
+      ["Rudy Herrera", "Cases", "Guatemala", "Karen", "10:00 AM - 7:00 PM"]
     ];
 
     const casesMxData = [
-      ["Galilea Gutierrez", "Cases", "Mexico", "Carlos Rios", "Mon–Fri, 7:00–16:00 PM"],
-      ["Joseth Huerta", "Cases", "Mexico", "Carlos Rios", "Mon–Fri, 6:00–15:00 PM"],
-      ["Alondra Mendoza", "Cases", "Mexico", "Sabdy Alvarez", "Mon–Fri, 9:00–18:00 PM"]
+      ["Galilea Gutierrez", "Cases", "Mexico", "Carlos Rios", "7:00 AM - 4:00 PM"],
+      ["Joseth Huerta", "Cases", "Mexico", "Carlos Rios", "6:00 AM - 3:00 PM"],
+      ["Alondra Mendoza", "Cases", "Mexico", "Sabdy Alvarez", "9:00 AM - 6:00 PM"]
     ];
 
     let currentTab = 'phones';
@@ -671,6 +679,7 @@
       }, 50);
     }
 
+    // CONDITIONAL FORMATTING FUNCTIONS
     function applyConditionalFormatting(input, type) {
       if (!input) return;
       const val = parseFloat(input.value) || 0;
@@ -698,7 +707,7 @@
         select.innerHTML = `
           <option value="group1">1. QA Performance (QA 1 vs QA 2)</option>
           <option value="group2">2. Call Volumes & Handle Times (Inbound, Outbound, Total, Avg/Day & AHT)</option>
-          <option value="group3">3. Call Drops & Misses (Abnd on Hold, Declined & Missed)</option>
+          <option value="group3">3. Call Drops & Misses (Abnd Hold, Declined & Missed)</option>
         `;
       } else {
         select.innerHTML = `
@@ -721,8 +730,8 @@
       updateMetricSelectOptions();
 
       if (tab === 'phones') {
-        btnPhones.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs transition-colors bg-[#ebbd31] text-slate-950 font-bold shadow-md";
-        btnCases.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400 font-medium";
+        btnPhones.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors bg-[#ebbd31] text-slate-950 shadow-md";
+        btnCases.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400";
         viewPhones.classList.remove('hidden');
         viewCases.classList.add('hidden');
         formBtnText.innerText = "NEW QA PHONES EVALUATION";
@@ -732,8 +741,8 @@
         document.getElementById('kpi-label-3').innerText = 'Total Volume';
         document.getElementById('kpi-label-4').innerText = 'Avg. Calls / Day';
       } else {
-        btnCases.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs transition-colors bg-[#ebbd31] text-slate-950 font-bold shadow-md";
-        btnPhones.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400 font-medium";
+        btnCases.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors bg-[#ebbd31] text-slate-950 shadow-md";
+        btnPhones.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400";
         viewCases.classList.remove('hidden');
         viewPhones.classList.add('hidden');
         formBtnText.innerText = "NEW QA CASES EVALUATION";
@@ -771,20 +780,20 @@
         <td class="p-1"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text cell-leaders text-slate-300"></td>
         <td class="p-1"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text cell-schedule text-slate-400 text-[10px]"></td>
         
-        <td class="p-1 text-center"><input type="number" value="${agent[5] || 0}" min="0" max="100" class="cell-input qa1 font-bold" oninput="updateCalculations(this)"></td>
-        <td class="p-1 text-center"><input type="number" value="${agent[6] || 0}" min="0" max="100" class="cell-input qa2 font-bold" oninput="updateCalculations(this)"></td>
+        <td class="p-1 text-center col-qa"><input type="number" value="${agent[5] || 0}" min="0" max="100" class="cell-input qa1 font-bold" oninput="updateCalculations(this)"></td>
+        <td class="p-1 text-center col-qa"><input type="number" value="${agent[6] || 0}" min="0" max="100" class="cell-input qa2 font-bold" oninput="updateCalculations(this)"></td>
         
-        <td class="p-1 text-center"><input type="number" value="${agent[7] || 0}" class="cell-input inbound" oninput="updateCalculations(this)"></td>
-        <td class="p-1 text-center"><input type="number" value="${agent[8] || 0}" class="cell-input outbound" oninput="updateCalculations(this)"></td>
-        <td class="p-2 text-center font-bold text-white total-calls">${totalCalls}</td>
-        <td class="p-1 text-center"><input type="text" value="${agent[9] || '00:00:00'}" class="cell-input text-center font-mono text-[10px]"></td>
-        <td class="p-2 text-center font-bold text-[#ebbd31]/90 avg-daily">${avgDailyCalls}</td>
-        <td class="p-1 text-center"><input type="number" value="${agent[10] || 0}" class="cell-input abandon" oninput="updateCalculations(this)"></td>
-        <td class="p-1 text-center"><input type="number" value="${agent[11] || 0}" class="cell-input declined" oninput="updateCalculations(this)"></td>
-        <td class="p-1 text-center"><input type="number" value="${agent[12] || 0}" class="cell-input missed" oninput="updateCalculations(this)"></td>
+        <td class="p-1 text-center col-num"><input type="number" value="${agent[7] || 0}" class="cell-input inbound" oninput="updateCalculations(this)"></td>
+        <td class="p-1 text-center col-num"><input type="number" value="${agent[8] || 0}" class="cell-input outbound" oninput="updateCalculations(this)"></td>
+        <td class="p-1 text-center font-bold text-white total-calls col-num">${totalCalls}</td>
+        <td class="p-1 text-center col-aht"><input type="text" value="${agent[9] || '00:00:00'}" class="cell-input text-center font-mono text-[11px]"></td>
+        <td class="p-1 text-center font-bold text-[#ebbd31]/90 avg-daily col-num">${avgDailyCalls}</td>
+        <td class="p-1 text-center col-drop"><input type="number" value="${agent[10] || 0}" class="cell-input abandon" oninput="updateCalculations(this)"></td>
+        <td class="p-1 text-center col-drop"><input type="number" value="${agent[11] || 0}" class="cell-input declined" oninput="updateCalculations(this)"></td>
+        <td class="p-1 text-center col-drop"><input type="number" value="${agent[12] || 0}" class="cell-input missed" oninput="updateCalculations(this)"></td>
 
         <td class="p-1 text-center">
-          <select class="cell-input text-[#ebbd31] font-medium text-[11px]">
+          <select class="cell-input text-[#ebbd31] font-medium text-[10px]">
             <option value="N/A" ${agent[13] === 'N/A' ? 'selected' : ''}>N/A</option>
             <option value="Coaching" ${agent[13] === 'Coaching' ? 'selected' : ''}>Coaching</option>
             <option value="Feedback" ${agent[13] === 'Feedback' ? 'selected' : ''}>Feedback</option>
@@ -802,11 +811,11 @@
         
         <td class="p-1 text-center">
           <div class="flex items-center justify-center space-x-1">
-            <button onclick="saveRow(this)" class="text-amber-400 hover:text-amber-300 p-0.5 transition-colors" title="Save Row">
-              <i class="fa-solid fa-floppy-disk"></i>
+            <button onclick="saveRow(this)" class="text-amber-400 hover:text-amber-300 p-1 transition-colors" title="Save Row">
+              <i class="fa-solid fa-floppy-disk text-xs"></i>
             </button>
-            <button onclick="deleteAgentRow(this, '${tableId}')" class="text-rose-400 hover:text-rose-300 p-0.5 transition-colors" title="Delete Agent">
-              <i class="fa-solid fa-trash-can"></i>
+            <button onclick="deleteAgentRow(this, '${tableId}')" class="text-rose-400 hover:text-rose-300 p-1 transition-colors" title="Delete Agent">
+              <i class="fa-solid fa-trash-can text-xs"></i>
             </button>
           </div>
         </td>
@@ -814,6 +823,7 @@
 
       tbody.appendChild(tr);
 
+      // Apply conditional formatting
       applyConditionalFormatting(tr.querySelector('.qa1'), 'qa');
       applyConditionalFormatting(tr.querySelector('.qa2'), 'qa');
       applyConditionalFormatting(tr.querySelector('.abandon'), 'abandonOrMissed');
@@ -842,18 +852,18 @@
         <td class="p-1"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text cell-leaders text-slate-300"></td>
         <td class="p-1"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text cell-schedule text-slate-400 text-[10px]"></td>
         
-        <td class="p-1 text-center"><input type="number" value="${agent[5] || 0}" min="0" max="100" class="cell-input qaTotal font-bold" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center"><input type="number" value="${agent[6] || 0}" class="cell-input convReplied font-semibold text-white" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center"><input type="number" value="${agent[7] || 0}" class="cell-input avgResponseTime" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center"><input type="number" value="${agent[8] || 0}" class="cell-input slaMissed" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center"><input type="number" value="${agent[9] || 0}" class="cell-input csat text-emerald-400 font-bold" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center"><input type="number" value="${agent[10] || 0}" class="cell-input dsat text-rose-400 font-bold" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center"><input type="number" value="${agent[11] || 0}" class="cell-input surveyGood" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center"><input type="number" value="${agent[12] || 0}" class="cell-input surveyBad" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center font-bold text-white totalSurveys">${(parseInt(agent[11]||0) + parseInt(agent[12]||0))}</td>
+        <td class="p-1 text-center col-qa"><input type="number" value="${agent[5] || 0}" min="0" max="100" class="cell-input qaTotal font-bold" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-1 text-center col-num"><input type="number" value="${agent[6] || 0}" class="cell-input convReplied font-semibold text-white" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-1 text-center col-num"><input type="number" value="${agent[7] || 0}" class="cell-input avgResponseTime" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-1 text-center col-num"><input type="number" value="${agent[8] || 0}" class="cell-input slaMissed" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-1 text-center col-num"><input type="number" value="${agent[9] || 0}" class="cell-input csat text-emerald-400 font-bold" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-1 text-center col-num"><input type="number" value="${agent[10] || 0}" class="cell-input dsat text-rose-400 font-bold" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-1 text-center col-num"><input type="number" value="${agent[11] || 0}" class="cell-input surveyGood" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-1 text-center col-num"><input type="number" value="${agent[12] || 0}" class="cell-input surveyBad" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-1 text-center font-bold text-white totalSurveys col-num">${(parseInt(agent[11]||0) + parseInt(agent[12]||0))}</td>
 
         <td class="p-1 text-center">
-          <select class="cell-input text-[#ebbd31] font-medium text-[11px]">
+          <select class="cell-input text-[#ebbd31] font-medium text-[10px]">
             <option value="N/A" ${agent[13] === 'N/A' ? 'selected' : ''}>N/A</option>
             <option value="Coaching" ${agent[13] === 'Coaching' ? 'selected' : ''}>Coaching</option>
             <option value="Feedback" ${agent[13] === 'Feedback' ? 'selected' : ''}>Feedback</option>
@@ -871,11 +881,11 @@
         
         <td class="p-1 text-center">
           <div class="flex items-center justify-center space-x-1">
-            <button onclick="saveRow(this)" class="text-amber-400 hover:text-amber-300 p-0.5 transition-colors" title="Save Row">
-              <i class="fa-solid fa-floppy-disk"></i>
+            <button onclick="saveRow(this)" class="text-amber-400 hover:text-amber-300 p-1 transition-colors" title="Save Row">
+              <i class="fa-solid fa-floppy-disk text-xs"></i>
             </button>
-            <button onclick="deleteAgentRow(this, '${tableId}')" class="text-rose-400 hover:text-rose-300 p-0.5 transition-colors" title="Delete Agent">
-              <i class="fa-solid fa-trash-can"></i>
+            <button onclick="deleteAgentRow(this, '${tableId}')" class="text-rose-400 hover:text-rose-300 p-1 transition-colors" title="Delete Agent">
+              <i class="fa-solid fa-trash-can text-xs"></i>
             </button>
           </div>
         </td>
@@ -883,6 +893,7 @@
 
       tbody.appendChild(tr);
 
+      // Apply conditional formatting for Cases
       applyConditionalFormatting(tr.querySelector('.qaTotal'), 'qa');
     }
 
@@ -1044,6 +1055,7 @@
       if (tr.querySelector('.total-calls')) tr.querySelector('.total-calls').innerText = total;
       if (tr.querySelector('.avg-daily')) tr.querySelector('.avg-daily').innerText = avgDaily;
 
+      // Apply conditional formatting on user input
       applyConditionalFormatting(tr.querySelector('.qa1'), 'qa');
       applyConditionalFormatting(tr.querySelector('.qa2'), 'qa');
       applyConditionalFormatting(tr.querySelector('.abandon'), 'abandonOrMissed');
@@ -1067,6 +1079,7 @@
 
       if (tr.querySelector('.totalSurveys')) tr.querySelector('.totalSurveys').innerText = total;
 
+      // Apply conditional formatting for Cases
       applyConditionalFormatting(tr.querySelector('.qaTotal'), 'qa');
 
       calculateGlobalKPIs();
@@ -1177,7 +1190,7 @@
             decData.push(parseFloat(r.querySelector('.declined')?.value) || 0);
             missData.push(parseFloat(r.querySelector('.missed')?.value) || 0);
           });
-          datasetsMap.push({ label: 'Abnd on Hold', data: abndData, backgroundColor: '#f87171' });
+          datasetsMap.push({ label: 'Abnd Hold', data: abndData, backgroundColor: '#f87171' });
           datasetsMap.push({ label: 'Declined Calls', data: decData, backgroundColor: '#fb923c' });
           datasetsMap.push({ label: 'Missed Calls', data: missData, backgroundColor: '#f43f5e' });
         }
