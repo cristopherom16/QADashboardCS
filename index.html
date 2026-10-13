@@ -24,6 +24,7 @@
       --navy-border: #2a344d;
       --amber-main: #ebbd31;
       --amber-hover: #d1a320;
+      --amber-grid: rgba(235, 189, 49, 0.35);
     }
     body {
       background-color: var(--navy-bg);
@@ -134,11 +135,35 @@
       font-weight: 800 !important;
     }
     
-    /* Ensure QA numbers are fully visible */
+    /* QA numbers styling */
     .qa1, .qa2, .qaTotal {
       min-width: 65px;
       padding-left: 2px;
       padding-right: 2px;
+    }
+
+    /* ENHANCED AMBER GRIDLINES FOR TABLES */
+    table.data-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      border: 1px solid var(--amber-grid);
+    }
+    table.data-table th {
+      border-right: 1px solid var(--amber-grid);
+      border-bottom: 2px solid var(--amber-main);
+    }
+    table.data-table th:last-child {
+      border-right: none;
+    }
+    table.data-table td {
+      border-right: 1px solid var(--amber-grid);
+      border-bottom: 1px solid rgba(235, 189, 49, 0.2);
+    }
+    table.data-table td:last-child {
+      border-right: none;
+    }
+    table.data-table tbody tr:hover td {
+      background-color: rgba(235, 189, 49, 0.05);
     }
   </style>
 </head>
@@ -319,9 +344,9 @@
           <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
             <canvas id="chart-gua-col"></canvas>
           </div>
-          <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-xs text-left text-slate-300" id="table-gua-col">
-              <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
+          <div class="overflow-x-auto custom-scrollbar p-2">
+            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-gua-col">
+              <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
                   <th class="p-3 min-w-[200px]">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
                   <th class="p-3 text-center text-[#ebbd31] min-w-[70px]">QA 1</th><th class="p-3 text-center text-[#ebbd31] min-w-[70px]">QA 2</th>
@@ -330,7 +355,7 @@
                   <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-[#2a344d]/50"></tbody>
+              <tbody></tbody>
             </table>
           </div>
         </div>
@@ -350,9 +375,9 @@
           <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
             <canvas id="chart-pan"></canvas>
           </div>
-          <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-xs text-left text-slate-300" id="table-pan">
-              <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
+          <div class="overflow-x-auto custom-scrollbar p-2">
+            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-pan">
+              <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
                   <th class="p-3 min-w-[200px]">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
                   <th class="p-3 text-center text-[#ebbd31] min-w-[70px]">QA 1</th><th class="p-3 text-center text-[#ebbd31] min-w-[70px]">QA 2</th>
@@ -361,7 +386,7 @@
                   <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-[#2a344d]/50"></tbody>
+              <tbody></tbody>
             </table>
           </div>
         </div>
@@ -381,9 +406,9 @@
           <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
             <canvas id="chart-mx-phones"></canvas>
           </div>
-          <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-xs text-left text-slate-300" id="table-mx-phones">
-              <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
+          <div class="overflow-x-auto custom-scrollbar p-2">
+            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-mx-phones">
+              <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
                   <th class="p-3 min-w-[200px]">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
                   <th class="p-3 text-center text-[#ebbd31] min-w-[70px]">QA 1</th><th class="p-3 text-center text-[#ebbd31] min-w-[70px]">QA 2</th>
@@ -392,7 +417,7 @@
                   <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-[#2a344d]/50"></tbody>
+              <tbody></tbody>
             </table>
           </div>
         </div>
@@ -415,16 +440,16 @@
           <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
             <canvas id="chart-cases-gua"></canvas>
           </div>
-          <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-xs text-left text-slate-300" id="table-cases-gua">
-              <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
+          <div class="overflow-x-auto custom-scrollbar p-2">
+            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-cases-gua">
+              <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
                   <th class="p-3 min-w-[200px]">Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
                   <th class="p-3 text-center text-[#ebbd31] min-w-[80px]">QA Total</th><th class="p-3 text-center">Conversations replied to</th><th class="p-3 text-center">Average First response time mins</th><th class="p-3 text-center">SLA missed</th><th class="p-3 text-center">Teammate CSAT score</th><th class="p-3 text-center">Teammate DSAT score</th><th class="p-3 text-center">survey count good</th><th class="p-3 text-center">survey count bad</th><th class="p-3 text-center">Total surveys</th>
                   <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-[#2a344d]/50"></tbody>
+              <tbody></tbody>
             </table>
           </div>
         </div>
@@ -444,16 +469,16 @@
           <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
             <canvas id="chart-cases-mx"></canvas>
           </div>
-          <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-xs text-left text-slate-300" id="table-cases-mx">
-              <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
+          <div class="overflow-x-auto custom-scrollbar p-2">
+            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-cases-mx">
+              <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
                   <th class="p-3 min-w-[200px]">Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
                   <th class="p-3 text-center text-[#ebbd31] min-w-[80px]">QA Total</th><th class="p-3 text-center">Conversations replied to</th><th class="p-3 text-center">Average First response time mins</th><th class="p-3 text-center">SLA missed</th><th class="p-3 text-center">Teammate CSAT score</th><th class="p-3 text-center">Teammate DSAT score</th><th class="p-3 text-center">survey count good</th><th class="p-3 text-center">survey count bad</th><th class="p-3 text-center">Total surveys</th>
                   <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-[#2a344d]/50"></tbody>
+              <tbody></tbody>
             </table>
           </div>
         </div>
@@ -664,7 +689,7 @@
     function appendPhoneRowToTable(tableId, agent = ["New Agent", "Task", "Branch", "Leader", "Schedule", "Days Off"]) {
       const tbody = document.querySelector(`#${tableId} tbody`);
       const tr = document.createElement('tr');
-      tr.className = "hover:bg-slate-800/40 transition-colors border-b border-[#2a344d]/30";
+      tr.className = "hover:bg-slate-800/40 transition-colors";
 
       const totalCalls = (parseInt(agent[8]||0) + parseInt(agent[9]||0));
       const avgDailyCalls = Math.round(totalCalls / 5);
@@ -738,7 +763,7 @@
     function appendCasesRowToTable(tableId, agent = ["New Agent", "Task", "Branch", "Leader", "Schedule", "Days Off"]) {
       const tbody = document.querySelector(`#${tableId} tbody`);
       const tr = document.createElement('tr');
-      tr.className = "hover:bg-slate-800/40 transition-colors border-b border-[#2a344d]/30";
+      tr.className = "hover:bg-slate-800/40 transition-colors";
 
       tr.innerHTML = `
         <td class="p-2"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="renderTableChart('${tableId}')"></td>
@@ -1148,12 +1173,12 @@
           scales: {
             x: {
               ticks: { color: '#94a3b8', font: { size: 10 } },
-              grid: { color: 'rgba(42, 52, 77, 0.4)' }
+              grid: { color: 'rgba(235, 189, 49, 0.15)' }
             },
             y: {
               beginAtZero: true,
               ticks: { color: '#94a3b8', font: { size: 10 } },
-              grid: { color: 'rgba(42, 52, 77, 0.4)' }
+              grid: { color: 'rgba(235, 189, 49, 0.15)' }
             }
           }
         }
