@@ -984,7 +984,7 @@
 
       const qa1 = parseFloat(agent[5]) || 0;
       const qa2 = parseFloat(agent[6]) || 0;
-      const avgQa = (qa1 > 0 && qa2 > 0) ? ((qa1 + qa2) / 2).toFixed(1) : (qa1 || qa2 || 0);
+      const avgQa = (qa1 > 0 && qa2 > 0) ? Math.round((qa1 + qa2) / 2) : Math.round(qa1 || qa2 || 0);
 
       const totalCalls = (parseInt(agent[7]||0) + parseInt(agent[8]||0));
       const avgDailyCalls = Math.round(totalCalls / 5);
@@ -1441,7 +1441,7 @@
       const tr = input.closest('tr');
       const qa1 = parseFloat(tr.querySelector('.qa1')?.value) || 0;
       const qa2 = parseFloat(tr.querySelector('.qa2')?.value) || 0;
-      const avgQa = (qa1 > 0 && qa2 > 0) ? ((qa1 + qa2) / 2).toFixed(1) : (qa1 || qa2 || 0);
+      const avgQa = (qa1 > 0 && qa2 > 0) ? Math.round((qa1 + qa2) / 2) : Math.round(qa1 || qa2 || 0);
 
       const inbound = parseInt(tr.querySelector('.inbound')?.value) || 0;
       const outbound = parseInt(tr.querySelector('.outbound')?.value) || 0;
@@ -1511,8 +1511,8 @@
           });
         });
 
-        document.getElementById('kpi-qa1').innerText = qa1Count ? (qa1Sum / qa1Count).toFixed(1) : '0';
-        document.getElementById('kpi-qa2').innerText = qa2Count ? (qa2Sum / qa2Count).toFixed(1) : '0';
+        document.getElementById('kpi-qa1').innerText = qa1Count ? Math.round(qa1Sum / qa1Count) : '0';
+        document.getElementById('kpi-qa2').innerText = qa2Count ? Math.round(qa2Sum / qa2Count) : '0';
         document.getElementById('kpi-total').innerText = totalCalls.toLocaleString();
         document.getElementById('kpi-daily').innerText = Math.round(totalCalls / 5);
       } else {
@@ -1537,8 +1537,8 @@
           });
         });
 
-        document.getElementById('kpi-qa1').innerText = qaCount ? (qaSum / qaCount).toFixed(1) : '0';
-        document.getElementById('kpi-qa2').innerText = csatCount ? (csatSum / csatCount).toFixed(1) : '0';
+        document.getElementById('kpi-qa1').innerText = qaCount ? Math.round(qaSum / qaCount) : '0';
+        document.getElementById('kpi-qa2').innerText = csatCount ? Math.round(csatSum / csatCount) : '0';
         document.getElementById('kpi-total').innerText = totalConvs.toLocaleString();
         document.getElementById('kpi-daily').innerText = respTimeCount ? (totalRespTime / respTimeCount).toFixed(1) + ' min' : '0 min';
       }
