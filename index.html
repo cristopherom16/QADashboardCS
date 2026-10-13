@@ -71,39 +71,66 @@
       font-weight: 600;
     }
 
-    /* ESTILO COMPACTO Y EXPANDIBLE PARA COMENTARIOS */
+    /* COLUMNA SCHEDULE CORTA */
+    .cell-schedule {
+      width: 130px;
+      max-width: 130px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    /* SECCIÓN DE COMENTARIOS: VISTA PREVIA Y HOVER FLOATING TOOLTIP */
+    .comment-container {
+      position: relative;
+      width: 200px;
+      max-width: 200px;
+    }
     .cell-comment-area {
       text-align: left;
-      width: 220px;
-      max-width: 220px;
-      height: 32px;
-      max-height: 32px;
+      width: 100%;
+      height: 28px;
       resize: none;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      line-height: 1.4;
+      line-height: 1.3;
       display: block;
       cursor: pointer;
-      transition: all 0.2s ease-in-out;
     }
+    .comment-popover {
+      display: none;
+      position: absolute;
+      bottom: 110%;
+      left: 0;
+      width: 260px;
+      max-height: 180px;
+      overflow-y: auto;
+      background-color: #0f172a;
+      color: #f8fafc;
+      border: 1px solid #ebbd31;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 11px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 50;
+      pointer-events: none;
+    }
+    .comment-container:hover .comment-popover {
+      display: block;
+    }
+
     .cell-input:hover, .cell-comment-area:hover {
       border-color: #3b486b;
       background: rgba(28, 34, 52, 0.8);
     }
-    /* Al hacer clic (focus), la celda de comentarios se expande mostrando todo el texto */
-    .cell-comment-area:focus {
+    .cell-input:focus, .cell-comment-area:focus {
       outline: none;
       border-color: #ebbd31;
       background: #141824;
       box-shadow: 0 0 0 2px rgba(235, 189, 49, 0.25);
-      white-space: pre-wrap;
-      word-break: break-word;
-      overflow-y: auto;
-      height: auto;
-      max-height: 160px;
-      position: relative;
-      z-index: 10;
     }
 
     select.cell-input {
@@ -179,10 +206,6 @@
     table.data-table td:last-child {
       border-right: none;
     }
-    table.data-table td:has(.cell-comment-area),
-    table.data-table th.col-comment {
-      white-space: normal;
-    }
     table.data-table tbody tr:hover td {
       background-color: rgba(235, 189, 49, 0.05);
     }
@@ -196,7 +219,6 @@
   <aside class="w-full md:w-64 bg-[#141824] border-r border-[#2a344d] flex flex-col flex-shrink-0 justify-between h-screen">
     <div>
       <div class="p-5 border-b border-[#2a344d] flex items-center space-x-3">
-        <!-- Highway Yellow "H" Circular Logo SVG -->
         <div class="w-11 h-11 bg-[#20283d] rounded-full flex items-center justify-center p-2 shadow-md border border-slate-700/60 flex-shrink-0">
           <svg viewBox="0 0 260 180" class="w-full h-full text-[#ebbd31] fill-current">
             <path d="M 52 0 L 98 0 L 46 180 L 0 180 Z M 162 0 L 208 0 L 260 180 L 214 180 Z M 70 80 L 188 80 L 181 120 L 59 120 Z" />
@@ -369,11 +391,11 @@
             <table class="w-full text-xs text-left text-slate-300 data-table" id="table-gua-col">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-3">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
+                  <th class="p-3">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th>
                   <th class="p-3 text-center text-[#ebbd31]">QA 1</th><th class="p-3 text-center text-[#ebbd31]">QA 2</th>
                   <th class="p-3 text-center">Inbound Calls</th><th class="p-3 text-center">Outbound Calls</th><th class="p-3 text-center">Total Calls</th><th class="p-3 text-center">Avg. Handle Time</th><th class="p-3 text-center">Avg. Calls/Day</th>
                   <th class="p-3 text-center">Abandon on hold</th><th class="p-3 text-center">Declined calls</th><th class="p-3 text-center">Missed Calls</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center col-comment">Comments</th><th class="p-3 text-center">Actions</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -400,11 +422,11 @@
             <table class="w-full text-xs text-left text-slate-300 data-table" id="table-pan">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-3">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
+                  <th class="p-3">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th>
                   <th class="p-3 text-center text-[#ebbd31]">QA 1</th><th class="p-3 text-center text-[#ebbd31]">QA 2</th>
                   <th class="p-3 text-center">Inbound Calls</th><th class="p-3 text-center">Outbound Calls</th><th class="p-3 text-center">Total Calls</th><th class="p-3 text-center">Avg. Handle Time</th><th class="p-3 text-center">Avg. Calls/Day</th>
                   <th class="p-3 text-center">Abandon on hold</th><th class="p-3 text-center">Declined calls</th><th class="p-3 text-center">Missed Calls</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center col-comment">Comments</th><th class="p-3 text-center">Actions</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -431,11 +453,11 @@
             <table class="w-full text-xs text-left text-slate-300 data-table" id="table-mx-phones">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-3">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
+                  <th class="p-3">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th>
                   <th class="p-3 text-center text-[#ebbd31]">QA 1</th><th class="p-3 text-center text-[#ebbd31]">QA 2</th>
                   <th class="p-3 text-center">Inbound Calls</th><th class="p-3 text-center">Outbound Calls</th><th class="p-3 text-center">Total Calls</th><th class="p-3 text-center">Avg. Handle Time</th><th class="p-3 text-center">Avg. Calls/Day</th>
                   <th class="p-3 text-center">Abandon on hold</th><th class="p-3 text-center">Declined calls</th><th class="p-3 text-center">Missed Calls</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center col-comment">Comments</th><th class="p-3 text-center">Actions</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -465,9 +487,9 @@
             <table class="w-full text-xs text-left text-slate-300 data-table" id="table-cases-gua">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-3">Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
+                  <th class="p-3">Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th>
                   <th class="p-3 text-center text-[#ebbd31]">QA Total</th><th class="p-3 text-center">Conversations replied to</th><th class="p-3 text-center">Average First response time mins</th><th class="p-3 text-center">SLA missed</th><th class="p-3 text-center">Teammate CSAT score</th><th class="p-3 text-center">Teammate DSAT score</th><th class="p-3 text-center">survey count good</th><th class="p-3 text-center">survey count bad</th><th class="p-3 text-center">Total surveys</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center col-comment">Comments</th><th class="p-3 text-center">Actions</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -494,9 +516,9 @@
             <table class="w-full text-xs text-left text-slate-300 data-table" id="table-cases-mx">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-3">Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
+                  <th class="p-3">Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th>
                   <th class="p-3 text-center text-[#ebbd31]">QA Total</th><th class="p-3 text-center">Conversations replied to</th><th class="p-3 text-center">Average First response time mins</th><th class="p-3 text-center">SLA missed</th><th class="p-3 text-center">Teammate CSAT score</th><th class="p-3 text-center">Teammate DSAT score</th><th class="p-3 text-center">survey count good</th><th class="p-3 text-center">survey count bad</th><th class="p-3 text-center">Total surveys</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center col-comment">Comments</th><th class="p-3 text-center">Actions</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -524,93 +546,93 @@
     firebase.initializeApp(firebaseConfig);
     const rtdb = firebase.database();
 
-    // BASE DATASETS
+    // BASE DATASETS (SinDays Off)
     const phonesGuaColData = [
-      ["Acsa Esquivel", "Insurance phones", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM", "Sat-Sun"],
-      ["Alexander Alvarado", "Phones", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM", "SAT-SUN"],
-      ["Ana Melendez", "Insurance phones", "Guatemala", "Kevin Lopez", "Mon-Fri 6:00:00 AM 3:00:00 PM", "SAT-SUN"],
-      ["Andrea Gonzalez", "Phones", "Colombia", "Nury", "Mon-Fri 8:00:00 AM 5:00:00 PM", "SAT-SUN"],
-      ["Cesar Lopez", "Insurance phones", "Guatemala", "Kevin Lopez", "Mon-Fri 9:00:00 AM 6:00:00 PM", "SAT-SUN"],
-      ["Esvin Gomez", "ELD cases", "Guatemala", "Diego Gonzalez", "Mon-Fri 7:00:00 AM 4:00:00 PM", "SAT-SUN"],
-      ["Froy Gonzalez", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 9:00:00 AM 6:00:00 PM", "Sat-Sun"],
-      ["Gustavo Lopez", "Insurance phones", "Guatemala", "Andrea", "Mon-Fri 6:00:00 AM 3:00:00 PM", "SAT-SUN"],
-      ["Iverth Anthony Monterroso", "ELD cases", "Guatemala", "Jonathan", "8:00:00 AM 5:00:00 PM", "Sat-Sun"],
-      ["Kener Lee", "Insurance", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM", "Sat-Sun"],
-      ["Kevin Acabal", "ELD phones", "Guatemala", "Diego Gonzalez", "Mon-Fri 6:00:00 AM 3:00:00 PM", "SAT-SUN"],
-      ["Kevin Durango", "Phones", "Colombia", "Nury", "Mon-Fri 8:00:00 AM 5:00:00 PM", "SAT-SUN"],
-      ["Luis Ajche", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 8:00:00 AM 5:00:00 PM", "SAT-SUN"],
-      ["Luis Gonzalez", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 8:00:00 AM 5:00:00 PM", "SAT-SUN"],
-      ["Manfredo Monterroso", "Insurance phones", "Guatemala", "Andrea", "Mon-Fri 6:00:00 AM 3:00:00 PM", "SAT-SUN"],
-      ["Melanie Garcia", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 8:00:00 AM 5:00:00 PM", "SAT-SUN"],
-      ["Samantha Chinchilla", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 6:00:00 AM 3:00:00 PM", "SAT-SUN"],
-      ["Sebastian Quiñonez", "ELD cases", "Guatemala", "Jonathan", "7:00:00 AM 4:00:00 PM", "Sat-Sun"],
-      ["Sergio Chiguil", "ELD phones", "Guatemala", "Diego Gonzales", "Mon-Fri 5:00:00 AM 2:00:00 PM", "SAT-SUN"],
-      ["Sharon Olivares", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 6:00:00 AM 3:00:00 PM", "SAT-SUN"]
+      ["Acsa Esquivel", "Insurance phones", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM"],
+      ["Alexander Alvarado", "Phones", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM"],
+      ["Ana Melendez", "Insurance phones", "Guatemala", "Kevin Lopez", "Mon-Fri 6:00:00 AM 3:00:00 PM"],
+      ["Andrea Gonzalez", "Phones", "Colombia", "Nury", "Mon-Fri 8:00:00 AM 5:00:00 PM"],
+      ["Cesar Lopez", "Insurance phones", "Guatemala", "Kevin Lopez", "Mon-Fri 9:00:00 AM 6:00:00 PM"],
+      ["Esvin Gomez", "ELD cases", "Guatemala", "Diego Gonzalez", "Mon-Fri 7:00:00 AM 4:00:00 PM"],
+      ["Froy Gonzalez", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 9:00:00 AM 6:00:00 PM"],
+      ["Gustavo Lopez", "Insurance phones", "Guatemala", "Andrea", "Mon-Fri 6:00:00 AM 3:00:00 PM"],
+      ["Iverth Anthony Monterroso", "ELD cases", "Guatemala", "Jonathan", "8:00:00 AM 5:00:00 PM"],
+      ["Kener Lee", "Insurance", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM"],
+      ["Kevin Acabal", "ELD phones", "Guatemala", "Diego Gonzalez", "Mon-Fri 6:00:00 AM 3:00:00 PM"],
+      ["Kevin Durango", "Phones", "Colombia", "Nury", "Mon-Fri 8:00:00 AM 5:00:00 PM"],
+      ["Luis Ajche", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 8:00:00 AM 5:00:00 PM"],
+      ["Luis Gonzalez", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 8:00:00 AM 5:00:00 PM"],
+      ["Manfredo Monterroso", "Insurance phones", "Guatemala", "Andrea", "Mon-Fri 6:00:00 AM 3:00:00 PM"],
+      ["Melanie Garcia", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 8:00:00 AM 5:00:00 PM"],
+      ["Samantha Chinchilla", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 6:00:00 AM 3:00:00 PM"],
+      ["Sebastian Quiñonez", "ELD cases", "Guatemala", "Jonathan", "7:00:00 AM 4:00:00 PM"],
+      ["Sergio Chiguil", "ELD phones", "Guatemala", "Diego Gonzales", "Mon-Fri 5:00:00 AM 2:00:00 PM"],
+      ["Sharon Olivares", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 6:00:00 AM 3:00:00 PM"]
     ];
 
     const phonesPanData = [
-      ["Alexander Santamaria", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 6:00:00 AM 3:30:00 PM", "Thrusday and Sunday"],
-      ["Benneth Smith", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 6:30:00 AM - 4:00:00 PM", "Thrusday and Sunday"],
-      ["Dana Redwood", "Insurance", "Panama", "Daniela Cerezo", "Mon-Fri 7:00:00 AM - 4:30:00 PM", "Saturday and Sunday"],
-      ["Dean Spencer", "Phones", "Panama", "Daniela Cerezo", "5:00:00 AM - 2:30:00 PM", "Saturday and Sunday"],
-      ["Felix Torres", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 8:30:00 AM - 6:00:00 PM", "Wednesday and Sunday"],
-      ["Jesus Rios", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 7:00:00 AM - 4:30:00 PM", "Wednesday and Sunday"],
-      ["Jose Rodriguez", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 8:30:00 AM - 6:00:00 PM", "Saturday and Sunday"],
-      ["Kellyneth Estrada", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 5:30:00 AM - 3:00:00 PM", "Tuesday and Sunday"],
-      ["Kevin Williams", "Phones", "Panama", "Eduardo Bellamy", "Mon-Fri 8:30:00 AM - 6:00:00 PM", "Saturday and Sunday"],
-      ["Keyren Fuertes", "Insurance", "Panama", "Daniela Cerezo", "Mon-Fri 5:00:00 AM - 2:30:00 PM", "Saturday and Sunday"],
-      ["Marcos Botello", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 8:30:00 AM - 6:00:00 PM", "Saturday and Sunday"],
-      ["Marie Claire Perez", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 7:30:00 AM - 5:00:00 PM", "Saturday and Sunday"],
-      ["Marielys Tejada", "Insurance", "Panama", "Daniela Cerezo", "Mon-Fri 8:30:00 AM - 6:00:00 PM", "Saturday and Sunday"],
-      ["Sonia Jimenez", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 8:30:00 AM - 6:00:00 PM", "Saturday and Sunday"],
-      ["Stephanie Temple", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 6:00:00 AM - 3:30:00 PM", "Saturday and Sunday"],
-      ["Zinedine Moscote", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 7:00:00 AM - 4:30:00 PM", "Saturday and Sunday"]
+      ["Alexander Santamaria", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 6:00:00 AM 3:30:00 PM"],
+      ["Benneth Smith", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 6:30:00 AM - 4:00:00 PM"],
+      ["Dana Redwood", "Insurance", "Panama", "Daniela Cerezo", "Mon-Fri 7:00:00 AM - 4:30:00 PM"],
+      ["Dean Spencer", "Phones", "Panama", "Daniela Cerezo", "5:00:00 AM - 2:30:00 PM"],
+      ["Felix Torres", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 8:30:00 AM - 6:00:00 PM"],
+      ["Jesus Rios", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 7:00:00 AM - 4:30:00 PM"],
+      ["Jose Rodriguez", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 8:30:00 AM - 6:00:00 PM"],
+      ["Kellyneth Estrada", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 5:30:00 AM - 3:00:00 PM"],
+      ["Kevin Williams", "Phones", "Panama", "Eduardo Bellamy", "Mon-Fri 8:30:00 AM - 6:00:00 PM"],
+      ["Keyren Fuertes", "Insurance", "Panama", "Daniela Cerezo", "Mon-Fri 5:00:00 AM - 2:30:00 PM"],
+      ["Marcos Botello", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 8:30:00 AM - 6:00:00 PM"],
+      ["Marie Claire Perez", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 7:30:00 AM - 5:00:00 PM"],
+      ["Marielys Tejada", "Insurance", "Panama", "Daniela Cerezo", "Mon-Fri 8:30:00 AM - 6:00:00 PM"],
+      ["Sonia Jimenez", "ELD phones", "Panama", "Eduardo Bellamy", "Mon-Fri 8:30:00 AM - 6:00:00 PM"],
+      ["Stephanie Temple", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 6:00:00 AM - 3:30:00 PM"],
+      ["Zinedine Moscote", "Phones", "Panama", "Daniela Cerezo", "Mon-Fri 7:00:00 AM - 4:30:00 PM"]
     ];
 
     const phonesMxData = [
-      ["Cesar Larios", "Phones", "Mexico", "Carlos Rios", "Sun-Thrus 7:00:00 AM 4:00:00 PM", "Sunday-Thursday"],
-      ["Danae Fergoso", "Phones", "Mexico", "Sabdy Alvarez", "Mon-Fri 8:00:00 AM 5:00:00 PM", "Saturday-Sunday"],
-      ["Daniel Pelayo", "Phones", "Mexico", "Sabdy Alvarez", "Mon-Fri 9:00:00 AM 6:00:00 PM", "Saturday-Sunday"],
-      ["Israel Arias", "Phones", "Mexico", "Carlos Rios", "Mon-Fri 7:00 AM 4:00 PM", "Saturday-Sunday"],
-      ["Kevin Ibarra", "Phones", "Mexico", "Carlos Rios", "Mon-Fri 7:00 AM 4:00 PM", "Saturday-Sunday"],
-      ["Omar Jimenez", "Phones", "Mexico", "Carlos Rios", "Tues-Sat 9:00 AM 6:00PM", "Tuesday- Saturday"],
-      ["Raul Torne", "Phones", "Mexico", "Sabdy Alvarez", "Mon-Fri 8:00AM 5:00PM", "Saturday-Sunday"]
+      ["Cesar Larios", "Phones", "Mexico", "Carlos Rios", "Sun-Thrus 7:00:00 AM 4:00:00 PM"],
+      ["Danae Fergoso", "Phones", "Mexico", "Sabdy Alvarez", "Mon-Fri 8:00:00 AM 5:00:00 PM"],
+      ["Daniel Pelayo", "Phones", "Mexico", "Sabdy Alvarez", "Mon-Fri 9:00:00 AM 6:00:00 PM"],
+      ["Israel Arias", "Phones", "Mexico", "Carlos Rios", "Mon-Fri 7:00 AM 4:00 PM"],
+      ["Kevin Ibarra", "Phones", "Mexico", "Carlos Rios", "Mon-Fri 7:00 AM 4:00 PM"],
+      ["Omar Jimenez", "Phones", "Mexico", "Carlos Rios", "Tues-Sat 9:00 AM 6:00PM"],
+      ["Raul Torne", "Phones", "Mexico", "Sabdy Alvarez", "Mon-Fri 8:00AM 5:00PM"]
     ];
 
     const casesGuaColPhiData = [
-      ["Alejandra Manco", "Cases", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM", "Sat-Sun"],
-      ["Ann Jules Dayuta", "Cases", "Philipines", "Jennifer J", "11:00:00 AM 8:00:00 PM", "SAT-SUN"],
-      ["Ariel Mazate", "Insurance cases", "Guatemala", "Andrea", "6:00:00 AM 3:00:00 PM", "Fri-Sat"],
-      ["Brandon Vasquez", "ELD cases", "Guatemala", "Jonathan", "8:00:00 AM 5:00:00 PM", "Sat-Sun"],
-      ["Celina Franco", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 6:00:00 AM 3:00:00 PM", "SAT-SUN"],
-      ["Diana Orozco", "Cases", "Guatemala", "Karen", "6:00:00 AM 3:00:00 PM", "Sat-Sun"],
-      ["Edgar Linares", "ELD cases", "Guatemala", "Jonathan", "7:00:00 AM 4:00:00 PM", "Sat-Sun"],
-      ["Emely Hernandez", "Cases", "Guatemala", "Karen", "6:00:00 AM 3:00:00 PM", "Sat-Sun"],
-      ["Emilia Chajon", "Cases", "Guatemala", "Karen", "5:00:00 AM 2:00:00 PM", "Fri-Mon"],
-      ["Eunice Sir", "Insurance cases", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM", "Sat-Sun"],
-      ["Jorge Najera", "ELD cases", "Guatemala", "Jonathan", "Mon-Fri 9:00:00 AM 6:00:00 PM", "SAT-SUN"],
-      ["Jorge Saban", "Phones", "Guatemala", "Karen", "7:00:00 AM 4:00:00 PM", "Sat-Sun"],
-      ["Josue Sucuc", "ELD cases", "Guatemala", "Jonathan", "6:00:00 AM 3:00:00 PM", "Sat-Sun"],
-      ["Juan Carlos Avedaño", "Insurance cases", "Guatemala", "Andrea", "7:00:00 AM 4:00:00 PM", "Sat-Sun"],
-      ["Kathering Santos", "Insurance cases", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM", "Sat-Sun"],
-      ["Kyle Abad", "Cases", "Philipines", "Jennifer J", "10:00:00 PM 7:00:00 AM", "Fri-Sat"],
-      ["Lucia Herrera", "Cases", "Guatemala", "Karen", "7:00:00 AM 4:00:00 PM", "Sat-Sun"],
-      ["Luis Alexander Leon", "Insurance", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM", "SAT-SUN"],
-      ["Lynda Escobedo", "Insurance cases", "Guatemala", "Kevin Lopez", "Mon-Fri 6:00:00 AM 3:00:00 PM", "SAT-SUN"],
-      ["Marco Lopez", "Insurance cases", "Guatemala", "Kevin Lopez", "7:00:00 AM 4:00:00 PM", "Sat-Sun"],
-      ["Marianne Abigaile", "Cases", "Philipines", "Jennifer J", "5:00:00 PM 2:00:00 AM", "Mon-Tue"],
-      ["Michelle Marquez", "Insurance", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM", "SAT-SUN"],
-      ["Mary Joy Rafols", "Cases", "Philipines", "Jennifer J", "10:00:00 PM 7:00:00 AM", "Wed-Thu"],
-      ["Monica Prado", "Insurance cases", "Guatemala", "Kevin Lopez", "6:00:00 AM 3:00:00 PM", "Sat-Sun"],
-      ["Otto de la Cruz", "Insurance cases", "Guatemala", "Andrea", "6:00:00 AM 3:00:00 PM", "Sat-Sun"],
-      ["Pablo Saquilmer", "Cases", "Guatemala", "Karen", "6:00:00 AM 3:00:00 PM", "Sat-Sun"],
-      ["Rudy Herrera", "Cases", "Guatemala", "Karen", "10:00:00 AM 7:00:00 PM", "Sat-Sun"]
+      ["Alejandra Manco", "Cases", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM"],
+      ["Ann Jules Dayuta", "Cases", "Philipines", "Jennifer J", "11:00:00 AM 8:00:00 PM"],
+      ["Ariel Mazate", "Insurance cases", "Guatemala", "Andrea", "6:00:00 AM 3:00:00 PM"],
+      ["Brandon Vasquez", "ELD cases", "Guatemala", "Jonathan", "8:00:00 AM 5:00:00 PM"],
+      ["Celina Franco", "ELD phones", "Guatemala", "Jonathan", "Mon-Fri 6:00:00 AM 3:00:00 PM"],
+      ["Diana Orozco", "Cases", "Guatemala", "Karen", "6:00:00 AM 3:00:00 PM"],
+      ["Edgar Linares", "ELD cases", "Guatemala", "Jonathan", "7:00:00 AM 4:00:00 PM"],
+      ["Emely Hernandez", "Cases", "Guatemala", "Karen", "6:00:00 AM 3:00:00 PM"],
+      ["Emilia Chajon", "Cases", "Guatemala", "Karen", "5:00:00 AM 2:00:00 PM"],
+      ["Eunice Sir", "Insurance cases", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM"],
+      ["Jorge Najera", "ELD cases", "Guatemala", "Jonathan", "Mon-Fri 9:00:00 AM 6:00:00 PM"],
+      ["Jorge Saban", "Phones", "Guatemala", "Karen", "7:00:00 AM 4:00:00 PM"],
+      ["Josue Sucuc", "ELD cases", "Guatemala", "Jonathan", "6:00:00 AM 3:00:00 PM"],
+      ["Juan Carlos Avedaño", "Insurance cases", "Guatemala", "Andrea", "7:00:00 AM 4:00:00 PM"],
+      ["Kathering Santos", "Insurance cases", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM"],
+      ["Kyle Abad", "Cases", "Philipines", "Jennifer J", "10:00:00 PM 7:00:00 AM"],
+      ["Lucia Herrera", "Cases", "Guatemala", "Karen", "7:00:00 AM 4:00:00 PM"],
+      ["Luis Alexander Leon", "Insurance", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM"],
+      ["Lynda Escobedo", "Insurance cases", "Guatemala", "Kevin Lopez", "Mon-Fri 6:00:00 AM 3:00:00 PM"],
+      ["Marco Lopez", "Insurance cases", "Guatemala", "Kevin Lopez", "7:00:00 AM 4:00:00 PM"],
+      ["Marianne Abigaile", "Cases", "Philipines", "Jennifer J", "5:00:00 PM 2:00:00 AM"],
+      ["Michelle Marquez", "Insurance", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM"],
+      ["Mary Joy Rafols", "Cases", "Philipines", "Jennifer J", "10:00:00 PM 7:00:00 AM"],
+      ["Monica Prado", "Insurance cases", "Guatemala", "Kevin Lopez", "6:00:00 AM 3:00:00 PM"],
+      ["Otto de la Cruz", "Insurance cases", "Guatemala", "Andrea", "6:00:00 AM 3:00:00 PM"],
+      ["Pablo Saquilmer", "Cases", "Guatemala", "Karen", "6:00:00 AM 3:00:00 PM"],
+      ["Rudy Herrera", "Cases", "Guatemala", "Karen", "10:00:00 AM 7:00:00 PM"]
     ];
 
     const casesMxData = [
-      ["Galilea Gutierrez", "Cases", "Mexico", "Carlos Rios", "Mon–Fri, 7:00–16:00 PM", "Sat- Sun"],
-      ["Joseth Huerta", "Cases", "Mexico", "Carlos Rios", "Mon–Fri, 6:00–15:00 PM", "Sat- Sun"],
-      ["Alondra Mendoza", "Cases", "Mexico", "Sabdy Alvarez", "Mon–Fri, 9:00–18:00 PM", "Sat- Sun"]
+      ["Galilea Gutierrez", "Cases", "Mexico", "Carlos Rios", "Mon–Fri, 7:00–16:00 PM"],
+      ["Joseth Huerta", "Cases", "Mexico", "Carlos Rios", "Mon–Fri, 6:00–15:00 PM"],
+      ["Alondra Mendoza", "Cases", "Mexico", "Sabdy Alvarez", "Mon–Fri, 9:00–18:00 PM"]
     ];
 
     let currentTab = 'phones';
@@ -631,7 +653,14 @@
       document.body.removeChild(tempSpan);
     }
 
-    // Selecciona todo el texto automáticamente al hacer clic en el comentario
+    // Actualiza dinámicamente el texto del cuadro emergente (Tooltip)
+    function updateCommentPopover(textarea) {
+      const popover = textarea.nextElementSibling;
+      if (popover) {
+        popover.innerText = textarea.value || "Sin comentarios...";
+      }
+    }
+
     function handleCommentFocus(textarea) {
       setTimeout(() => {
         textarea.select();
@@ -723,46 +752,49 @@
       updateAgentCount(tableId);
     }
 
-    function appendPhoneRowToTable(tableId, agent = ["New Agent", "Task", "Branch", "Leader", "Schedule", "Days Off"]) {
+    function appendPhoneRowToTable(tableId, agent = ["New Agent", "Task", "Branch", "Leader", "Schedule"]) {
       const tbody = document.querySelector(`#${tableId} tbody`);
       const tr = document.createElement('tr');
       tr.className = "hover:bg-slate-800/40 transition-colors";
 
-      const totalCalls = (parseInt(agent[8]||0) + parseInt(agent[9]||0));
+      const totalCalls = (parseInt(agent[7]||0) + parseInt(agent[8]||0));
       const avgDailyCalls = Math.round(totalCalls / 5);
+      const commentText = agent[14] || '';
 
       tr.innerHTML = `
         <td class="p-2"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="autoResizeInput(this); renderTableChart('${tableId}')"></td>
         <td class="p-2"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
         <td class="p-2"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
         <td class="p-2"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
-        <td class="p-2"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text text-slate-400 text-[11px]" oninput="autoResizeInput(this)"></td>
-        <td class="p-2"><input type="text" value="${agent[5] || 'Days Off'}" class="cell-input cell-input-text text-slate-400 text-[11px]" oninput="autoResizeInput(this)"></td>
+        <td class="p-2"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text cell-schedule text-slate-400 text-[11px]"></td>
         
-        <td class="p-2 text-center"><input type="number" value="${agent[6] || 0}" min="0" max="100" class="cell-input qa1 font-bold" oninput="updateCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[7] || 0}" min="0" max="100" class="cell-input qa2 font-bold" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[5] || 0}" min="0" max="100" class="cell-input qa1 font-bold" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[6] || 0}" min="0" max="100" class="cell-input qa2 font-bold" oninput="updateCalculations(this)"></td>
         
-        <td class="p-2 text-center"><input type="number" value="${agent[8] || 0}" class="cell-input inbound" oninput="updateCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[9] || 0}" class="cell-input outbound" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[7] || 0}" class="cell-input inbound" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[8] || 0}" class="cell-input outbound" oninput="updateCalculations(this)"></td>
         <td class="p-3 text-center font-bold text-white total-calls">${totalCalls}</td>
-        <td class="p-2 text-center"><input type="text" value="${agent[10] || '00:00:00'}" class="cell-input text-center font-mono" oninput="autoResizeInput(this)"></td>
+        <td class="p-2 text-center"><input type="text" value="${agent[9] || '00:00:00'}" class="cell-input text-center font-mono" oninput="autoResizeInput(this)"></td>
         <td class="p-3 text-center font-bold text-[#ebbd31]/90 avg-daily">${avgDailyCalls}</td>
-        <td class="p-2 text-center"><input type="number" value="${agent[11] || 0}" class="cell-input abandon" oninput="updateCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[12] || 0}" class="cell-input declined" oninput="updateCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[13] || 0}" class="cell-input missed" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[10] || 0}" class="cell-input abandon" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[11] || 0}" class="cell-input declined" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[12] || 0}" class="cell-input missed" oninput="updateCalculations(this)"></td>
 
         <td class="p-2 text-center">
           <select class="cell-input text-[#ebbd31] font-medium text-xs">
-            <option value="N/A" ${agent[14] === 'N/A' ? 'selected' : ''}>N/A</option>
-            <option value="Coaching" ${agent[14] === 'Coaching' ? 'selected' : ''}>Coaching</option>
-            <option value="Feedback" ${agent[14] === 'Feedback' ? 'selected' : ''}>Feedback</option>
-            <option value="Accountability Session" ${agent[14] === 'Accountability Session' ? 'selected' : ''}>Accountability Session</option>
-            <option value="Disciplinary Action" ${agent[14] === 'Disciplinary Action' ? 'selected' : ''}>Disciplinary Action</option>
+            <option value="N/A" ${agent[13] === 'N/A' ? 'selected' : ''}>N/A</option>
+            <option value="Coaching" ${agent[13] === 'Coaching' ? 'selected' : ''}>Coaching</option>
+            <option value="Feedback" ${agent[13] === 'Feedback' ? 'selected' : ''}>Feedback</option>
+            <option value="Accountability Session" ${agent[13] === 'Accountability Session' ? 'selected' : ''}>Accountability Session</option>
+            <option value="Disciplinary Action" ${agent[13] === 'Disciplinary Action' ? 'selected' : ''}>Disciplinary Action</option>
           </select>
         </td>
 
         <td class="p-2">
-          <textarea placeholder="Add comments..." class="cell-input cell-comment-area text-slate-300" onfocus="handleCommentFocus(this)" title="Haz clic para ver/copiar todo el texto">${agent[15] || ''}</textarea>
+          <div class="comment-container">
+            <textarea placeholder="Add comments..." class="cell-input cell-comment-area text-slate-300" onfocus="handleCommentFocus(this)" oninput="updateCommentPopover(this)">${commentText}</textarea>
+            <div class="comment-popover">${commentText || "Sin comentarios..."}</div>
+          </div>
         </td>
         
         <td class="p-2 text-center">
@@ -779,7 +811,7 @@
 
       tbody.appendChild(tr);
 
-      tr.querySelectorAll('input[type="text"]').forEach(input => autoResizeInput(input));
+      tr.querySelectorAll('input[type="text"]:not(.cell-schedule)').forEach(input => autoResizeInput(input));
 
       // Apply conditional formatting
       applyConditionalFormatting(tr.querySelector('.qa1'), 'qa');
@@ -796,41 +828,45 @@
       updateAgentCount(tableId);
     }
 
-    function appendCasesRowToTable(tableId, agent = ["New Agent", "Task", "Branch", "Leader", "Schedule", "Days Off"]) {
+    function appendCasesRowToTable(tableId, agent = ["New Agent", "Task", "Branch", "Leader", "Schedule"]) {
       const tbody = document.querySelector(`#${tableId} tbody`);
       const tr = document.createElement('tr');
       tr.className = "hover:bg-slate-800/40 transition-colors";
+
+      const commentText = agent[14] || '';
 
       tr.innerHTML = `
         <td class="p-2"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="autoResizeInput(this); renderTableChart('${tableId}')"></td>
         <td class="p-2"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
         <td class="p-2"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
         <td class="p-2"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
-        <td class="p-2"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text text-slate-400 text-[11px]" oninput="autoResizeInput(this)"></td>
-        <td class="p-2"><input type="text" value="${agent[5] || 'Days Off'}" class="cell-input cell-input-text text-slate-400 text-[11px]" oninput="autoResizeInput(this)"></td>
+        <td class="p-2"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text cell-schedule text-slate-400 text-[11px]"></td>
         
-        <td class="p-2 text-center"><input type="number" value="${agent[6] || 0}" min="0" max="100" class="cell-input qaTotal font-bold" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[7] || 0}" class="cell-input convReplied font-semibold text-white" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[8] || 0}" class="cell-input avgResponseTime" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[9] || 0}" class="cell-input slaMissed" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[10] || 0}" class="cell-input csat text-emerald-400 font-bold" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[11] || 0}" class="cell-input dsat text-rose-400 font-bold" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[12] || 0}" class="cell-input surveyGood" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[13] || 0}" class="cell-input surveyBad" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-3 text-center font-bold text-white totalSurveys">${(parseInt(agent[12]||0) + parseInt(agent[13]||0))}</td>
+        <td class="p-2 text-center"><input type="number" value="${agent[5] || 0}" min="0" max="100" class="cell-input qaTotal font-bold" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[6] || 0}" class="cell-input convReplied font-semibold text-white" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[7] || 0}" class="cell-input avgResponseTime" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[8] || 0}" class="cell-input slaMissed" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[9] || 0}" class="cell-input csat text-emerald-400 font-bold" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[10] || 0}" class="cell-input dsat text-rose-400 font-bold" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[11] || 0}" class="cell-input surveyGood" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[12] || 0}" class="cell-input surveyBad" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-3 text-center font-bold text-white totalSurveys">${(parseInt(agent[11]||0) + parseInt(agent[12]||0))}</td>
 
         <td class="p-2 text-center">
           <select class="cell-input text-[#ebbd31] font-medium text-xs">
-            <option value="N/A" ${agent[14] === 'N/A' ? 'selected' : ''}>N/A</option>
-            <option value="Coaching" ${agent[14] === 'Coaching' ? 'selected' : ''}>Coaching</option>
-            <option value="Feedback" ${agent[14] === 'Feedback' ? 'selected' : ''}>Feedback</option>
-            <option value="Accountability Session" ${agent[14] === 'Accountability Session' ? 'selected' : ''}>Accountability Session</option>
-            <option value="Disciplinary Action" ${agent[14] === 'Disciplinary Action' ? 'selected' : ''}>Disciplinary Action</option>
+            <option value="N/A" ${agent[13] === 'N/A' ? 'selected' : ''}>N/A</option>
+            <option value="Coaching" ${agent[13] === 'Coaching' ? 'selected' : ''}>Coaching</option>
+            <option value="Feedback" ${agent[13] === 'Feedback' ? 'selected' : ''}>Feedback</option>
+            <option value="Accountability Session" ${agent[13] === 'Accountability Session' ? 'selected' : ''}>Accountability Session</option>
+            <option value="Disciplinary Action" ${agent[13] === 'Disciplinary Action' ? 'selected' : ''}>Disciplinary Action</option>
           </select>
         </td>
 
         <td class="p-2">
-          <textarea placeholder="Add comments..." class="cell-input cell-comment-area text-slate-300" onfocus="handleCommentFocus(this)" title="Haz clic para ver/copiar todo el texto">${agent[15] || ''}</textarea>
+          <div class="comment-container">
+            <textarea placeholder="Add comments..." class="cell-input cell-comment-area text-slate-300" onfocus="handleCommentFocus(this)" oninput="updateCommentPopover(this)">${commentText}</textarea>
+            <div class="comment-popover">${commentText || "Sin comentarios..."}</div>
+          </div>
         </td>
         
         <td class="p-2 text-center">
@@ -847,7 +883,7 @@
 
       tbody.appendChild(tr);
 
-      tr.querySelectorAll('input[type="text"]').forEach(input => autoResizeInput(input));
+      tr.querySelectorAll('input[type="text"]:not(.cell-schedule)').forEach(input => autoResizeInput(input));
 
       // Apply conditional formatting for Cases
       applyConditionalFormatting(tr.querySelector('.qaTotal'), 'qa');
