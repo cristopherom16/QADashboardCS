@@ -70,11 +70,22 @@
       min-width: 180px;
       font-weight: 600;
     }
-    .cell-input:hover {
+    .cell-comment-area {
+      text-align: left;
+      min-width: 220px;
+      resize: none;
+      overflow-y: hidden;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.4;
+      min-height: 32px;
+      display: block;
+    }
+    .cell-input:hover, .cell-comment-area:hover {
       border-color: #3b486b;
       background: rgba(28, 34, 52, 0.8);
     }
-    .cell-input:focus {
+    .cell-input:focus, .cell-comment-area:focus {
       outline: none;
       border-color: #ebbd31;
       background: #141824;
@@ -99,6 +110,28 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       z-index: 100;
       display: none;
+    }
+
+    /* ESTILOS CONDICIONALES EXPLICITOS */
+    .cond-green {
+      background-color: #16a34a !important;
+      color: #000000 !important;
+      font-weight: 800 !important;
+    }
+    .cond-yellow {
+      background-color: #eab308 !important;
+      color: #000000 !important;
+      font-weight: 800 !important;
+    }
+    .cond-orange {
+      background-color: #f97316 !important;
+      color: #000000 !important;
+      font-weight: 800 !important;
+    }
+    .cond-red {
+      background-color: #dc2626 !important;
+      color: #ffffff !important;
+      font-weight: 800 !important;
     }
   </style>
 </head>
@@ -137,7 +170,7 @@
       </nav>
     </div>
 
-    <!-- EXPORT EXCEL BUTTON (BOTTOM LEFT OF SIDEBAR) -->
+    <!-- EXPORT EXCEL BUTTON -->
     <div class="p-4 border-t border-[#2a344d] space-y-3">
       <button onclick="exportToExcel()" class="w-full flex items-center justify-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-3 rounded-lg text-xs transition-colors shadow-md">
         <i class="fa-solid fa-file-excel text-sm"></i>
@@ -258,7 +291,6 @@
         <div class="flex items-center space-x-2 w-full md:w-auto">
           <label class="text-xs text-slate-400 font-medium whitespace-nowrap"><i class="fa-solid fa-chart-column text-[#ebbd31] mr-1"></i>CHART CATEGORY:</label>
           <select id="chartMetricSelect" onchange="updateAllCharts()" class="bg-[#141824] border border-[#2a344d] text-[#ebbd31] text-xs font-semibold px-3 py-1.5 rounded-lg focus:outline-none cursor-pointer w-full md:w-auto">
-            <!-- Dynamically populated into 3 unified charts -->
           </select>
         </div>
       </div>
@@ -288,7 +320,7 @@
                   <th class="p-3 text-center text-[#ebbd31]">QA 1</th><th class="p-3 text-center text-[#ebbd31]">QA 2</th>
                   <th class="p-3 text-center">Inbound Calls</th><th class="p-3 text-center">Outbound Calls</th><th class="p-3 text-center">Total Calls</th><th class="p-3 text-center">Avg. Handle Time</th><th class="p-3 text-center">Avg. Calls/Day</th>
                   <th class="p-3 text-center">Abandon on hold</th><th class="p-3 text-center">Declined calls</th><th class="p-3 text-center">Missed Calls</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-[#2a344d]/50"></tbody>
@@ -319,7 +351,7 @@
                   <th class="p-3 text-center text-[#ebbd31]">QA 1</th><th class="p-3 text-center text-[#ebbd31]">QA 2</th>
                   <th class="p-3 text-center">Inbound Calls</th><th class="p-3 text-center">Outbound Calls</th><th class="p-3 text-center">Total Calls</th><th class="p-3 text-center">Avg. Handle Time</th><th class="p-3 text-center">Avg. Calls/Day</th>
                   <th class="p-3 text-center">Abandon on hold</th><th class="p-3 text-center">Declined calls</th><th class="p-3 text-center">Missed Calls</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-[#2a344d]/50"></tbody>
@@ -350,7 +382,7 @@
                   <th class="p-3 text-center text-[#ebbd31]">QA 1</th><th class="p-3 text-center text-[#ebbd31]">QA 2</th>
                   <th class="p-3 text-center">Inbound Calls</th><th class="p-3 text-center">Outbound Calls</th><th class="p-3 text-center">Total Calls</th><th class="p-3 text-center">Avg. Handle Time</th><th class="p-3 text-center">Avg. Calls/Day</th>
                   <th class="p-3 text-center">Abandon on hold</th><th class="p-3 text-center">Declined calls</th><th class="p-3 text-center">Missed Calls</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-[#2a344d]/50"></tbody>
@@ -382,7 +414,7 @@
                 <tr>
                   <th class="p-3 min-w-[200px]">Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
                   <th class="p-3 text-center text-[#ebbd31]">QA Total</th><th class="p-3 text-center">Conversations replied to</th><th class="p-3 text-center">Average First response time mins</th><th class="p-3 text-center">SLA missed</th><th class="p-3 text-center">Teammate CSAT score</th><th class="p-3 text-center">Teammate DSAT score</th><th class="p-3 text-center">survey count good</th><th class="p-3 text-center">survey count bad</th><th class="p-3 text-center">Total surveys</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-[#2a344d]/50"></tbody>
@@ -411,7 +443,7 @@
                 <tr>
                   <th class="p-3 min-w-[200px]">Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
                   <th class="p-3 text-center text-[#ebbd31]">QA Total</th><th class="p-3 text-center">Conversations replied to</th><th class="p-3 text-center">Average First response time mins</th><th class="p-3 text-center">SLA missed</th><th class="p-3 text-center">Teammate CSAT score</th><th class="p-3 text-center">Teammate DSAT score</th><th class="p-3 text-center">survey count good</th><th class="p-3 text-center">survey count bad</th><th class="p-3 text-center">Total surveys</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
+                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-[#2a344d]/50"></tbody>
@@ -531,6 +563,32 @@
     let currentTab = 'phones';
     const chartInstances = {};
 
+    function autoExpandTextarea(element) {
+      if (!element) return;
+      element.style.height = 'auto';
+      element.style.height = element.scrollHeight + 'px';
+    }
+
+    // FUNCIONALIDADES DE FORMATO CONDICIONAL
+    function applyConditionalFormatting(input, type) {
+      if (!input) return;
+      const val = parseFloat(input.value) || 0;
+      input.classList.remove('cond-green', 'cond-yellow', 'cond-orange', 'cond-red');
+
+      if (type === 'qa') {
+        if (val >= 95) input.classList.add('cond-green');
+        else if (val >= 85) input.classList.add('cond-yellow');
+        else if (val >= 65) input.classList.add('cond-orange');
+        else input.classList.add('cond-red');
+      } else if (type === 'abandonOrMissed') {
+        if (val <= 2) input.classList.add('cond-green');
+        else input.classList.add('cond-red');
+      } else if (type === 'declined') {
+        if (val === 0) input.classList.add('cond-green');
+        else input.classList.add('cond-red');
+      }
+    }
+
     function updateMetricSelectOptions() {
       const select = document.getElementById('chartMetricSelect');
       select.innerHTML = '';
@@ -609,8 +667,8 @@
         <td class="p-2"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text text-slate-400 text-[11px]"></td>
         <td class="p-2"><input type="text" value="${agent[5] || 'Days Off'}" class="cell-input cell-input-text text-slate-400 text-[11px]"></td>
         
-        <td class="p-2 text-center"><input type="number" value="${agent[6] || 0}" min="0" max="100" class="cell-input qa1 font-bold text-[#ebbd31]" oninput="updateCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[7] || 0}" min="0" max="100" class="cell-input qa2 font-bold text-[#ebbd31]" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[6] || 0}" min="0" max="100" class="cell-input qa1 font-bold" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[7] || 0}" min="0" max="100" class="cell-input qa2 font-bold" oninput="updateCalculations(this)"></td>
         
         <td class="p-2 text-center"><input type="number" value="${agent[8] || 0}" class="cell-input inbound" oninput="updateCalculations(this)"></td>
         <td class="p-2 text-center"><input type="number" value="${agent[9] || 0}" class="cell-input outbound" oninput="updateCalculations(this)"></td>
@@ -631,7 +689,9 @@
           </select>
         </td>
 
-        <td class="p-2"><input type="text" value="${agent[15] || ''}" placeholder="Add comments..." class="cell-input cell-input-text text-slate-300"></td>
+        <td class="p-2">
+          <textarea placeholder="Add comments..." class="cell-input cell-comment-area text-slate-300" oninput="autoExpandTextarea(this)">${agent[15] || ''}</textarea>
+        </td>
         
         <td class="p-2 text-center">
           <div class="flex items-center justify-center space-x-2">
@@ -646,6 +706,16 @@
       `;
 
       tbody.appendChild(tr);
+
+      // Aplicar condicionales
+      applyConditionalFormatting(tr.querySelector('.qa1'), 'qa');
+      applyConditionalFormatting(tr.querySelector('.qa2'), 'qa');
+      applyConditionalFormatting(tr.querySelector('.abandon'), 'abandonOrMissed');
+      applyConditionalFormatting(tr.querySelector('.missed'), 'abandonOrMissed');
+      applyConditionalFormatting(tr.querySelector('.declined'), 'declined');
+
+      const txt = tr.querySelector('.cell-comment-area');
+      if (txt) autoExpandTextarea(txt);
     }
 
     function renderCasesTable(tableId, rawData) {
@@ -668,7 +738,7 @@
         <td class="p-2"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text text-slate-400 text-[11px]"></td>
         <td class="p-2"><input type="text" value="${agent[5] || 'Days Off'}" class="cell-input cell-input-text text-slate-400 text-[11px]"></td>
         
-        <td class="p-2 text-center"><input type="number" value="${agent[6] || 0}" min="0" max="100" class="cell-input qaTotal font-bold text-[#ebbd31]" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center"><input type="number" value="${agent[6] || 0}" min="0" max="100" class="cell-input qaTotal font-bold" oninput="updateCasesCalculations(this)"></td>
         <td class="p-2 text-center"><input type="number" value="${agent[7] || 0}" class="cell-input convReplied font-semibold text-white" oninput="updateCasesCalculations(this)"></td>
         <td class="p-2 text-center"><input type="number" value="${agent[8] || 0}" class="cell-input avgResponseTime" oninput="updateCasesCalculations(this)"></td>
         <td class="p-2 text-center"><input type="number" value="${agent[9] || 0}" class="cell-input slaMissed" oninput="updateCasesCalculations(this)"></td>
@@ -688,7 +758,9 @@
           </select>
         </td>
 
-        <td class="p-2"><input type="text" value="${agent[15] || ''}" placeholder="Add comments..." class="cell-input cell-input-text text-slate-300"></td>
+        <td class="p-2">
+          <textarea placeholder="Add comments..." class="cell-input cell-comment-area text-slate-300" oninput="autoExpandTextarea(this)">${agent[15] || ''}</textarea>
+        </td>
         
         <td class="p-2 text-center">
           <div class="flex items-center justify-center space-x-2">
@@ -703,6 +775,12 @@
       `;
 
       tbody.appendChild(tr);
+
+      // Aplicar condicionales para Cases
+      applyConditionalFormatting(tr.querySelector('.qaTotal'), 'qa');
+
+      const txt = tr.querySelector('.cell-comment-area');
+      if (txt) autoExpandTextarea(txt);
     }
 
     function addAgentRow(tableId) {
@@ -746,10 +824,9 @@
           const cells = row.querySelectorAll('th, td');
           
           cells.forEach((cell, cIdx) => {
-            // Skip the Actions column (last column)
             if (cIdx === cells.length - 1) return;
 
-            const input = cell.querySelector('input, select');
+            const input = cell.querySelector('input, select, textarea');
             if (input) {
               rowData.push(input.value);
             } else {
@@ -785,7 +862,7 @@
         payload[tableId] = [];
         
         rows.forEach(row => {
-          const inputs = row.querySelectorAll('input, select');
+          const inputs = row.querySelectorAll('input, select, textarea');
           const agentArr = [];
           inputs.forEach(ip => agentArr.push(ip.value));
           payload[tableId].push(agentArr);
@@ -864,6 +941,13 @@
       if (tr.querySelector('.total-calls')) tr.querySelector('.total-calls').innerText = total;
       if (tr.querySelector('.avg-daily')) tr.querySelector('.avg-daily').innerText = avgDaily;
 
+      // Aplicar condicionales al escribir
+      applyConditionalFormatting(tr.querySelector('.qa1'), 'qa');
+      applyConditionalFormatting(tr.querySelector('.qa2'), 'qa');
+      applyConditionalFormatting(tr.querySelector('.abandon'), 'abandonOrMissed');
+      applyConditionalFormatting(tr.querySelector('.missed'), 'abandonOrMissed');
+      applyConditionalFormatting(tr.querySelector('.declined'), 'declined');
+
       calculateGlobalKPIs();
       
       const table = tr.closest('table');
@@ -880,6 +964,9 @@
       const total = good + bad;
 
       if (tr.querySelector('.totalSurveys')) tr.querySelector('.totalSurveys').innerText = total;
+
+      // Aplicar condicional para Cases
+      applyConditionalFormatting(tr.querySelector('.qaTotal'), 'qa');
 
       calculateGlobalKPIs();
       
@@ -963,7 +1050,6 @@
 
       if (currentTab === 'phones') {
         if (groupOption === 'group1') {
-          // 1. QA Performance (QA 1, QA 2)
           const qa1Data = [], qa2Data = [];
           rows.forEach(r => {
             qa1Data.push(parseFloat(r.querySelector('.qa1')?.value) || 0);
@@ -972,7 +1058,6 @@
           datasetsMap.push({ label: 'QA 1 Score', data: qa1Data, backgroundColor: '#ebbd31' });
           datasetsMap.push({ label: 'QA 2 Score', data: qa2Data, backgroundColor: '#38bdf8' });
         } else if (groupOption === 'group2') {
-          // 2. Call Volumes & Handle Times
           const inData = [], outData = [], totData = [], avgDData = [];
           rows.forEach(r => {
             inData.push(parseFloat(r.querySelector('.inbound')?.value) || 0);
@@ -985,7 +1070,6 @@
           datasetsMap.push({ label: 'Total Calls', data: totData, backgroundColor: '#ebbd31' });
           datasetsMap.push({ label: 'AVG. Calls/Day', data: avgDData, backgroundColor: '#34d399' });
         } else {
-          // 3. Call Drops & Misses
           const abndData = [], decData = [], missData = [];
           rows.forEach(r => {
             abndData.push(parseFloat(r.querySelector('.abandon')?.value) || 0);
@@ -998,12 +1082,10 @@
         }
       } else {
         if (groupOption === 'group1') {
-          // 1. QA Performance (QA Total)
           const qaTotData = [];
           rows.forEach(r => qaTotData.push(parseFloat(r.querySelector('.qaTotal')?.value) || 0));
           datasetsMap.push({ label: 'QA Total', data: qaTotData, backgroundColor: '#ebbd31' });
         } else if (groupOption === 'group2') {
-          // 2. Case Activity & CSAT/DSAT
           const convData = [], csatData = [], dsatData = [], respData = [];
           rows.forEach(r => {
             convData.push(parseFloat(r.querySelector('.convReplied')?.value) || 0);
@@ -1016,7 +1098,6 @@
           datasetsMap.push({ label: 'DSAT Score', data: dsatData, backgroundColor: '#f87171' });
           datasetsMap.push({ label: 'Avg First Resp Time (m)', data: respData, backgroundColor: '#a78bfa' });
         } else {
-          // 3. Surveys & SLA Misses
           const gData = [], bData = [], tData = [], slaData = [];
           rows.forEach(r => {
             gData.push(parseFloat(r.querySelector('.surveyGood')?.value) || 0);
