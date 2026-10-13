@@ -112,7 +112,7 @@
       display: none;
     }
 
-    /* ESTILOS CONDICIONALES EXPLICITOS */
+    /* CONDITIONAL STYLES */
     .cond-green {
       background-color: #16a34a !important;
       color: #000000 !important;
@@ -132,6 +132,13 @@
       background-color: #dc2626 !important;
       color: #ffffff !important;
       font-weight: 800 !important;
+    }
+    
+    /* Ensure QA numbers are fully visible */
+    .qa1, .qa2, .qaTotal {
+      min-width: 65px;
+      padding-left: 2px;
+      padding-right: 2px;
     }
   </style>
 </head>
@@ -317,7 +324,7 @@
               <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
                 <tr>
                   <th class="p-3 min-w-[200px]">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
-                  <th class="p-3 text-center text-[#ebbd31]">QA 1</th><th class="p-3 text-center text-[#ebbd31]">QA 2</th>
+                  <th class="p-3 text-center text-[#ebbd31] min-w-[70px]">QA 1</th><th class="p-3 text-center text-[#ebbd31] min-w-[70px]">QA 2</th>
                   <th class="p-3 text-center">Inbound Calls</th><th class="p-3 text-center">Outbound Calls</th><th class="p-3 text-center">Total Calls</th><th class="p-3 text-center">Avg. Handle Time</th><th class="p-3 text-center">Avg. Calls/Day</th>
                   <th class="p-3 text-center">Abandon on hold</th><th class="p-3 text-center">Declined calls</th><th class="p-3 text-center">Missed Calls</th>
                   <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
@@ -348,7 +355,7 @@
               <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
                 <tr>
                   <th class="p-3 min-w-[200px]">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
-                  <th class="p-3 text-center text-[#ebbd31]">QA 1</th><th class="p-3 text-center text-[#ebbd31]">QA 2</th>
+                  <th class="p-3 text-center text-[#ebbd31] min-w-[70px]">QA 1</th><th class="p-3 text-center text-[#ebbd31] min-w-[70px]">QA 2</th>
                   <th class="p-3 text-center">Inbound Calls</th><th class="p-3 text-center">Outbound Calls</th><th class="p-3 text-center">Total Calls</th><th class="p-3 text-center">Avg. Handle Time</th><th class="p-3 text-center">Avg. Calls/Day</th>
                   <th class="p-3 text-center">Abandon on hold</th><th class="p-3 text-center">Declined calls</th><th class="p-3 text-center">Missed Calls</th>
                   <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
@@ -379,7 +386,7 @@
               <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
                 <tr>
                   <th class="p-3 min-w-[200px]">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
-                  <th class="p-3 text-center text-[#ebbd31]">QA 1</th><th class="p-3 text-center text-[#ebbd31]">QA 2</th>
+                  <th class="p-3 text-center text-[#ebbd31] min-w-[70px]">QA 1</th><th class="p-3 text-center text-[#ebbd31] min-w-[70px]">QA 2</th>
                   <th class="p-3 text-center">Inbound Calls</th><th class="p-3 text-center">Outbound Calls</th><th class="p-3 text-center">Total Calls</th><th class="p-3 text-center">Avg. Handle Time</th><th class="p-3 text-center">Avg. Calls/Day</th>
                   <th class="p-3 text-center">Abandon on hold</th><th class="p-3 text-center">Declined calls</th><th class="p-3 text-center">Missed Calls</th>
                   <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
@@ -413,7 +420,7 @@
               <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
                 <tr>
                   <th class="p-3 min-w-[200px]">Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
-                  <th class="p-3 text-center text-[#ebbd31]">QA Total</th><th class="p-3 text-center">Conversations replied to</th><th class="p-3 text-center">Average First response time mins</th><th class="p-3 text-center">SLA missed</th><th class="p-3 text-center">Teammate CSAT score</th><th class="p-3 text-center">Teammate DSAT score</th><th class="p-3 text-center">survey count good</th><th class="p-3 text-center">survey count bad</th><th class="p-3 text-center">Total surveys</th>
+                  <th class="p-3 text-center text-[#ebbd31] min-w-[80px]">QA Total</th><th class="p-3 text-center">Conversations replied to</th><th class="p-3 text-center">Average First response time mins</th><th class="p-3 text-center">SLA missed</th><th class="p-3 text-center">Teammate CSAT score</th><th class="p-3 text-center">Teammate DSAT score</th><th class="p-3 text-center">survey count good</th><th class="p-3 text-center">survey count bad</th><th class="p-3 text-center">Total surveys</th>
                   <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
                 </tr>
               </thead>
@@ -442,7 +449,7 @@
               <thead class="bg-[#141824]/80 text-slate-400 uppercase font-semibold border-b border-[#2a344d]">
                 <tr>
                   <th class="p-3 min-w-[200px]">Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th><th class="p-3">Days off</th>
-                  <th class="p-3 text-center text-[#ebbd31]">QA Total</th><th class="p-3 text-center">Conversations replied to</th><th class="p-3 text-center">Average First response time mins</th><th class="p-3 text-center">SLA missed</th><th class="p-3 text-center">Teammate CSAT score</th><th class="p-3 text-center">Teammate DSAT score</th><th class="p-3 text-center">survey count good</th><th class="p-3 text-center">survey count bad</th><th class="p-3 text-center">Total surveys</th>
+                  <th class="p-3 text-center text-[#ebbd31] min-w-[80px]">QA Total</th><th class="p-3 text-center">Conversations replied to</th><th class="p-3 text-center">Average First response time mins</th><th class="p-3 text-center">SLA missed</th><th class="p-3 text-center">Teammate CSAT score</th><th class="p-3 text-center">Teammate DSAT score</th><th class="p-3 text-center">survey count good</th><th class="p-3 text-center">survey count bad</th><th class="p-3 text-center">Total surveys</th>
                   <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center min-w-[220px]">Comments</th><th class="p-3 text-center min-w-[100px]">Actions</th>
                 </tr>
               </thead>
@@ -569,7 +576,7 @@
       element.style.height = element.scrollHeight + 'px';
     }
 
-    // FUNCIONALIDADES DE FORMATO CONDICIONAL
+    // CONDITIONAL FORMATTING FUNCTIONS
     function applyConditionalFormatting(input, type) {
       if (!input) return;
       const val = parseFloat(input.value) || 0;
@@ -659,6 +666,9 @@
       const tr = document.createElement('tr');
       tr.className = "hover:bg-slate-800/40 transition-colors border-b border-[#2a344d]/30";
 
+      const totalCalls = (parseInt(agent[8]||0) + parseInt(agent[9]||0));
+      const avgDailyCalls = Math.round(totalCalls / 5);
+
       tr.innerHTML = `
         <td class="p-2"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="renderTableChart('${tableId}')"></td>
         <td class="p-2"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text text-slate-300"></td>
@@ -672,9 +682,9 @@
         
         <td class="p-2 text-center"><input type="number" value="${agent[8] || 0}" class="cell-input inbound" oninput="updateCalculations(this)"></td>
         <td class="p-2 text-center"><input type="number" value="${agent[9] || 0}" class="cell-input outbound" oninput="updateCalculations(this)"></td>
-        <td class="p-3 text-center font-bold text-white total-calls">${(parseInt(agent[8]||0) + parseInt(agent[9]||0))}</td>
+        <td class="p-3 text-center font-bold text-white total-calls">${totalCalls}</td>
         <td class="p-2 text-center"><input type="text" value="${agent[10] || '00:00:00'}" class="cell-input text-center font-mono"></td>
-        <td class="p-3 text-center font-bold text-[#ebbd31]/90 avg-daily">${((parseInt(agent[8]||0) + parseInt(agent[9]||0))/5).toFixed(1)}</td>
+        <td class="p-3 text-center font-bold text-[#ebbd31]/90 avg-daily">${avgDailyCalls}</td>
         <td class="p-2 text-center"><input type="number" value="${agent[11] || 0}" class="cell-input abandon" oninput="updateCalculations(this)"></td>
         <td class="p-2 text-center"><input type="number" value="${agent[12] || 0}" class="cell-input declined" oninput="updateCalculations(this)"></td>
         <td class="p-2 text-center"><input type="number" value="${agent[13] || 0}" class="cell-input missed" oninput="updateCalculations(this)"></td>
@@ -707,7 +717,7 @@
 
       tbody.appendChild(tr);
 
-      // Aplicar condicionales
+      // Apply conditional formatting
       applyConditionalFormatting(tr.querySelector('.qa1'), 'qa');
       applyConditionalFormatting(tr.querySelector('.qa2'), 'qa');
       applyConditionalFormatting(tr.querySelector('.abandon'), 'abandonOrMissed');
@@ -776,7 +786,7 @@
 
       tbody.appendChild(tr);
 
-      // Aplicar condicionales para Cases
+      // Apply conditional formatting for Cases
       applyConditionalFormatting(tr.querySelector('.qaTotal'), 'qa');
 
       const txt = tr.querySelector('.cell-comment-area');
@@ -936,12 +946,12 @@
       const outbound = parseInt(tr.querySelector('.outbound')?.value) || 0;
       
       const total = inbound + outbound;
-      const avgDaily = (total / 5).toFixed(1);
+      const avgDaily = Math.round(total / 5);
 
       if (tr.querySelector('.total-calls')) tr.querySelector('.total-calls').innerText = total;
       if (tr.querySelector('.avg-daily')) tr.querySelector('.avg-daily').innerText = avgDaily;
 
-      // Aplicar condicionales al escribir
+      // Apply conditional formatting on user input
       applyConditionalFormatting(tr.querySelector('.qa1'), 'qa');
       applyConditionalFormatting(tr.querySelector('.qa2'), 'qa');
       applyConditionalFormatting(tr.querySelector('.abandon'), 'abandonOrMissed');
@@ -965,7 +975,7 @@
 
       if (tr.querySelector('.totalSurveys')) tr.querySelector('.totalSurveys').innerText = total;
 
-      // Aplicar condicional para Cases
+      // Apply conditional formatting for Cases
       applyConditionalFormatting(tr.querySelector('.qaTotal'), 'qa');
 
       calculateGlobalKPIs();
@@ -1000,7 +1010,7 @@
         document.getElementById('kpi-qa1').innerText = qa1Count ? (qa1Sum / qa1Count).toFixed(1) : '0';
         document.getElementById('kpi-qa2').innerText = qa2Count ? (qa2Sum / qa2Count).toFixed(1) : '0';
         document.getElementById('kpi-total').innerText = totalCalls.toLocaleString();
-        document.getElementById('kpi-daily').innerText = (totalCalls / 5).toFixed(1);
+        document.getElementById('kpi-daily').innerText = Math.round(totalCalls / 5);
       } else {
         activeTables = ['table-cases-gua', 'table-cases-mx'];
         let qaSum = 0, qaCount = 0;
