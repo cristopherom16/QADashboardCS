@@ -78,29 +78,29 @@
 
     /* COLUMNAS CON ANCHO OPTIMIZADO */
     .cell-task {
-      width: 85px;
-      max-width: 85px;
+      width: 80px;
+      max-width: 80px;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
     }
     .cell-branch {
-      width: 75px;
-      max-width: 75px;
+      width: 70px;
+      max-width: 70px;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
     }
     .cell-leaders {
-      width: 85px;
-      max-width: 85px;
+      width: 80px;
+      max-width: 80px;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
     }
     .cell-schedule {
-      width: 90px;
-      max-width: 90px;
+      width: 85px;
+      max-width: 85px;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
@@ -108,27 +108,32 @@
 
     /* CELDAS NUMÉRICAS Y AHT */
     .col-qa {
-      min-width: 52px;
-      max-width: 58px;
+      min-width: 50px;
+      max-width: 56px;
     }
     .col-num {
-      min-width: 55px;
-      max-width: 62px; /* Permite hasta 4 dígitos visiblemente */
+      min-width: 52px;
+      max-width: 60px;
     }
     .col-aht {
-      min-width: 78px; /* Tamaño exacto para formato 00:00:00 */
-      max-width: 82px;
+      min-width: 75px;
+      max-width: 80px;
     }
     .col-drop {
-      min-width: 52px;
-      max-width: 58px;
+      min-width: 50px;
+      max-width: 56px;
     }
 
-    /* COMENTARIOS Y POPOVER */
+    /* COMENTARIOS, RESOLUTION Y POPOVERS */
     .comment-container {
       position: relative;
       width: 130px;
       max-width: 130px;
+    }
+    .resolution-container {
+      position: relative;
+      width: 140px;
+      max-width: 140px;
     }
     .cell-comment-area {
       text-align: left;
@@ -162,7 +167,8 @@
       z-index: 100;
       pointer-events: auto;
     }
-    .comment-container:hover .comment-popover {
+    .comment-container:hover .comment-popover,
+    .resolution-container:hover .comment-popover {
       display: block;
     }
 
@@ -232,7 +238,7 @@
       border-right: 1px solid var(--amber-grid);
       border-bottom: 2px solid var(--amber-main);
       white-space: nowrap;
-      padding: 6px 4px !important;
+      padding: 5px 3px !important;
       font-size: 10px;
     }
     table.data-table th:last-child {
@@ -242,7 +248,7 @@
       border-right: 1px solid var(--amber-grid);
       border-bottom: 1px solid rgba(235, 189, 49, 0.2);
       white-space: nowrap;
-      padding: 2px 3px !important;
+      padding: 2px 2px !important;
     }
     table.data-table td:last-child {
       border-right: none;
@@ -275,7 +281,7 @@
         </div>
       </div>
 
-      <!-- CENTER DEPARTMENTS NAVIGATION -->
+      <!-- CENTER DEPARTMENTS & NOTES NAVIGATION -->
       <div class="flex items-center bg-[#141824] p-1 rounded-xl border border-[#2a344d] space-x-1">
         <button onclick="switchTab('phones')" id="btn-tab-phones" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors bg-[#ebbd31] text-slate-950 shadow-md">
           <i class="fa-solid fa-headset text-xs"></i>
@@ -285,6 +291,11 @@
         <button onclick="switchTab('cases')" id="btn-tab-cases" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400">
           <i class="fa-solid fa-folder-open text-xs"></i>
           <span>Customer Support Cases</span>
+        </button>
+
+        <button onclick="switchTab('notes')" id="btn-tab-notes" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400">
+          <i class="fa-solid fa-lightbulb text-xs text-[#ebbd31]"></i>
+          <span>Notes & Insights of the Month</span>
         </button>
       </div>
 
@@ -325,7 +336,7 @@
         </button>
       </div>
 
-      <!-- Action Button (Form Link & Excel Export Combo) -->
+      <!-- Action Button Combo -->
       <div class="flex flex-col items-end space-y-1">
         <a id="evaluationFormBtn" href="https://docs.google.com/forms/d/e/1FAIpQLSfRjVZUd6TyQHCQgiuL6VVuZFDtL1GPHmMFxETpyCEBjgiaHg/viewform" target="_blank" class="inline-flex items-center space-x-1.5 bg-[#ebbd31] hover:bg-[#d1a320] text-slate-950 font-bold px-3 py-1 rounded-lg text-xs transition-all shadow-md amber-glow">
           <i class="fa-solid fa-pen-to-square"></i>
@@ -342,7 +353,7 @@
     <div class="p-4 space-y-5">
 
       <!-- GLOBAL KPIS -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div id="kpi-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-3 flex items-center justify-between">
           <div>
             <p class="text-[11px] text-slate-400 font-medium">Avg. QA Score</p>
@@ -385,7 +396,7 @@
       </div>
 
       <!-- SEARCH BAR & THREE CHART CATEGORY SELECTOR -->
-      <div class="flex flex-col md:flex-row justify-between items-center bg-[#1c2234] p-2.5 rounded-xl border border-[#2a344d] gap-3">
+      <div id="search-chart-bar" class="flex flex-col md:flex-row justify-between items-center bg-[#1c2234] p-2.5 rounded-xl border border-[#2a344d] gap-3">
         <div class="relative w-full md:w-72">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
           <input type="text" id="searchInput" onkeyup="filterTables()" placeholder="Search agent, leader, task, branch..." class="w-full bg-[#141824] border border-[#2a344d] rounded-lg pl-8 pr-3 py-1 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#ebbd31]">
@@ -419,11 +430,11 @@
             <table class="w-full text-xs text-left text-slate-300 data-table" id="table-gua-col">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-2 min-w-[130px]">Agent Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
-                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA 1</th><th class="p-2 text-center text-[#ebbd31] col-qa">QA 2</th>
+                  <th class="p-2 min-w-[120px]">Agent Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
+                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA 1</th><th class="p-2 text-center text-[#ebbd31] col-qa">QA 2</th><th class="p-2 text-center text-[#ebbd31] col-qa">AVG QA</th>
                   <th class="p-2 text-center col-num">Inbound</th><th class="p-2 text-center col-num">Outbound</th><th class="p-2 text-center col-num">Total</th><th class="p-2 text-center col-aht">AHT</th><th class="p-2 text-center col-num">Avg/Day</th>
                   <th class="p-2 text-center col-drop">Abnd Hold</th><th class="p-2 text-center col-drop">Declined</th><th class="p-2 text-center col-drop">Missed</th>
-                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[60px]">Actions</th>
+                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center text-[#ebbd31] min-w-[140px]">Resolution</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[55px]">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -450,11 +461,11 @@
             <table class="w-full text-xs text-left text-slate-300 data-table" id="table-pan">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-2 min-w-[130px]">Agent Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
-                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA 1</th><th class="p-2 text-center text-[#ebbd31] col-qa">QA 2</th>
+                  <th class="p-2 min-w-[120px]">Agent Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
+                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA 1</th><th class="p-2 text-center text-[#ebbd31] col-qa">QA 2</th><th class="p-2 text-center text-[#ebbd31] col-qa">AVG QA</th>
                   <th class="p-2 text-center col-num">Inbound</th><th class="p-2 text-center col-num">Outbound</th><th class="p-2 text-center col-num">Total</th><th class="p-2 text-center col-aht">AHT</th><th class="p-2 text-center col-num">Avg/Day</th>
                   <th class="p-2 text-center col-drop">Abnd Hold</th><th class="p-2 text-center col-drop">Declined</th><th class="p-2 text-center col-drop">Missed</th>
-                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[60px]">Actions</th>
+                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center text-[#ebbd31] min-w-[140px]">Resolution</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[55px]">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -481,11 +492,11 @@
             <table class="w-full text-xs text-left text-slate-300 data-table" id="table-mx-phones">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-2 min-w-[130px]">Agent Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
-                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA 1</th><th class="p-2 text-center text-[#ebbd31] col-qa">QA 2</th>
+                  <th class="p-2 min-w-[120px]">Agent Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
+                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA 1</th><th class="p-2 text-center text-[#ebbd31] col-qa">QA 2</th><th class="p-2 text-center text-[#ebbd31] col-qa">AVG QA</th>
                   <th class="p-2 text-center col-num">Inbound</th><th class="p-2 text-center col-num">Outbound</th><th class="p-2 text-center col-num">Total</th><th class="p-2 text-center col-aht">AHT</th><th class="p-2 text-center col-num">Avg/Day</th>
                   <th class="p-2 text-center col-drop">Abnd Hold</th><th class="p-2 text-center col-drop">Declined</th><th class="p-2 text-center col-drop">Missed</th>
-                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[60px]">Actions</th>
+                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center text-[#ebbd31] min-w-[140px]">Resolution</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[55px]">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -515,9 +526,9 @@
             <table class="w-full text-xs text-left text-slate-300 data-table" id="table-cases-gua">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-2 min-w-[130px]">Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
+                  <th class="p-2 min-w-[120px]">Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
                   <th class="p-2 text-center text-[#ebbd31] col-qa">QA Total</th><th class="p-2 text-center col-num">Convs</th><th class="p-2 text-center col-num">Resp Time</th><th class="p-2 text-center col-num">SLA Missed</th><th class="p-2 text-center col-num">CSAT</th><th class="p-2 text-center col-num">DSAT</th><th class="p-2 text-center col-num">Good</th><th class="p-2 text-center col-num">Bad</th><th class="p-2 text-center col-num">Total Surv</th>
-                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[60px]">Actions</th>
+                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center text-[#ebbd31] min-w-[140px]">Resolution</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[55px]">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -544,14 +555,121 @@
             <table class="w-full text-xs text-left text-slate-300 data-table" id="table-cases-mx">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-2 min-w-[130px]">Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
+                  <th class="p-2 min-w-[120px]">Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
                   <th class="p-2 text-center text-[#ebbd31] col-qa">QA Total</th><th class="p-2 text-center col-num">Convs</th><th class="p-2 text-center col-num">Resp Time</th><th class="p-2 text-center col-num">SLA Missed</th><th class="p-2 text-center col-num">CSAT</th><th class="p-2 text-center col-num">DSAT</th><th class="p-2 text-center col-num">Good</th><th class="p-2 text-center col-num">Bad</th><th class="p-2 text-center col-num">Total Surv</th>
-                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[60px]">Actions</th>
+                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center text-[#ebbd31] min-w-[140px]">Resolution</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[55px]">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <!-- VIEW 3: NOTES & INSIGHTS OF THE MONTH TAB -->
+      <div id="view-notes" class="space-y-6 hidden">
+        <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-5 shadow-xl space-y-6">
+          
+          <!-- MONTH & WEEK SPECIFIC NOTES TEXT BOX -->
+          <div class="bg-[#141824] border border-[#2a344d] rounded-xl p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold text-[#ebbd31] uppercase tracking-wider flex items-center space-x-2">
+                <i class="fa-solid fa-note-sticky text-base"></i>
+                <span>General Notes & Insights for <span id="currentPeriodLabel" class="text-white underline decoration-[#ebbd31]">October - Week 3</span></span>
+              </h3>
+              <button onclick="saveMonthlyNote()" class="inline-flex items-center space-x-1.5 bg-[#ebbd31] hover:bg-[#d1a320] text-slate-950 font-bold px-3 py-1 rounded-lg text-xs transition-all shadow-md">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save Note</span>
+              </button>
+            </div>
+            <textarea id="periodNotesArea" placeholder="Write general observations, monthly insights, quality trends, or department targets for this week/month..." class="w-full bg-[#1c2234] border border-[#2a344d] rounded-lg p-3 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#ebbd31] min-h-[110px] resize-y custom-scrollbar leading-relaxed"></textarea>
+          </div>
+
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#2a344d] pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-[#ebbd31] flex items-center space-x-2">
+                <i class="fa-solid fa-brain"></i>
+                <span>Agent Specific QA Profile & Insights</span>
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">Search and analyze individual agent QA metrics, action plans, resolutions, and AI insights.</p>
+            </div>
+
+            <!-- AGENT SEARCH / DROPDOWN SELECTOR -->
+            <div class="relative w-full md:w-80">
+              <label class="text-[10px] text-slate-400 font-semibold block mb-1">SELECT OR SEARCH AGENT:</label>
+              <select id="agentNotesSelector" onchange="loadAgentNotesProfile()" class="w-full bg-[#141824] border border-[#ebbd31] text-[#ebbd31] font-bold text-xs rounded-lg p-2 focus:outline-none cursor-pointer shadow-md">
+                <option value="">-- Choose Agent --</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- AGENT PROFILE CONTENT -->
+          <div id="agentProfileContainer" class="hidden space-y-6">
+            
+            <!-- TOP METRIC CARDS FOR AGENT -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="bg-[#141824] border border-[#2a344d] rounded-xl p-4">
+                <p class="text-xs text-slate-400 font-medium">Department / Source</p>
+                <h4 id="agent-dept" class="text-sm font-bold text-white mt-1">-</h4>
+              </div>
+
+              <div class="bg-[#141824] border border-[#2a344d] rounded-xl p-4">
+                <p class="text-xs text-slate-400 font-medium">AVG QA Score of the Month</p>
+                <h3 id="agent-avg-qa" class="text-2xl font-bold text-[#ebbd31] mt-1">-</h3>
+              </div>
+
+              <div class="bg-[#141824] border border-[#2a344d] rounded-xl p-4">
+                <p class="text-xs text-slate-400 font-medium">AVG AHT of the Month</p>
+                <h3 id="agent-avg-aht" class="text-2xl font-bold text-sky-400 mt-1">-</h3>
+              </div>
+
+              <div class="bg-[#141824] border border-[#2a344d] rounded-xl p-4">
+                <p class="text-xs text-slate-400 font-medium">Assigned Leader & Branch</p>
+                <h4 id="agent-leader-branch" class="text-sm font-bold text-slate-200 mt-1">-</h4>
+              </div>
+            </div>
+
+            <!-- ACTION PLAN & RESOLUTIONS SUMMARY -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-[#141824] border border-[#2a344d] rounded-xl p-4 space-y-2">
+                <h3 class="text-xs font-bold text-[#ebbd31] uppercase tracking-wider flex items-center space-x-1.5">
+                  <i class="fa-solid fa-list-check"></i>
+                  <span>Action Plan Details</span>
+                </h3>
+                <div id="agent-action-plan" class="bg-[#1c2234] border border-[#2a344d] rounded-lg p-3 text-xs text-slate-200 whitespace-pre-wrap font-medium">
+                  -
+                </div>
+              </div>
+
+              <div class="bg-[#141824] border border-[#2a344d] rounded-xl p-4 space-y-2">
+                <h3 class="text-xs font-bold text-[#ebbd31] uppercase tracking-wider flex items-center space-x-1.5">
+                  <i class="fa-solid fa-handshake"></i>
+                  <span>Resolutions for Action Plan</span>
+                </h3>
+                <div id="agent-resolution" class="bg-[#1c2234] border border-[#2a344d] rounded-lg p-3 text-xs text-slate-200 whitespace-pre-wrap font-medium">
+                  -
+                </div>
+              </div>
+            </div>
+
+            <!-- AI RECOMMENDATIONS BOX -->
+            <div class="bg-gradient-to-r from-amber-500/10 via-[#1c2234] to-blue-500/10 border border-[#ebbd31]/40 rounded-xl p-5 space-y-3 shadow-lg">
+              <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-wand-magic-sparkles text-[#ebbd31] text-lg"></i>
+                <h3 class="text-sm font-bold text-[#ebbd31] tracking-wide uppercase">AI Recommendations to Improve Agent's QA</h3>
+              </div>
+              <ul id="agent-ai-recommendations" class="space-y-2 text-xs text-slate-300 list-disc list-inside pl-1 leading-relaxed">
+              </ul>
+            </div>
+
+          </div>
+
+          <!-- PLACEHOLDER WHEN NO AGENT SELECTED -->
+          <div id="agentPlaceholder" class="text-center py-12 text-slate-500 space-y-2">
+            <i class="fa-solid fa-user-gear text-4xl mb-2 text-slate-600"></i>
+            <p class="text-sm font-medium">Select an agent from the dropdown menu above to view their monthly profile, notes, and AI insights.</p>
+          </div>
+
         </div>
       </div>
 
@@ -679,10 +797,84 @@
       }, 50);
     }
 
+    // MANEJO DINÁMICO DE RESOLUTION SEGÚN LA SELECCIÓN DE ACTION PLAN
+    function renderResolutionCell(selectElem, savedVal = '') {
+      const val = selectElem.value;
+      const td = selectElem.closest('tr').querySelector('.td-resolution');
+      if (!td) return;
+
+      if (val === 'N/A') {
+        td.innerHTML = `<span class="text-slate-500 font-mono text-[11px] px-2">N/A</span><input type="hidden" class="res-val" value="N/A">`;
+      } 
+      else if (val === 'Coaching' || val === 'Feedback') {
+        const textVal = (savedVal && savedVal !== 'N/A') ? savedVal : '';
+        td.innerHTML = `
+          <div class="resolution-container">
+            <textarea placeholder="Write ${val.toLowerCase()} details..." class="cell-input cell-comment-area res-val text-slate-300 text-[11px]" onfocus="handleCommentFocus(this)" oninput="updateCommentPopover(this)">${textVal}</textarea>
+            <div class="comment-popover">${textVal || "No details added..."}</div>
+          </div>`;
+      } 
+      else if (val === 'Accountability Session') {
+        let parts = savedVal.split(' | Insights: ');
+        let dateVal = parts[0] || new Date().toISOString().split('T')[0];
+        let textVal = parts[1] || 'Insights of the Session: ';
+        if (!textVal.startsWith('Insights of the Session:')) {
+          textVal = 'Insights of the Session: ' + textVal;
+        }
+
+        td.innerHTML = `
+          <div class="flex flex-col space-y-1 p-0.5 resolution-container">
+            <input type="date" value="${dateVal}" class="res-date cell-input text-[10px] text-[#ebbd31] font-semibold bg-[#141824] border border-[#2a344d] rounded px-1 py-0.5">
+            <textarea class="cell-input cell-comment-area res-text text-slate-300 text-[10px]" onfocus="handleCommentFocus(this)" oninput="updateCommentPopover(this)">${textVal}</textarea>
+            <div class="comment-popover">${dateVal} - ${textVal}</div>
+          </div>`;
+      } 
+      else if (val === 'Disciplinary Action') {
+        let parts = savedVal.split(' | Reason: ');
+        let optVal = parts[0] || 'Accountability';
+        let textVal = parts[1] || 'Reason: ';
+        if (!textVal.startsWith('Reason:')) {
+          textVal = 'Reason: ' + textVal;
+        }
+
+        const opts = ['Accountability', 'Verbal Warning', 'Written', 'Suspension & Removal'];
+        const optionsHtml = opts.map(o => `<option value="${o}" ${o === optVal ? 'selected' : ''}>${o}</option>`).join('');
+
+        td.innerHTML = `
+          <div class="flex flex-col space-y-1 p-0.5 resolution-container">
+            <select class="res-opt cell-input text-[#ebbd31] text-[10px] font-semibold bg-[#141824] border border-[#2a344d] rounded px-1 py-0.5">
+              ${optionsHtml}
+            </select>
+            <textarea class="cell-input cell-comment-area res-text text-slate-300 text-[10px]" onfocus="handleCommentFocus(this)" oninput="updateCommentPopover(this)">${textVal}</textarea>
+            <div class="comment-popover">${optVal} - ${textVal}</div>
+          </div>`;
+      }
+    }
+
+    function getResolutionValue(tr) {
+      const td = tr.querySelector('.td-resolution');
+      if (!td) return 'N/A';
+
+      const hidden = td.querySelector('input.res-val');
+      if (hidden) return hidden.value;
+
+      const singleArea = td.querySelector('textarea.res-val');
+      if (singleArea) return singleArea.value;
+
+      const resDate = td.querySelector('.res-date');
+      const resText = td.querySelector('.res-text');
+      if (resDate && resText) return `${resDate.value} | Insights: ${resText.value}`;
+
+      const resOpt = td.querySelector('.res-opt');
+      if (resOpt && resText) return `${resOpt.value} | Reason: ${resText.value}`;
+
+      return 'N/A';
+    }
+
     // CONDITIONAL FORMATTING FUNCTIONS
     function applyConditionalFormatting(input, type) {
       if (!input) return;
-      const val = parseFloat(input.value) || 0;
+      const val = parseFloat(input.innerText || input.value) || 0;
       input.classList.remove('cond-green', 'cond-yellow', 'cond-orange', 'cond-red');
 
       if (type === 'qa') {
@@ -705,7 +897,7 @@
 
       if (currentTab === 'phones') {
         select.innerHTML = `
-          <option value="group1">1. QA Performance (QA 1 vs QA 2)</option>
+          <option value="group1">1. QA Performance (QA 1 vs QA 2 vs AVG QA)</option>
           <option value="group2">2. Call Volumes & Handle Times (Inbound, Outbound, Total, Avg/Day & AHT)</option>
           <option value="group3">3. Call Drops & Misses (Abnd Hold, Declined & Missed)</option>
         `;
@@ -722,39 +914,60 @@
       currentTab = tab;
       const btnPhones = document.getElementById('btn-tab-phones');
       const btnCases = document.getElementById('btn-tab-cases');
+      const btnNotes = document.getElementById('btn-tab-notes');
       const viewPhones = document.getElementById('view-phones');
       const viewCases = document.getElementById('view-cases');
+      const viewNotes = document.getElementById('view-notes');
+      const kpiContainer = document.getElementById('kpi-container');
+      const searchChartBar = document.getElementById('search-chart-bar');
       const formBtnText = document.getElementById('formBtnText');
       const evalBtn = document.getElementById('evaluationFormBtn');
 
       updateMetricSelectOptions();
 
+      // Reset Active Styles
+      btnPhones.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400";
+      btnCases.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400";
+      btnNotes.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400";
+
+      viewPhones.classList.add('hidden');
+      viewCases.classList.add('hidden');
+      viewNotes.classList.add('hidden');
+      kpiContainer.classList.remove('hidden');
+      searchChartBar.classList.remove('hidden');
+
       if (tab === 'phones') {
         btnPhones.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors bg-[#ebbd31] text-slate-950 shadow-md";
-        btnCases.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400";
         viewPhones.classList.remove('hidden');
-        viewCases.classList.add('hidden');
         formBtnText.innerText = "NEW QA PHONES EVALUATION";
         evalBtn.href = "https://docs.google.com/forms/d/e/1FAIpQLSfRjVZUd6TyQHCQgiuL6VVuZFDtL1GPHmMFxETpyCEBjgiaHg/viewform";
         
         document.getElementById('kpi-label-2').innerText = 'Avg. QA 2 Score';
         document.getElementById('kpi-label-3').innerText = 'Total Volume';
         document.getElementById('kpi-label-4').innerText = 'Avg. Calls / Day';
-      } else {
+        calculateGlobalKPIs();
+        updateAllCharts();
+        loadWeekFromFirebase();
+      } else if (tab === 'cases') {
         btnCases.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors bg-[#ebbd31] text-slate-950 shadow-md";
-        btnPhones.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400";
         viewCases.classList.remove('hidden');
-        viewPhones.classList.add('hidden');
         formBtnText.innerText = "NEW QA CASES EVALUATION";
         evalBtn.href = "https://docs.google.com/forms/d/e/1FAIpQLSdNqvd20SHKNrkyLi4IgxmyCfZQW0dde0xV7RzcIpOinKOMTg/viewform";
 
         document.getElementById('kpi-label-2').innerText = 'Avg. CSAT Score';
         document.getElementById('kpi-label-3').innerText = 'Total Conversations';
         document.getElementById('kpi-label-4').innerText = 'Avg. Response Time';
+        calculateGlobalKPIs();
+        updateAllCharts();
+        loadWeekFromFirebase();
+      } else if (tab === 'notes') {
+        btnNotes.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors bg-[#ebbd31] text-slate-950 shadow-md";
+        viewNotes.classList.remove('hidden');
+        kpiContainer.classList.add('hidden');
+        searchChartBar.classList.add('hidden');
+        populateAgentNotesDropdown();
+        loadMonthlyNoteFromFirebase();
       }
-      calculateGlobalKPIs();
-      updateAllCharts();
-      loadWeekFromFirebase();
     }
 
     function renderPhonesTable(tableId, rawData) {
@@ -769,9 +982,15 @@
       const tr = document.createElement('tr');
       tr.className = "hover:bg-slate-800/40 transition-colors";
 
+      const qa1 = parseFloat(agent[5]) || 0;
+      const qa2 = parseFloat(agent[6]) || 0;
+      const avgQa = (qa1 > 0 && qa2 > 0) ? ((qa1 + qa2) / 2).toFixed(1) : (qa1 || qa2 || 0);
+
       const totalCalls = (parseInt(agent[7]||0) + parseInt(agent[8]||0));
       const avgDailyCalls = Math.round(totalCalls / 5);
-      const commentText = agent[14] || '';
+      const actionPlan = agent[13] || 'N/A';
+      const resolutionVal = agent[14] || 'N/A';
+      const commentText = agent[15] || '';
 
       tr.innerHTML = `
         <td class="p-1"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="renderTableChart('${tableId}')"></td>
@@ -780,27 +999,30 @@
         <td class="p-1"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text cell-leaders text-slate-300"></td>
         <td class="p-1"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text cell-schedule text-slate-400 text-[10px]"></td>
         
-        <td class="p-1 text-center col-qa"><input type="number" value="${agent[5] || 0}" min="0" max="100" class="cell-input qa1 font-bold" oninput="updateCalculations(this)"></td>
-        <td class="p-1 text-center col-qa"><input type="number" value="${agent[6] || 0}" min="0" max="100" class="cell-input qa2 font-bold" oninput="updateCalculations(this)"></td>
-        
+        <td class="p-1 text-center col-qa"><input type="number" value="${qa1}" min="0" max="100" class="cell-input qa1 font-bold" oninput="updateCalculations(this)"></td>
+        <td class="p-1 text-center col-qa"><input type="number" value="${qa2}" min="0" max="100" class="cell-input qa2 font-bold" oninput="updateCalculations(this)"></td>
+        <td class="p-1 text-center col-qa font-bold text-[#ebbd31] avg-qa">${avgQa}</td>
+
         <td class="p-1 text-center col-num"><input type="number" value="${agent[7] || 0}" class="cell-input inbound" oninput="updateCalculations(this)"></td>
         <td class="p-1 text-center col-num"><input type="number" value="${agent[8] || 0}" class="cell-input outbound" oninput="updateCalculations(this)"></td>
         <td class="p-1 text-center font-bold text-white total-calls col-num">${totalCalls}</td>
-        <td class="p-1 text-center col-aht"><input type="text" value="${agent[9] || '00:00:00'}" class="cell-input text-center font-mono text-[11px]"></td>
+        <td class="p-1 text-center col-aht"><input type="text" value="${agent[9] || '00:00:00'}" class="cell-input text-center font-mono text-[11px] aht-input"></td>
         <td class="p-1 text-center font-bold text-[#ebbd31]/90 avg-daily col-num">${avgDailyCalls}</td>
         <td class="p-1 text-center col-drop"><input type="number" value="${agent[10] || 0}" class="cell-input abandon" oninput="updateCalculations(this)"></td>
         <td class="p-1 text-center col-drop"><input type="number" value="${agent[11] || 0}" class="cell-input declined" oninput="updateCalculations(this)"></td>
         <td class="p-1 text-center col-drop"><input type="number" value="${agent[12] || 0}" class="cell-input missed" oninput="updateCalculations(this)"></td>
 
         <td class="p-1 text-center">
-          <select class="cell-input text-[#ebbd31] font-medium text-[10px]">
-            <option value="N/A" ${agent[13] === 'N/A' ? 'selected' : ''}>N/A</option>
-            <option value="Coaching" ${agent[13] === 'Coaching' ? 'selected' : ''}>Coaching</option>
-            <option value="Feedback" ${agent[13] === 'Feedback' ? 'selected' : ''}>Feedback</option>
-            <option value="Accountability Session" ${agent[13] === 'Accountability Session' ? 'selected' : ''}>Accountability Session</option>
-            <option value="Disciplinary Action" ${agent[13] === 'Disciplinary Action' ? 'selected' : ''}>Disciplinary Action</option>
+          <select class="cell-input action-plan-select text-[#ebbd31] font-medium text-[10px]" onchange="renderResolutionCell(this)">
+            <option value="N/A" ${actionPlan === 'N/A' ? 'selected' : ''}>N/A</option>
+            <option value="Coaching" ${actionPlan === 'Coaching' ? 'selected' : ''}>Coaching</option>
+            <option value="Feedback" ${actionPlan === 'Feedback' ? 'selected' : ''}>Feedback</option>
+            <option value="Accountability Session" ${actionPlan === 'Accountability Session' ? 'selected' : ''}>Accountability Session</option>
+            <option value="Disciplinary Action" ${actionPlan === 'Disciplinary Action' ? 'selected' : ''}>Disciplinary Action</option>
           </select>
         </td>
+
+        <td class="p-1 text-center td-resolution min-w-[140px]"></td>
 
         <td class="p-1">
           <div class="comment-container">
@@ -823,9 +1045,13 @@
 
       tbody.appendChild(tr);
 
-      // Apply conditional formatting
+      const selectElem = tr.querySelector('.action-plan-select');
+      if (selectElem) renderResolutionCell(selectElem, resolutionVal);
+
+      // Apply conditional formatting including AVG QA
       applyConditionalFormatting(tr.querySelector('.qa1'), 'qa');
       applyConditionalFormatting(tr.querySelector('.qa2'), 'qa');
+      applyConditionalFormatting(tr.querySelector('.avg-qa'), 'qa');
       applyConditionalFormatting(tr.querySelector('.abandon'), 'abandonOrMissed');
       applyConditionalFormatting(tr.querySelector('.missed'), 'abandonOrMissed');
       applyConditionalFormatting(tr.querySelector('.declined'), 'declined');
@@ -843,7 +1069,9 @@
       const tr = document.createElement('tr');
       tr.className = "hover:bg-slate-800/40 transition-colors";
 
-      const commentText = agent[14] || '';
+      const actionPlan = agent[13] || 'N/A';
+      const resolutionVal = agent[14] || 'N/A';
+      const commentText = agent[15] || '';
 
       tr.innerHTML = `
         <td class="p-1"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="renderTableChart('${tableId}')"></td>
@@ -863,14 +1091,16 @@
         <td class="p-1 text-center font-bold text-white totalSurveys col-num">${(parseInt(agent[11]||0) + parseInt(agent[12]||0))}</td>
 
         <td class="p-1 text-center">
-          <select class="cell-input text-[#ebbd31] font-medium text-[10px]">
-            <option value="N/A" ${agent[13] === 'N/A' ? 'selected' : ''}>N/A</option>
-            <option value="Coaching" ${agent[13] === 'Coaching' ? 'selected' : ''}>Coaching</option>
-            <option value="Feedback" ${agent[13] === 'Feedback' ? 'selected' : ''}>Feedback</option>
-            <option value="Accountability Session" ${agent[13] === 'Accountability Session' ? 'selected' : ''}>Accountability Session</option>
-            <option value="Disciplinary Action" ${agent[13] === 'Disciplinary Action' ? 'selected' : ''}>Disciplinary Action</option>
+          <select class="cell-input action-plan-select text-[#ebbd31] font-medium text-[10px]" onchange="renderResolutionCell(this)">
+            <option value="N/A" ${actionPlan === 'N/A' ? 'selected' : ''}>N/A</option>
+            <option value="Coaching" ${actionPlan === 'Coaching' ? 'selected' : ''}>Coaching</option>
+            <option value="Feedback" ${actionPlan === 'Feedback' ? 'selected' : ''}>Feedback</option>
+            <option value="Accountability Session" ${actionPlan === 'Accountability Session' ? 'selected' : ''}>Accountability Session</option>
+            <option value="Disciplinary Action" ${actionPlan === 'Disciplinary Action' ? 'selected' : ''}>Disciplinary Action</option>
           </select>
         </td>
+
+        <td class="p-1 text-center td-resolution min-w-[140px]"></td>
 
         <td class="p-1">
           <div class="comment-container">
@@ -893,8 +1123,159 @@
 
       tbody.appendChild(tr);
 
+      const selectElem = tr.querySelector('.action-plan-select');
+      if (selectElem) renderResolutionCell(selectElem, resolutionVal);
+
       // Apply conditional formatting for Cases
       applyConditionalFormatting(tr.querySelector('.qaTotal'), 'qa');
+    }
+
+    // MANEJO DE GUARDADO Y CARGA DE NOTAS GENERALES DEL MES / SEMANA EN FIREBASE
+    async function saveMonthlyNote() {
+      const month = document.getElementById('monthSelect').value;
+      const week = document.getElementById('weekSelect').value;
+      const noteText = document.getElementById('periodNotesArea').value;
+      const key = `${month}_Week_${week}`;
+
+      try {
+        await rtdb.ref(`monthly_notes/${key}`).set(noteText);
+        showToast(`Notes Saved for ${month} - Week ${week}!`);
+      } catch (err) {
+        console.error("Error saving note:", err);
+        showToast("Error saving notes!");
+      }
+    }
+
+    function loadMonthlyNoteFromFirebase() {
+      const month = document.getElementById('monthSelect').value;
+      const week = document.getElementById('weekSelect').value;
+      const key = `${month}_Week_${week}`;
+      const label = document.getElementById('currentPeriodLabel');
+      if (label) label.innerText = `${month} - Week ${week}`;
+
+      rtdb.ref(`monthly_notes/${key}`).once('value').then(snapshot => {
+        const area = document.getElementById('periodNotesArea');
+        if (area) {
+          area.value = snapshot.exists() ? snapshot.val() : '';
+        }
+      }).catch(err => console.error("Error loading note:", err));
+    }
+
+    // POPULATE DROPDOWN DE AGENTES PARA PROFILE DE INSIGHTS
+    function populateAgentNotesDropdown() {
+      const select = document.getElementById('agentNotesSelector');
+      select.innerHTML = '<option value="">-- Select Agent --</option>';
+
+      const agentsList = [];
+
+      document.querySelectorAll('tbody tr').forEach(tr => {
+        const nameInput = tr.querySelector('.cell-input-name');
+        if (nameInput && nameInput.value) {
+          const name = nameInput.value.trim();
+          const isPhone = tr.querySelector('.avg-qa') !== null;
+          if (name && !agentsList.some(a => a.name === name)) {
+            agentsList.push({
+              name: name,
+              type: isPhone ? 'Phones' : 'Cases',
+              element: tr
+            });
+          }
+        }
+      });
+
+      agentsList.sort((a,b) => a.name.localeCompare(b.name)).forEach(ag => {
+        const opt = document.createElement('option');
+        opt.value = ag.name;
+        opt.innerText = `${ag.name} (${ag.type})`;
+        select.appendChild(opt);
+      });
+    }
+
+    // CARGAR DETALLES DE PROFILE E INSIGHTS
+    function loadAgentNotesProfile() {
+      const selectedName = document.getElementById('agentNotesSelector').value;
+      const profileBox = document.getElementById('agentProfileContainer');
+      const placeholderBox = document.getElementById('agentPlaceholder');
+
+      if (!selectedName) {
+        profileBox.classList.add('hidden');
+        placeholderBox.classList.remove('hidden');
+        return;
+      }
+
+      let agentRow = null;
+      let isPhone = false;
+
+      document.querySelectorAll('tbody tr').forEach(tr => {
+        const nameInput = tr.querySelector('.cell-input-name');
+        if (nameInput && nameInput.value.trim() === selectedName) {
+          agentRow = tr;
+          isPhone = tr.querySelector('.avg-qa') !== null;
+        }
+      });
+
+      if (!agentRow) return;
+
+      const branch = agentRow.querySelector('.cell-branch')?.value || 'N/A';
+      const leader = agentRow.querySelector('.cell-leaders')?.value || 'N/A';
+      const actionPlan = agentRow.querySelector('.action-plan-select')?.value || 'N/A';
+      const resolution = getResolutionValue(agentRow);
+
+      let qaScore = 0;
+      let ahtScore = '00:00:00';
+
+      if (isPhone) {
+        qaScore = parseFloat(agentRow.querySelector('.avg-qa')?.innerText) || 0;
+        ahtScore = agentRow.querySelector('.aht-input')?.value || '00:00:00';
+      } else {
+        qaScore = parseFloat(agentRow.querySelector('.qaTotal')?.value) || 0;
+        const respTime = parseFloat(agentRow.querySelector('.avgResponseTime')?.value) || 0;
+        ahtScore = `${respTime} min (Avg Response)`;
+      }
+
+      document.getElementById('agent-dept').innerText = isPhone ? 'Customer Support - Phones' : 'Customer Support - Cases';
+      document.getElementById('agent-avg-qa').innerText = qaScore > 0 ? `${qaScore}%` : 'N/A';
+      document.getElementById('agent-avg-aht').innerText = ahtScore;
+      document.getElementById('agent-leader-branch').innerText = `${leader} (${branch})`;
+      document.getElementById('agent-action-plan').innerText = `Action Plan: ${actionPlan}`;
+      document.getElementById('agent-resolution').innerText = `Resolution Details: ${resolution}`;
+
+      // Generación dinámica de recomendaciones IA
+      const recsContainer = document.getElementById('agent-ai-recommendations');
+      recsContainer.innerHTML = '';
+
+      const recs = [];
+
+      if (qaScore >= 95) {
+        recs.push(`<strong>Top Performer Strategy:</strong> ${selectedName} maintains high QA standards (${qaScore}%). Recommend pairing them with new hires for peer coaching.`);
+      } else if (qaScore >= 85) {
+        recs.push(`<strong>Consistency Booster:</strong> ${selectedName} is performing steadily (${qaScore}%). Focus feedback on fine-tuning soft skills and procedure adherence.`);
+      } else if (qaScore > 0) {
+        recs.push(`<strong>Priority Coaching Required:</strong> Current QA score (${qaScore}%) is below target. Schedule a targeted 1-on-1 accountability session to review recent failed evaluations.`);
+      } else {
+        recs.push(`<strong>Initial Baseline:</strong> No evaluations recorded yet this week. Complete at least 2 evaluations to generate tailored quality insights.`);
+      }
+
+      if (actionPlan !== 'N/A') {
+        recs.push(`<strong>Action Plan Follow-up:</strong> Active plan is set to <em>${actionPlan}</em>. Ensure resolution commitments are tracked and documented in the weekly review.`);
+      } else {
+        recs.push(`<strong>Proactive Development:</strong> No active Action Plan required. Maintain routine weekly 1-on-1 check-ins.`);
+      }
+
+      if (isPhone) {
+        recs.push(`<strong>AHT Efficiency Optimization:</strong> Review active call handle time (${ahtScore}) to optimize call control techniques without sacrificing resolution quality.`);
+      } else {
+        recs.push(`<strong>SLA & Response Speed:</strong> Monitor first response time (${ahtScore}) to ensure prompt customer engagement and SLA compliance.`);
+      }
+
+      recs.forEach(r => {
+        const li = document.createElement('li');
+        li.innerHTML = r;
+        recsContainer.appendChild(li);
+      });
+
+      placeholderBox.classList.add('hidden');
+      profileBox.classList.remove('hidden');
     }
 
     function addAgentRow(tableId) {
@@ -933,18 +1314,22 @@
         const rows = table.querySelectorAll('tr');
         const sheetData = [];
 
-        rows.forEach((row, rIdx) => {
+        rows.forEach((row) => {
           const rowData = [];
           const cells = row.querySelectorAll('th, td');
           
           cells.forEach((cell, cIdx) => {
             if (cIdx === cells.length - 1) return;
 
-            const input = cell.querySelector('input, select, textarea');
-            if (input) {
-              rowData.push(input.value);
+            if (cell.classList.contains('td-resolution')) {
+              rowData.push(getResolutionValue(row));
             } else {
-              rowData.push(cell.innerText.trim());
+              const input = cell.querySelector('input, select, textarea');
+              if (input) {
+                rowData.push(input.value);
+              } else {
+                rowData.push(cell.innerText.trim());
+              }
             }
           });
           if (rowData.length > 0) sheetData.push(rowData);
@@ -976,15 +1361,21 @@
         payload[tableId] = [];
         
         rows.forEach(row => {
-          const inputs = row.querySelectorAll('input, select, textarea');
+          const inputs = row.querySelectorAll('input:not(.res-val):not(.res-date):not(.res-text), select:not(.res-opt), textarea:not(.res-val):not(.res-text)');
           const agentArr = [];
-          inputs.forEach(ip => agentArr.push(ip.value));
+          inputs.forEach((ip, idx) => {
+            agentArr.push(ip.value);
+            if (idx === 13) {
+              agentArr.push(getResolutionValue(row));
+            }
+          });
           payload[tableId].push(agentArr);
         });
       });
 
       try {
         await rtdb.ref(`qa_data/${currentTab}/${key}`).set(payload);
+        await saveMonthlyNote();
         showToast(`Week ${week} (${month}) Saved to Firebase!`);
       } catch (err) {
         console.error("Firebase Error: ", err);
@@ -1026,6 +1417,8 @@
       }).catch(err => {
         console.error("Firebase read error:", err);
       });
+
+      loadMonthlyNoteFromFirebase();
     }
 
     function deleteAgentRow(btn, tableId) {
@@ -1046,11 +1439,19 @@
 
     function updateCalculations(input) {
       const tr = input.closest('tr');
+      const qa1 = parseFloat(tr.querySelector('.qa1')?.value) || 0;
+      const qa2 = parseFloat(tr.querySelector('.qa2')?.value) || 0;
+      const avgQa = (qa1 > 0 && qa2 > 0) ? ((qa1 + qa2) / 2).toFixed(1) : (qa1 || qa2 || 0);
+
       const inbound = parseInt(tr.querySelector('.inbound')?.value) || 0;
       const outbound = parseInt(tr.querySelector('.outbound')?.value) || 0;
-      
       const total = inbound + outbound;
       const avgDaily = Math.round(total / 5);
+
+      if (tr.querySelector('.avg-qa')) {
+        tr.querySelector('.avg-qa').innerText = avgQa;
+        applyConditionalFormatting(tr.querySelector('.avg-qa'), 'qa');
+      }
 
       if (tr.querySelector('.total-calls')) tr.querySelector('.total-calls').innerText = total;
       if (tr.querySelector('.avg-daily')) tr.querySelector('.avg-daily').innerText = avgDaily;
@@ -1074,7 +1475,6 @@
       const tr = input.closest('tr');
       const good = parseInt(tr.querySelector('.surveyGood')?.value) || 0;
       const bad = parseInt(tr.querySelector('.surveyBad')?.value) || 0;
-      
       const total = good + bad;
 
       if (tr.querySelector('.totalSurveys')) tr.querySelector('.totalSurveys').innerText = total;
@@ -1164,13 +1564,15 @@
 
       if (currentTab === 'phones') {
         if (groupOption === 'group1') {
-          const qa1Data = [], qa2Data = [];
+          const qa1Data = [], qa2Data = [], avgQaData = [];
           rows.forEach(r => {
             qa1Data.push(parseFloat(r.querySelector('.qa1')?.value) || 0);
             qa2Data.push(parseFloat(r.querySelector('.qa2')?.value) || 0);
+            avgQaData.push(parseFloat(r.querySelector('.avg-qa')?.innerText) || 0);
           });
           datasetsMap.push({ label: 'QA 1 Score', data: qa1Data, backgroundColor: '#ebbd31' });
           datasetsMap.push({ label: 'QA 2 Score', data: qa2Data, backgroundColor: '#38bdf8' });
+          datasetsMap.push({ label: 'AVG QA Score', data: avgQaData, backgroundColor: '#34d399' });
         } else if (groupOption === 'group2') {
           const inData = [], outData = [], totData = [], avgDData = [];
           rows.forEach(r => {
