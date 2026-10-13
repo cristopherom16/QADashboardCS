@@ -59,7 +59,7 @@
       color: inherit;
       width: 100%;
       text-align: center;
-      padding: 3px 6px;
+      padding: 2px 4px;
       border-radius: 4px;
       transition: all 0.2s;
     }
@@ -69,55 +69,66 @@
     .cell-input-name {
       text-align: left;
       font-weight: 600;
+      max-width: 130px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
     }
 
-    /* COLUMNAS CON ANCHO COMPACTO/ACORTADO */
+    /* COLUMNAS ACORTADAS / ULTRA-COMPACTAS PARA EVITAR SCROLL HORIZONTAL */
+    .cell-task {
+      width: 90px;
+      max-width: 90px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
     .cell-branch {
-      width: 100px;
-      max-width: 100px;
+      width: 80px;
+      max-width: 80px;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
     }
     .cell-leaders {
-      width: 110px;
-      max-width: 110px;
+      width: 85px;
+      max-width: 85px;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
     }
     .cell-schedule {
-      width: 120px;
-      max-width: 120px;
+      width: 95px;
+      max-width: 95px;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
     }
 
-    /* SECCIÓN DE COMENTARIOS: CROP A 1 LÍNEA Y POPOVER DESPLEGABLE HACIA ABAJO CON SCROLL */
+    /* SECCIÓN DE COMENTARIOS CON HOVER DESPLEGABLE HACIA ABAJO CON SCROLL */
     .comment-container {
       position: relative;
-      width: 200px;
-      max-width: 200px;
+      width: 120px;
+      max-width: 120px;
     }
     .cell-comment-area {
       text-align: left;
       width: 100%;
-      height: 28px;
+      height: 26px;
       resize: none;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      line-height: 1.3;
+      line-height: 1.2;
       display: block;
       cursor: pointer;
     }
     .comment-popover {
       display: none;
       position: absolute;
-      top: 100%; /* Muestra el comentario hacia ABAJO */
-      left: 0;
-      width: 260px;
+      top: 100%;
+      right: 0;
+      width: 240px;
       max-height: 180px;
       overflow-y: auto;
       background-color: #0f172a;
@@ -130,7 +141,7 @@
       word-break: break-word;
       box-shadow: 0 10px 25px rgba(0,0,0,0.6);
       z-index: 100;
-      pointer-events: auto; /* Permite interactuar y hacer scroll dentro del cuadro */
+      pointer-events: auto;
     }
     .comment-container:hover .comment-popover {
       display: block;
@@ -192,7 +203,7 @@
     
     /* QA numbers styling */
     .qa1, .qa2, .qaTotal {
-      min-width: 65px;
+      min-width: 50px;
       padding-left: 2px;
       padding-right: 2px;
     }
@@ -202,12 +213,15 @@
       border-collapse: separate;
       border-spacing: 0;
       border: 1px solid var(--amber-grid);
-      white-space: nowrap;
+      width: 100%;
+      table-layout: auto;
     }
     table.data-table th {
       border-right: 1px solid var(--amber-grid);
       border-bottom: 2px solid var(--amber-main);
       white-space: nowrap;
+      font-size: 11px;
+      padding: 6px 4px;
     }
     table.data-table th:last-child {
       border-right: none;
@@ -216,6 +230,8 @@
       border-right: 1px solid var(--amber-grid);
       border-bottom: 1px solid rgba(235, 189, 49, 0.2);
       white-space: nowrap;
+      padding: 3px 2px;
+      font-size: 11px;
     }
     table.data-table td:last-child {
       border-right: none;
@@ -225,63 +241,47 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col md:flex-row antialiased">
+<body class="min-h-screen flex flex-col antialiased">
 
   <div id="toast" class="toast-msg"><i class="fa-solid fa-check-circle mr-2"></i><span id="toast-text">Data Saved Successfully!</span></div>
 
-  <!-- SIDEBAR NAVIGATION -->
-  <aside class="w-full md:w-64 bg-[#141824] border-r border-[#2a344d] flex flex-col flex-shrink-0 justify-between h-screen">
-    <div>
-      <div class="p-5 border-b border-[#2a344d] flex items-center space-x-3">
-        <div class="w-11 h-11 bg-[#20283d] rounded-full flex items-center justify-center p-2 shadow-md border border-slate-700/60 flex-shrink-0">
+  <!-- MAIN CONTENT AREA -->
+  <main class="flex-1 flex flex-col h-screen overflow-y-auto custom-scrollbar">
+    
+    <!-- TOP HEADER / CONTROL BAR (Sin sidebar, todo integrado arriba) -->
+    <header class="bg-[#1c2234] border-b border-[#2a344d] p-3 sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- LOGO -->
+      <div class="flex items-center space-x-2">
+        <div class="w-9 h-9 bg-[#20283d] rounded-full flex items-center justify-center p-1.5 shadow-md border border-slate-700/60 flex-shrink-0">
           <svg viewBox="0 0 260 180" class="w-full h-full text-[#ebbd31] fill-current">
             <path d="M 52 0 L 98 0 L 46 180 L 0 180 Z M 162 0 L 208 0 L 260 180 L 214 180 Z M 70 80 L 188 80 L 181 120 L 59 120 Z" />
           </svg>
         </div>
         <div>
-          <h1 class="font-bold text-lg tracking-wide text-white">HIGHWAY</h1>
-          <p class="text-xs text-[#ebbd31] font-medium tracking-wider">QA DASHBOARD</p>
+          <h1 class="font-bold text-sm tracking-wide text-white leading-none">HIGHWAY</h1>
+          <p class="text-[10px] text-[#ebbd31] font-medium tracking-wider leading-none mt-0.5">QA DASHBOARD</p>
         </div>
       </div>
 
-      <nav class="p-4 space-y-2">
-        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-2">Departments</div>
-        
-        <button onclick="switchTab('phones')" id="btn-tab-phones" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors bg-[#ebbd31] text-slate-950 font-semibold shadow-lg shadow-amber-500/10">
-          <i class="fa-solid fa-headset w-5 text-center"></i>
-          <span>Customer Support - Phones</span>
+      <!-- DEPARTMENTS BUTTONS (En medio en la parte superior) -->
+      <div class="flex items-center bg-[#141824] p-1 rounded-xl border border-[#2a344d] space-x-1">
+        <button onclick="switchTab('phones')" id="btn-tab-phones" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs transition-colors bg-[#ebbd31] text-slate-950 font-bold shadow-md">
+          <i class="fa-solid fa-headset"></i>
+          <span>Phones</span>
         </button>
 
-        <button onclick="switchTab('cases')" id="btn-tab-cases" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400">
-          <i class="fa-solid fa-folder-open w-5 text-center"></i>
-          <span>Customer Support Cases</span>
+        <button onclick="switchTab('cases')" id="btn-tab-cases" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400 font-medium">
+          <i class="fa-solid fa-folder-open"></i>
+          <span>Cases</span>
         </button>
-      </nav>
-    </div>
-
-    <!-- EXPORT EXCEL BUTTON -->
-    <div class="p-4 border-t border-[#2a344d] space-y-3">
-      <button onclick="exportToExcel()" class="w-full flex items-center justify-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-3 rounded-lg text-xs transition-colors shadow-md">
-        <i class="fa-solid fa-file-excel text-sm"></i>
-        <span>Download Excel Report</span>
-      </button>
-      <div class="text-[11px] text-slate-500 text-center">
-        Highway QA System &copy; 2026
       </div>
-    </div>
-  </aside>
 
-  <!-- MAIN CONTENT AREA -->
-  <main class="flex-1 flex flex-col h-screen overflow-y-auto custom-scrollbar">
-    
-    <!-- TOP HEADER / CONTROL BAR -->
-    <header class="bg-[#1c2234] border-b border-[#2a344d] p-4 sticky top-0 z-20 flex flex-wrap items-center justify-between gap-4">
-      
       <!-- Date Controls & Save & Process Week Button -->
-      <div class="flex items-center space-x-3 flex-wrap">
-        <div class="flex items-center space-x-2 bg-[#141824] px-3 py-1.5 rounded-lg border border-[#2a344d]">
-          <label class="text-xs text-slate-400 font-medium">MONTH:</label>
-          <select id="monthSelect" onchange="changePeriod()" class="bg-transparent text-[#ebbd31] text-sm font-semibold focus:outline-none cursor-pointer">
+      <div class="flex items-center space-x-2 flex-wrap">
+        <div class="flex items-center space-x-1 bg-[#141824] px-2.5 py-1 rounded-lg border border-[#2a344d]">
+          <label class="text-[11px] text-slate-400 font-medium">MONTH:</label>
+          <select id="monthSelect" onchange="changePeriod()" class="bg-transparent text-[#ebbd31] text-xs font-semibold focus:outline-none cursor-pointer">
             <option value="January" class="bg-[#1c2234] text-white">January</option>
             <option value="February" class="bg-[#1c2234] text-white">February</option>
             <option value="March" class="bg-[#1c2234] text-white">March</option>
@@ -297,9 +297,9 @@
           </select>
         </div>
 
-        <div class="flex items-center space-x-2 bg-[#141824] px-3 py-1.5 rounded-lg border border-[#2a344d]">
-          <label class="text-xs text-slate-400 font-medium">WEEK:</label>
-          <select id="weekSelect" onchange="changePeriod()" class="bg-transparent text-[#ebbd31] text-sm font-semibold focus:outline-none cursor-pointer">
+        <div class="flex items-center space-x-1 bg-[#141824] px-2.5 py-1 rounded-lg border border-[#2a344d]">
+          <label class="text-[11px] text-slate-400 font-medium">WEEK:</label>
+          <select id="weekSelect" onchange="changePeriod()" class="bg-transparent text-[#ebbd31] text-xs font-semibold focus:outline-none cursor-pointer">
             <option value="1" class="bg-[#1c2234] text-white">1</option>
             <option value="2" class="bg-[#1c2234] text-white">2</option>
             <option value="3" class="bg-[#1c2234] text-white" selected>3</option>
@@ -309,107 +309,113 @@
         </div>
 
         <!-- SAVE & PROCESS WEEK BUTTON -->
-        <button onclick="saveAndProcessWeek()" class="inline-flex items-center space-x-2 bg-[#ebbd31] hover:bg-[#d1a320] text-slate-950 font-bold px-3.5 py-1.5 rounded-lg text-xs transition-all shadow-md amber-glow">
+        <button onclick="saveAndProcessWeek()" class="inline-flex items-center space-x-1.5 bg-[#ebbd31] hover:bg-[#d1a320] text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs transition-all shadow-md amber-glow">
           <i class="fa-solid fa-cloud-arrow-up text-slate-950"></i>
-          <span>Save & Process Week</span>
+          <span>Save Week</span>
         </button>
       </div>
 
-      <!-- Action Button (Form Link) -->
-      <div>
-        <a id="evaluationFormBtn" href="https://docs.google.com/forms/d/e/1FAIpQLSfRjVZUd6TyQHCQgiuL6VVuZFDtL1GPHmMFxETpyCEBjgiaHg/viewform" target="_blank" class="inline-flex items-center space-x-2 bg-[#ebbd31] hover:bg-[#d1a320] text-slate-950 font-bold px-4 py-2 rounded-lg text-sm transition-all shadow-lg shadow-amber-500/20 amber-glow">
+      <!-- Action Button & Download Excel integrated small below -->
+      <div class="flex flex-col items-end space-y-1">
+        <a id="evaluationFormBtn" href="https://docs.google.com/forms/d/e/1FAIpQLSfRjVZUd6TyQHCQgiuL6VVuZFDtL1GPHmMFxETpyCEBjgiaHg/viewform" target="_blank" class="inline-flex items-center space-x-1.5 bg-[#ebbd31] hover:bg-[#d1a320] text-slate-950 font-bold px-3 py-1 rounded-lg text-xs transition-all shadow-md amber-glow">
           <i class="fa-solid fa-pen-to-square"></i>
           <span id="formBtnText">NEW QA PHONES EVALUATION</span>
         </a>
+
+        <!-- Excel Export Button Pequeno abajo del boton de New Evaluation -->
+        <button onclick="exportToExcel()" class="inline-flex items-center space-x-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-0.5 px-2 rounded text-[10px] transition-colors shadow">
+          <i class="fa-solid fa-file-excel text-[11px]"></i>
+          <span>Download Excel Report</span>
+        </button>
       </div>
     </header>
 
     <!-- DASHBOARD BODY -->
-    <div class="p-6 space-y-6">
+    <div class="p-4 space-y-5">
 
       <!-- GLOBAL KPIS -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-4 flex items-center justify-between">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-3 flex items-center justify-between">
           <div>
-            <p class="text-xs text-slate-400 font-medium">Avg. QA Score</p>
-            <h3 id="kpi-qa1" class="text-2xl font-bold text-[#ebbd31] mt-1">0</h3>
+            <p class="text-[11px] text-slate-400 font-medium">Avg. QA Score</p>
+            <h3 id="kpi-qa1" class="text-xl font-bold text-[#ebbd31] mt-0.5">0</h3>
           </div>
-          <div class="w-10 h-10 rounded-lg bg-amber-500/10 text-[#ebbd31] flex items-center justify-center">
-            <i class="fa-solid fa-chart-line text-lg"></i>
+          <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-[#ebbd31] flex items-center justify-center">
+            <i class="fa-solid fa-chart-line text-sm"></i>
           </div>
         </div>
 
-        <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-4 flex items-center justify-between">
+        <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-3 flex items-center justify-between">
           <div>
-            <p class="text-xs text-slate-400 font-medium" id="kpi-label-2">Avg. QA 2 Score</p>
-            <h3 id="kpi-qa2" class="text-2xl font-bold text-[#ebbd31] mt-1">0</h3>
+            <p class="text-[11px] text-slate-400 font-medium" id="kpi-label-2">Avg. QA 2 Score</p>
+            <h3 id="kpi-qa2" class="text-xl font-bold text-[#ebbd31] mt-0.5">0</h3>
           </div>
-          <div class="w-10 h-10 rounded-lg bg-amber-500/10 text-[#ebbd31] flex items-center justify-center">
-            <i class="fa-solid fa-award text-lg"></i>
+          <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-[#ebbd31] flex items-center justify-center">
+            <i class="fa-solid fa-award text-sm"></i>
           </div>
         </div>
 
-        <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-4 flex items-center justify-between">
+        <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-3 flex items-center justify-between">
           <div>
-            <p class="text-xs text-slate-400 font-medium" id="kpi-label-3">Total Volume</p>
-            <h3 id="kpi-total" class="text-2xl font-bold text-white mt-1">0</h3>
+            <p class="text-[11px] text-slate-400 font-medium" id="kpi-label-3">Total Volume</p>
+            <h3 id="kpi-total" class="text-xl font-bold text-white mt-0.5">0</h3>
           </div>
-          <div class="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
-            <i class="fa-solid fa-folder text-lg"></i>
+          <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
+            <i class="fa-solid fa-folder text-sm"></i>
           </div>
         </div>
 
-        <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-4 flex items-center justify-between">
+        <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-3 flex items-center justify-between">
           <div>
-            <p class="text-xs text-slate-400 font-medium" id="kpi-label-4">Avg. Calls / Day</p>
-            <h3 id="kpi-daily" class="text-2xl font-bold text-white mt-1">0</h3>
+            <p class="text-[11px] text-slate-400 font-medium" id="kpi-label-4">Avg. Calls / Day</p>
+            <h3 id="kpi-daily" class="text-xl font-bold text-white mt-0.5">0</h3>
           </div>
-          <div class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-            <i class="fa-solid fa-calculator text-lg"></i>
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+            <i class="fa-solid fa-calculator text-sm"></i>
           </div>
         </div>
       </div>
 
       <!-- SEARCH BAR & THREE CHART CATEGORY SELECTOR -->
-      <div class="flex flex-col md:flex-row justify-between items-center bg-[#1c2234] p-3 rounded-xl border border-[#2a344d] gap-4">
-        <div class="relative w-full md:w-80">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-          <input type="text" id="searchInput" onkeyup="filterTables()" placeholder="Search agent, leader, task, branch..." class="w-full bg-[#141824] border border-[#2a344d] rounded-lg pl-9 pr-4 py-1.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#ebbd31]">
+      <div class="flex flex-col sm:flex-row justify-between items-center bg-[#1c2234] p-2.5 rounded-xl border border-[#2a344d] gap-3">
+        <div class="relative w-full sm:w-72">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+          <input type="text" id="searchInput" onkeyup="filterTables()" placeholder="Search agent, leader, task..." class="w-full bg-[#141824] border border-[#2a344d] rounded-lg pl-8 pr-3 py-1 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#ebbd31]">
         </div>
 
-        <div class="flex items-center space-x-2 w-full md:w-auto">
+        <div class="flex items-center space-x-2 w-full sm:w-auto">
           <label class="text-xs text-slate-400 font-medium whitespace-nowrap"><i class="fa-solid fa-chart-column text-[#ebbd31] mr-1"></i>CHART CATEGORY:</label>
-          <select id="chartMetricSelect" onchange="updateAllCharts()" class="bg-[#141824] border border-[#2a344d] text-[#ebbd31] text-xs font-semibold px-3 py-1.5 rounded-lg focus:outline-none cursor-pointer w-full md:w-auto">
+          <select id="chartMetricSelect" onchange="updateAllCharts()" class="bg-[#141824] border border-[#2a344d] text-[#ebbd31] text-xs font-semibold px-2.5 py-1 rounded-lg focus:outline-none cursor-pointer w-full sm:w-auto">
           </select>
         </div>
       </div>
 
       <!-- VIEW 1: PHONES TAB -->
-      <div id="view-phones" class="space-y-8">
+      <div id="view-phones" class="space-y-6">
         <!-- Table 1: GUA / COL -->
         <div class="bg-[#1c2234] rounded-xl border border-[#2a344d] overflow-hidden shadow-xl">
-          <div class="p-4 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
-            <h2 class="text-sm font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - GUA / COL</h2>
-            <div class="flex items-center space-x-3">
-              <button onclick="addAgentRow('table-gua-col')" class="px-2.5 py-1 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-lg text-xs font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
-                <i class="fa-solid fa-plus text-[10px]"></i>
+          <div class="p-3 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
+            <h2 class="text-xs font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - GUA / COL</h2>
+            <div class="flex items-center space-x-2">
+              <button onclick="addAgentRow('table-gua-col')" class="px-2 py-0.5 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-md text-[11px] font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
+                <i class="fa-solid fa-plus text-[9px]"></i>
                 <span>Add Agent</span>
               </button>
-              <span class="text-xs bg-[#2a344d] text-slate-300 px-2.5 py-1 rounded-full font-mono agent-count">20 Agents</span>
+              <span class="text-[11px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">20 Agents</span>
             </div>
           </div>
-          <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
+          <div class="p-3 border-b border-[#2a344d] bg-[#141824]/40 h-52 relative">
             <canvas id="chart-gua-col"></canvas>
           </div>
-          <div class="overflow-x-auto custom-scrollbar p-2">
-            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-gua-col">
+          <div class="overflow-x-auto custom-scrollbar p-1">
+            <table class="data-table" id="table-gua-col">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-3">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th>
-                  <th class="p-3 text-center text-[#ebbd31]">QA 1</th><th class="p-3 text-center text-[#ebbd31]">QA 2</th>
-                  <th class="p-3 text-center">Inbound Calls</th><th class="p-3 text-center">Outbound Calls</th><th class="p-3 text-center">Total Calls</th><th class="p-3 text-center">Avg. Handle Time</th><th class="p-3 text-center">Avg. Calls/Day</th>
-                  <th class="p-3 text-center">Abandon on hold</th><th class="p-3 text-center">Declined calls</th><th class="p-3 text-center">Missed Calls</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center">Actions</th>
+                  <th>Agent Name</th><th>Task</th><th>Branch</th><th>Leaders</th><th>Schedule</th>
+                  <th class="text-center text-[#ebbd31]">QA 1</th><th class="text-center text-[#ebbd31]">QA 2</th>
+                  <th class="text-center">Inbound</th><th class="text-center">Outbound</th><th class="text-center">Total</th><th class="text-center">AHT</th><th class="text-center">Calls/Day</th>
+                  <th class="text-center">Abnd Hold</th><th class="text-center">Declined</th><th class="text-center">Missed</th>
+                  <th class="text-center text-[#ebbd31]">Action Plan</th><th class="text-center">Comments</th><th class="text-center">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -419,28 +425,28 @@
 
         <!-- Table 2: PAN -->
         <div class="bg-[#1c2234] rounded-xl border border-[#2a344d] overflow-hidden shadow-xl">
-          <div class="p-4 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
-            <h2 class="text-sm font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - PAN</h2>
-            <div class="flex items-center space-x-3">
-              <button onclick="addAgentRow('table-pan')" class="px-2.5 py-1 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-lg text-xs font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
-                <i class="fa-solid fa-plus text-[10px]"></i>
+          <div class="p-3 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
+            <h2 class="text-xs font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - PAN</h2>
+            <div class="flex items-center space-x-2">
+              <button onclick="addAgentRow('table-pan')" class="px-2 py-0.5 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-md text-[11px] font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
+                <i class="fa-solid fa-plus text-[9px]"></i>
                 <span>Add Agent</span>
               </button>
-              <span class="text-xs bg-[#2a344d] text-slate-300 px-2.5 py-1 rounded-full font-mono agent-count">16 Agents</span>
+              <span class="text-[11px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">16 Agents</span>
             </div>
           </div>
-          <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
+          <div class="p-3 border-b border-[#2a344d] bg-[#141824]/40 h-52 relative">
             <canvas id="chart-pan"></canvas>
           </div>
-          <div class="overflow-x-auto custom-scrollbar p-2">
-            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-pan">
+          <div class="overflow-x-auto custom-scrollbar p-1">
+            <table class="data-table" id="table-pan">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-3">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th>
-                  <th class="p-3 text-center text-[#ebbd31]">QA 1</th><th class="p-3 text-center text-[#ebbd31]">QA 2</th>
-                  <th class="p-3 text-center">Inbound Calls</th><th class="p-3 text-center">Outbound Calls</th><th class="p-3 text-center">Total Calls</th><th class="p-3 text-center">Avg. Handle Time</th><th class="p-3 text-center">Avg. Calls/Day</th>
-                  <th class="p-3 text-center">Abandon on hold</th><th class="p-3 text-center">Declined calls</th><th class="p-3 text-center">Missed Calls</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center">Actions</th>
+                  <th>Agent Name</th><th>Task</th><th>Branch</th><th>Leaders</th><th>Schedule</th>
+                  <th class="text-center text-[#ebbd31]">QA 1</th><th class="text-center text-[#ebbd31]">QA 2</th>
+                  <th class="text-center">Inbound</th><th class="text-center">Outbound</th><th class="text-center">Total</th><th class="text-center">AHT</th><th class="text-center">Calls/Day</th>
+                  <th class="text-center">Abnd Hold</th><th class="text-center">Declined</th><th class="text-center">Missed</th>
+                  <th class="text-center text-[#ebbd31]">Action Plan</th><th class="text-center">Comments</th><th class="text-center">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -450,28 +456,28 @@
 
         <!-- Table 3: MX - PHONES -->
         <div class="bg-[#1c2234] rounded-xl border border-[#2a344d] overflow-hidden shadow-xl">
-          <div class="p-4 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
-            <h2 class="text-sm font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - MX - Phones</h2>
-            <div class="flex items-center space-x-3">
-              <button onclick="addAgentRow('table-mx-phones')" class="px-2.5 py-1 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-lg text-xs font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
-                <i class="fa-solid fa-plus text-[10px]"></i>
+          <div class="p-3 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
+            <h2 class="text-xs font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - MX - Phones</h2>
+            <div class="flex items-center space-x-2">
+              <button onclick="addAgentRow('table-mx-phones')" class="px-2 py-0.5 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-md text-[11px] font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
+                <i class="fa-solid fa-plus text-[9px]"></i>
                 <span>Add Agent</span>
               </button>
-              <span class="text-xs bg-[#2a344d] text-slate-300 px-2.5 py-1 rounded-full font-mono agent-count">7 Agents</span>
+              <span class="text-[11px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">7 Agents</span>
             </div>
           </div>
-          <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
+          <div class="p-3 border-b border-[#2a344d] bg-[#141824]/40 h-52 relative">
             <canvas id="chart-mx-phones"></canvas>
           </div>
-          <div class="overflow-x-auto custom-scrollbar p-2">
-            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-mx-phones">
+          <div class="overflow-x-auto custom-scrollbar p-1">
+            <table class="data-table" id="table-mx-phones">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-3">Agent Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th>
-                  <th class="p-3 text-center text-[#ebbd31]">QA 1</th><th class="p-3 text-center text-[#ebbd31]">QA 2</th>
-                  <th class="p-3 text-center">Inbound Calls</th><th class="p-3 text-center">Outbound Calls</th><th class="p-3 text-center">Total Calls</th><th class="p-3 text-center">Avg. Handle Time</th><th class="p-3 text-center">Avg. Calls/Day</th>
-                  <th class="p-3 text-center">Abandon on hold</th><th class="p-3 text-center">Declined calls</th><th class="p-3 text-center">Missed Calls</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center">Actions</th>
+                  <th>Agent Name</th><th>Task</th><th>Branch</th><th>Leaders</th><th>Schedule</th>
+                  <th class="text-center text-[#ebbd31]">QA 1</th><th class="text-center text-[#ebbd31]">QA 2</th>
+                  <th class="text-center">Inbound</th><th class="text-center">Outbound</th><th class="text-center">Total</th><th class="text-center">AHT</th><th class="text-center">Calls/Day</th>
+                  <th class="text-center">Abnd Hold</th><th class="text-center">Declined</th><th class="text-center">Missed</th>
+                  <th class="text-center text-[#ebbd31]">Action Plan</th><th class="text-center">Comments</th><th class="text-center">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -481,29 +487,29 @@
       </div>
 
       <!-- VIEW 2: CASES TAB -->
-      <div id="view-cases" class="space-y-8 hidden">
+      <div id="view-cases" class="space-y-6 hidden">
         <!-- Table 1: GUA / COL / PHI CASES -->
         <div class="bg-[#1c2234] rounded-xl border border-[#2a344d] overflow-hidden shadow-xl">
-          <div class="p-4 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
-            <h2 class="text-sm font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - GUA / COL / PHI</h2>
-            <div class="flex items-center space-x-3">
-              <button onclick="addCasesRow('table-cases-gua')" class="px-2.5 py-1 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-lg text-xs font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
-                <i class="fa-solid fa-plus text-[10px]"></i>
+          <div class="p-3 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
+            <h2 class="text-xs font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - GUA / COL / PHI</h2>
+            <div class="flex items-center space-x-2">
+              <button onclick="addCasesRow('table-cases-gua')" class="px-2 py-0.5 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-md text-[11px] font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
+                <i class="fa-solid fa-plus text-[9px]"></i>
                 <span>Add Agent</span>
               </button>
-              <span class="text-xs bg-[#2a344d] text-slate-300 px-2.5 py-1 rounded-full font-mono agent-count">27 Agents</span>
+              <span class="text-[11px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">27 Agents</span>
             </div>
           </div>
-          <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
+          <div class="p-3 border-b border-[#2a344d] bg-[#141824]/40 h-52 relative">
             <canvas id="chart-cases-gua"></canvas>
           </div>
-          <div class="overflow-x-auto custom-scrollbar p-2">
-            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-cases-gua">
+          <div class="overflow-x-auto custom-scrollbar p-1">
+            <table class="data-table" id="table-cases-gua">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-3">Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th>
-                  <th class="p-3 text-center text-[#ebbd31]">QA Total</th><th class="p-3 text-center">Conversations replied to</th><th class="p-3 text-center">Average First response time mins</th><th class="p-3 text-center">SLA missed</th><th class="p-3 text-center">Teammate CSAT score</th><th class="p-3 text-center">Teammate DSAT score</th><th class="p-3 text-center">survey count good</th><th class="p-3 text-center">survey count bad</th><th class="p-3 text-center">Total surveys</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center">Actions</th>
+                  <th>Name</th><th>Task</th><th>Branch</th><th>Leaders</th><th>Schedule</th>
+                  <th class="text-center text-[#ebbd31]">QA Total</th><th class="text-center">Convs Replied</th><th class="text-center">Avg FRT (m)</th><th class="text-center">SLA Missed</th><th class="text-center">CSAT</th><th class="text-center">DSAT</th><th class="text-center">Good Surv.</th><th class="text-center">Bad Surv.</th><th class="text-center">Total Surv.</th>
+                  <th class="text-center text-[#ebbd31]">Action Plan</th><th class="text-center">Comments</th><th class="text-center">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -513,26 +519,26 @@
 
         <!-- Table 2: MX CASES -->
         <div class="bg-[#1c2234] rounded-xl border border-[#2a344d] overflow-hidden shadow-xl">
-          <div class="p-4 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
-            <h2 class="text-sm font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - MX - CASES</h2>
-            <div class="flex items-center space-x-3">
-              <button onclick="addCasesRow('table-cases-mx')" class="px-2.5 py-1 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-lg text-xs font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
-                <i class="fa-solid fa-plus text-[10px]"></i>
+          <div class="p-3 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
+            <h2 class="text-xs font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - MX - CASES</h2>
+            <div class="flex items-center space-x-2">
+              <button onclick="addCasesRow('table-cases-mx')" class="px-2 py-0.5 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-md text-[11px] font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
+                <i class="fa-solid fa-plus text-[9px]"></i>
                 <span>Add Agent</span>
               </button>
-              <span class="text-xs bg-[#2a344d] text-slate-300 px-2.5 py-1 rounded-full font-mono agent-count">3 Agents</span>
+              <span class="text-[11px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">3 Agents</span>
             </div>
           </div>
-          <div class="p-4 border-b border-[#2a344d] bg-[#141824]/40 h-64 relative">
+          <div class="p-3 border-b border-[#2a344d] bg-[#141824]/40 h-52 relative">
             <canvas id="chart-cases-mx"></canvas>
           </div>
-          <div class="overflow-x-auto custom-scrollbar p-2">
-            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-cases-mx">
+          <div class="overflow-x-auto custom-scrollbar p-1">
+            <table class="data-table" id="table-cases-mx">
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th class="p-3">Name</th><th class="p-3">Task</th><th class="p-3">Branch</th><th class="p-3">Leaders</th><th class="p-3">Schedule</th>
-                  <th class="p-3 text-center text-[#ebbd31]">QA Total</th><th class="p-3 text-center">Conversations replied to</th><th class="p-3 text-center">Average First response time mins</th><th class="p-3 text-center">SLA missed</th><th class="p-3 text-center">Teammate CSAT score</th><th class="p-3 text-center">Teammate DSAT score</th><th class="p-3 text-center">survey count good</th><th class="p-3 text-center">survey count bad</th><th class="p-3 text-center">Total surveys</th>
-                  <th class="p-3 text-center text-[#ebbd31]">Action Plan</th><th class="p-3 text-center">Comments</th><th class="p-3 text-center">Actions</th>
+                  <th>Name</th><th>Task</th><th>Branch</th><th>Leaders</th><th>Schedule</th>
+                  <th class="text-center text-[#ebbd31]">QA Total</th><th class="text-center">Convs Replied</th><th class="text-center">Avg FRT (m)</th><th class="text-center">SLA Missed</th><th class="text-center">CSAT</th><th class="text-center">DSAT</th><th class="text-center">Good Surv.</th><th class="text-center">Bad Surv.</th><th class="text-center">Total Surv.</th>
+                  <th class="text-center text-[#ebbd31]">Action Plan</th><th class="text-center">Comments</th><th class="text-center">Actions</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -560,7 +566,7 @@
     firebase.initializeApp(firebaseConfig);
     const rtdb = firebase.database();
 
-    // BASE DATASETS (Sin Days Off)
+    // BASE DATASETS
     const phonesGuaColData = [
       ["Acsa Esquivel", "Insurance phones", "Guatemala", "Andrea", "8:00:00 AM 5:00:00 PM"],
       ["Alexander Alvarado", "Phones", "Colombia", "Nury", "8:00:00 AM 5:00:00 PM"],
@@ -652,21 +658,6 @@
     let currentTab = 'phones';
     const chartInstances = {};
 
-    function autoResizeInput(input) {
-      if (!input || input.tagName !== 'INPUT' || input.type !== 'text') return;
-      const tempSpan = document.createElement('span');
-      tempSpan.style.visibility = 'hidden';
-      tempSpan.style.position = 'absolute';
-      tempSpan.style.whiteSpace = 'pre';
-      tempSpan.style.font = window.getComputedStyle(input).font;
-      tempSpan.textContent = input.value || input.placeholder || '';
-      document.body.appendChild(tempSpan);
-      
-      const newWidth = Math.max(tempSpan.offsetWidth + 20, 60);
-      input.style.width = newWidth + 'px';
-      document.body.removeChild(tempSpan);
-    }
-
     function updateCommentPopover(textarea) {
       const popover = textarea.nextElementSibling;
       if (popover) {
@@ -680,7 +671,6 @@
       }, 50);
     }
 
-    // CONDITIONAL FORMATTING FUNCTIONS
     function applyConditionalFormatting(input, type) {
       if (!input) return;
       const val = parseFloat(input.value) || 0;
@@ -731,8 +721,8 @@
       updateMetricSelectOptions();
 
       if (tab === 'phones') {
-        btnPhones.className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors bg-[#ebbd31] text-slate-950 font-semibold shadow-lg shadow-amber-500/10";
-        btnCases.className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400";
+        btnPhones.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs transition-colors bg-[#ebbd31] text-slate-950 font-bold shadow-md";
+        btnCases.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400 font-medium";
         viewPhones.classList.remove('hidden');
         viewCases.classList.add('hidden');
         formBtnText.innerText = "NEW QA PHONES EVALUATION";
@@ -742,8 +732,8 @@
         document.getElementById('kpi-label-3').innerText = 'Total Volume';
         document.getElementById('kpi-label-4').innerText = 'Avg. Calls / Day';
       } else {
-        btnCases.className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors bg-[#ebbd31] text-slate-950 font-semibold shadow-lg shadow-amber-500/10";
-        btnPhones.className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400";
+        btnCases.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs transition-colors bg-[#ebbd31] text-slate-950 font-bold shadow-md";
+        btnPhones.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400 font-medium";
         viewCases.classList.remove('hidden');
         viewPhones.classList.add('hidden');
         formBtnText.innerText = "NEW QA CASES EVALUATION";
@@ -775,26 +765,26 @@
       const commentText = agent[14] || '';
 
       tr.innerHTML = `
-        <td class="p-2"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="autoResizeInput(this); renderTableChart('${tableId}')"></td>
-        <td class="p-2"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
-        <td class="p-2"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text cell-branch text-slate-300"></td>
-        <td class="p-2"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text cell-leaders text-slate-300"></td>
-        <td class="p-2"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text cell-schedule text-slate-400 text-[11px]"></td>
+        <td class="p-1"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="renderTableChart('${tableId}')"></td>
+        <td class="p-1"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text cell-task text-slate-300"></td>
+        <td class="p-1"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text cell-branch text-slate-300"></td>
+        <td class="p-1"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text cell-leaders text-slate-300"></td>
+        <td class="p-1"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text cell-schedule text-slate-400 text-[10px]"></td>
         
-        <td class="p-2 text-center"><input type="number" value="${agent[5] || 0}" min="0" max="100" class="cell-input qa1 font-bold" oninput="updateCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[6] || 0}" min="0" max="100" class="cell-input qa2 font-bold" oninput="updateCalculations(this)"></td>
+        <td class="p-1 text-center"><input type="number" value="${agent[5] || 0}" min="0" max="100" class="cell-input qa1 font-bold" oninput="updateCalculations(this)"></td>
+        <td class="p-1 text-center"><input type="number" value="${agent[6] || 0}" min="0" max="100" class="cell-input qa2 font-bold" oninput="updateCalculations(this)"></td>
         
-        <td class="p-2 text-center"><input type="number" value="${agent[7] || 0}" class="cell-input inbound" oninput="updateCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[8] || 0}" class="cell-input outbound" oninput="updateCalculations(this)"></td>
-        <td class="p-3 text-center font-bold text-white total-calls">${totalCalls}</td>
-        <td class="p-2 text-center"><input type="text" value="${agent[9] || '00:00:00'}" class="cell-input text-center font-mono" oninput="autoResizeInput(this)"></td>
-        <td class="p-3 text-center font-bold text-[#ebbd31]/90 avg-daily">${avgDailyCalls}</td>
-        <td class="p-2 text-center"><input type="number" value="${agent[10] || 0}" class="cell-input abandon" oninput="updateCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[11] || 0}" class="cell-input declined" oninput="updateCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[12] || 0}" class="cell-input missed" oninput="updateCalculations(this)"></td>
+        <td class="p-1 text-center"><input type="number" value="${agent[7] || 0}" class="cell-input inbound" oninput="updateCalculations(this)"></td>
+        <td class="p-1 text-center"><input type="number" value="${agent[8] || 0}" class="cell-input outbound" oninput="updateCalculations(this)"></td>
+        <td class="p-2 text-center font-bold text-white total-calls">${totalCalls}</td>
+        <td class="p-1 text-center"><input type="text" value="${agent[9] || '00:00:00'}" class="cell-input text-center font-mono text-[10px]"></td>
+        <td class="p-2 text-center font-bold text-[#ebbd31]/90 avg-daily">${avgDailyCalls}</td>
+        <td class="p-1 text-center"><input type="number" value="${agent[10] || 0}" class="cell-input abandon" oninput="updateCalculations(this)"></td>
+        <td class="p-1 text-center"><input type="number" value="${agent[11] || 0}" class="cell-input declined" oninput="updateCalculations(this)"></td>
+        <td class="p-1 text-center"><input type="number" value="${agent[12] || 0}" class="cell-input missed" oninput="updateCalculations(this)"></td>
 
-        <td class="p-2 text-center">
-          <select class="cell-input text-[#ebbd31] font-medium text-xs">
+        <td class="p-1 text-center">
+          <select class="cell-input text-[#ebbd31] font-medium text-[11px]">
             <option value="N/A" ${agent[13] === 'N/A' ? 'selected' : ''}>N/A</option>
             <option value="Coaching" ${agent[13] === 'Coaching' ? 'selected' : ''}>Coaching</option>
             <option value="Feedback" ${agent[13] === 'Feedback' ? 'selected' : ''}>Feedback</option>
@@ -803,19 +793,19 @@
           </select>
         </td>
 
-        <td class="p-2">
+        <td class="p-1">
           <div class="comment-container">
             <textarea placeholder="Add comments..." class="cell-input cell-comment-area text-slate-300" onfocus="handleCommentFocus(this)" oninput="updateCommentPopover(this)">${commentText}</textarea>
             <div class="comment-popover">${commentText || "Sin comentarios..."}</div>
           </div>
         </td>
         
-        <td class="p-2 text-center">
-          <div class="flex items-center justify-center space-x-2">
-            <button onclick="saveRow(this)" class="text-amber-400 hover:text-amber-300 p-1 transition-colors" title="Save Row">
+        <td class="p-1 text-center">
+          <div class="flex items-center justify-center space-x-1">
+            <button onclick="saveRow(this)" class="text-amber-400 hover:text-amber-300 p-0.5 transition-colors" title="Save Row">
               <i class="fa-solid fa-floppy-disk"></i>
             </button>
-            <button onclick="deleteAgentRow(this, '${tableId}')" class="text-rose-400 hover:text-rose-300 p-1 transition-colors" title="Delete Agent">
+            <button onclick="deleteAgentRow(this, '${tableId}')" class="text-rose-400 hover:text-rose-300 p-0.5 transition-colors" title="Delete Agent">
               <i class="fa-solid fa-trash-can"></i>
             </button>
           </div>
@@ -824,9 +814,6 @@
 
       tbody.appendChild(tr);
 
-      tr.querySelectorAll('input[type="text"]:not(.cell-schedule):not(.cell-branch):not(.cell-leaders)').forEach(input => autoResizeInput(input));
-
-      // Apply conditional formatting
       applyConditionalFormatting(tr.querySelector('.qa1'), 'qa');
       applyConditionalFormatting(tr.querySelector('.qa2'), 'qa');
       applyConditionalFormatting(tr.querySelector('.abandon'), 'abandonOrMissed');
@@ -849,24 +836,24 @@
       const commentText = agent[14] || '';
 
       tr.innerHTML = `
-        <td class="p-2"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="autoResizeInput(this); renderTableChart('${tableId}')"></td>
-        <td class="p-2"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text text-slate-300" oninput="autoResizeInput(this)"></td>
-        <td class="p-2"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text cell-branch text-slate-300"></td>
-        <td class="p-2"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text cell-leaders text-slate-300"></td>
-        <td class="p-2"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text cell-schedule text-slate-400 text-[11px]"></td>
+        <td class="p-1"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="renderTableChart('${tableId}')"></td>
+        <td class="p-1"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text cell-task text-slate-300"></td>
+        <td class="p-1"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text cell-branch text-slate-300"></td>
+        <td class="p-1"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text cell-leaders text-slate-300"></td>
+        <td class="p-1"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text cell-schedule text-slate-400 text-[10px]"></td>
         
-        <td class="p-2 text-center"><input type="number" value="${agent[5] || 0}" min="0" max="100" class="cell-input qaTotal font-bold" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[6] || 0}" class="cell-input convReplied font-semibold text-white" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[7] || 0}" class="cell-input avgResponseTime" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[8] || 0}" class="cell-input slaMissed" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[9] || 0}" class="cell-input csat text-emerald-400 font-bold" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[10] || 0}" class="cell-input dsat text-rose-400 font-bold" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[11] || 0}" class="cell-input surveyGood" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-2 text-center"><input type="number" value="${agent[12] || 0}" class="cell-input surveyBad" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-3 text-center font-bold text-white totalSurveys">${(parseInt(agent[11]||0) + parseInt(agent[12]||0))}</td>
+        <td class="p-1 text-center"><input type="number" value="${agent[5] || 0}" min="0" max="100" class="cell-input qaTotal font-bold" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-1 text-center"><input type="number" value="${agent[6] || 0}" class="cell-input convReplied font-semibold text-white" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-1 text-center"><input type="number" value="${agent[7] || 0}" class="cell-input avgResponseTime" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-1 text-center"><input type="number" value="${agent[8] || 0}" class="cell-input slaMissed" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-1 text-center"><input type="number" value="${agent[9] || 0}" class="cell-input csat text-emerald-400 font-bold" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-1 text-center"><input type="number" value="${agent[10] || 0}" class="cell-input dsat text-rose-400 font-bold" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-1 text-center"><input type="number" value="${agent[11] || 0}" class="cell-input surveyGood" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-1 text-center"><input type="number" value="${agent[12] || 0}" class="cell-input surveyBad" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-2 text-center font-bold text-white totalSurveys">${(parseInt(agent[11]||0) + parseInt(agent[12]||0))}</td>
 
-        <td class="p-2 text-center">
-          <select class="cell-input text-[#ebbd31] font-medium text-xs">
+        <td class="p-1 text-center">
+          <select class="cell-input text-[#ebbd31] font-medium text-[11px]">
             <option value="N/A" ${agent[13] === 'N/A' ? 'selected' : ''}>N/A</option>
             <option value="Coaching" ${agent[13] === 'Coaching' ? 'selected' : ''}>Coaching</option>
             <option value="Feedback" ${agent[13] === 'Feedback' ? 'selected' : ''}>Feedback</option>
@@ -875,19 +862,19 @@
           </select>
         </td>
 
-        <td class="p-2">
+        <td class="p-1">
           <div class="comment-container">
             <textarea placeholder="Add comments..." class="cell-input cell-comment-area text-slate-300" onfocus="handleCommentFocus(this)" oninput="updateCommentPopover(this)">${commentText}</textarea>
             <div class="comment-popover">${commentText || "Sin comentarios..."}</div>
           </div>
         </td>
         
-        <td class="p-2 text-center">
-          <div class="flex items-center justify-center space-x-2">
-            <button onclick="saveRow(this)" class="text-amber-400 hover:text-amber-300 p-1 transition-colors" title="Save Row">
+        <td class="p-1 text-center">
+          <div class="flex items-center justify-center space-x-1">
+            <button onclick="saveRow(this)" class="text-amber-400 hover:text-amber-300 p-0.5 transition-colors" title="Save Row">
               <i class="fa-solid fa-floppy-disk"></i>
             </button>
-            <button onclick="deleteAgentRow(this, '${tableId}')" class="text-rose-400 hover:text-rose-300 p-1 transition-colors" title="Delete Agent">
+            <button onclick="deleteAgentRow(this, '${tableId}')" class="text-rose-400 hover:text-rose-300 p-0.5 transition-colors" title="Delete Agent">
               <i class="fa-solid fa-trash-can"></i>
             </button>
           </div>
@@ -896,9 +883,6 @@
 
       tbody.appendChild(tr);
 
-      tr.querySelectorAll('input[type="text"]:not(.cell-schedule):not(.cell-branch):not(.cell-leaders)').forEach(input => autoResizeInput(input));
-
-      // Apply conditional formatting for Cases
       applyConditionalFormatting(tr.querySelector('.qaTotal'), 'qa');
     }
 
@@ -1060,7 +1044,6 @@
       if (tr.querySelector('.total-calls')) tr.querySelector('.total-calls').innerText = total;
       if (tr.querySelector('.avg-daily')) tr.querySelector('.avg-daily').innerText = avgDaily;
 
-      // Apply conditional formatting on user input
       applyConditionalFormatting(tr.querySelector('.qa1'), 'qa');
       applyConditionalFormatting(tr.querySelector('.qa2'), 'qa');
       applyConditionalFormatting(tr.querySelector('.abandon'), 'abandonOrMissed');
@@ -1084,7 +1067,6 @@
 
       if (tr.querySelector('.totalSurveys')) tr.querySelector('.totalSurveys').innerText = total;
 
-      // Apply conditional formatting for Cases
       applyConditionalFormatting(tr.querySelector('.qaTotal'), 'qa');
 
       calculateGlobalKPIs();
@@ -1251,17 +1233,17 @@
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              labels: { color: '#94a3b8', font: { size: 11, weight: '600' } }
+              labels: { color: '#94a3b8', font: { size: 10, weight: '600' } }
             }
           },
           scales: {
             x: {
-              ticks: { color: '#94a3b8', font: { size: 10 } },
+              ticks: { color: '#94a3b8', font: { size: 9 } },
               grid: { color: 'rgba(235, 189, 49, 0.15)' }
             },
             y: {
               beginAtZero: true,
-              ticks: { color: '#94a3b8', font: { size: 10 } },
+              ticks: { color: '#94a3b8', font: { size: 9 } },
               grid: { color: 'rgba(235, 189, 49, 0.15)' }
             }
           }
