@@ -1,1706 +1,2187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Highway QA Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Chart.js Library -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WFM Analytics & Call Volume Analysis Dashboard</title>
+    <!-- Chart.js & PapaParse -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- SheetJS Library (for Excel export) -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #0b2545;       /* Azul oscuro profundo */
+            --primary-dark: #031021;        /* Azul medianoche */
+            --accent-yellow: #ffb703;      /* Ámbar vibrante */
+            --accent-yellow-light: #fff3d1;/* Ámbar claro para selecciones/saldos */
+            --accent-yellow-dark: #b67d00; /* Ámbar oscuro para bordes y texto */
+            --bg-light: #08121e;           /* Fondo principal oscuro */
+            --card-bg: #0f2b48;            /* Fondo de tarjetas y paneles */
+            --border-color: #ffb703;        /* Bordes en Amarillo Ámbar */
+            --success-color: #00e676;
+            --warning-color: #ff9100;
+            --danger-color: #ff5252;
+            --text-main: #ffffff;           /* Texto claro para legibilidad */
+        }
 
-  <!-- Firebase Compat SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-main);
+        }
 
-  <style>
-    :root {
-      --navy-bg: #141824;
-      --navy-card: #1c2234;
-      --navy-border: #2a344d;
-      --amber-main: #ebbd31;
-      --amber-hover: #d1a320;
-      --amber-grid: rgba(235, 189, 49, 0.35);
-    }
-    body {
-      background-color: var(--navy-bg);
-      color: #f8fafc;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    .amber-glow {
-      box-shadow: 0 0 15px rgba(235, 189, 49, 0.25);
-    }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: #1c2234;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #2a344d;
-      border-radius: 3px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #ebbd31;
-    }
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    .cell-input {
-      background: transparent;
-      border: 1px solid transparent;
-      color: inherit;
-      width: 100%;
-      text-align: center;
-      padding: 2px 3px;
-      border-radius: 4px;
-      transition: all 0.2s;
-    }
-    .cell-input-text {
-      text-align: left;
-    }
-    .cell-input-name {
-      text-align: left;
-      font-weight: 600;
-      width: 130px;
-      max-width: 130px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-    }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            border: 2px solid var(--accent-yellow);
+        }
 
-    /* COLUMNAS CON ANCHO OPTIMIZADO */
-    .cell-task {
-      width: 80px;
-      max-width: 80px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-    }
-    .cell-branch {
-      width: 70px;
-      max-width: 70px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-    }
-    .cell-leaders {
-      width: 80px;
-      max-width: 80px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-    }
-    .cell-schedule {
-      width: 85px;
-      max-width: 85px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-    }
+        .header {
+            background-color: var(--primary-dark);
+            color: #ffffff;
+            margin: -25px -25px 25px -25px;
+            padding: 20px 30px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border-bottom: 4px solid var(--accent-yellow);
+        }
 
-    /* CELDAS NUMÉRICAS Y AHT */
-    .col-qa {
-      min-width: 50px;
-      max-width: 56px;
-    }
-    .col-num {
-      min-width: 52px;
-      max-width: 60px;
-    }
-    .col-aht {
-      min-width: 75px;
-      max-width: 80px;
-    }
-    .col-drop {
-      min-width: 50px;
-      max-width: 56px;
-    }
+        .header-branding {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
 
-    /* COMENTARIOS, RESOLUTION Y POPOVERS */
-    .comment-container {
-      position: relative;
-      width: 130px;
-      max-width: 130px;
-    }
-    .resolution-container {
-      position: relative;
-      width: 140px;
-      max-width: 140px;
-    }
-    .cell-comment-area {
-      text-align: left;
-      width: 100%;
-      height: 26px;
-      resize: none;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      line-height: 1.2;
-      display: block;
-      cursor: pointer;
-    }
-    .comment-popover {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      width: 240px;
-      max-height: 160px;
-      overflow-y: auto;
-      background-color: #0f172a;
-      color: #f8fafc;
-      border: 1px solid #ebbd31;
-      border-radius: 6px;
-      padding: 8px 10px;
-      font-size: 11px;
-      white-space: pre-wrap;
-      word-break: break-word;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-      z-index: 100;
-      pointer-events: auto;
-    }
-    .comment-container:hover .comment-popover,
-    .resolution-container:hover .comment-popover {
-      display: block;
-    }
+        /* LOGO CIRCLE CON ICONO DE QUALITY */
+        .logo-circle {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background-color: #232a36;
+            border: 2px solid var(--accent-yellow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 10px rgba(255, 183, 3, 0.4);
+            flex-shrink: 0;
+        }
 
-    .cell-input:hover, .cell-comment-area:hover {
-      border-color: #3b486b;
-      background: rgba(28, 34, 52, 0.8);
-    }
-    .cell-input:focus, .cell-comment-area:focus {
-      outline: none;
-      border-color: #ebbd31;
-      background: #141824;
-      box-shadow: 0 0 0 2px rgba(235, 189, 49, 0.25);
-    }
+        .logo-icon {
+            color: #ebbd31;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
 
-    select.cell-input {
-      cursor: pointer;
-    }
-    select.cell-input option {
-      background-color: #1c2234;
-      color: #f8fafc;
-    }
-    .toast-msg {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #ebbd31;
-      color: #0f172a;
-      font-weight: bold;
-      padding: 10px 18px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      z-index: 100;
-      display: none;
-    }
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--accent-yellow);
+        }
 
-    /* CONDITIONAL STYLES */
-    .cond-green {
-      background-color: #16a34a !important;
-      color: #000000 !important;
-      font-weight: 800 !important;
-    }
-    .cond-yellow {
-      background-color: #eab308 !important;
-      color: #000000 !important;
-      font-weight: 800 !important;
-    }
-    .cond-orange {
-      background-color: #f97316 !important;
-      color: #000000 !important;
-      font-weight: 800 !important;
-    }
-    .cond-red {
-      background-color: #dc2626 !important;
-      color: #ffffff !important;
-      font-weight: 800 !important;
-    }
-    
-    /* ENHANCED AMBER GRIDLINES FOR TABLES */
-    table.data-table {
-      border-collapse: separate;
-      border-spacing: 0;
-      border: 1px solid var(--amber-grid);
-      white-space: nowrap;
-      width: 100%;
-    }
-    table.data-table th {
-      border-right: 1px solid var(--amber-grid);
-      border-bottom: 2px solid var(--amber-main);
-      white-space: nowrap;
-      padding: 5px 3px !important;
-      font-size: 10px;
-    }
-    table.data-table th:last-child {
-      border-right: none;
-    }
-    table.data-table td {
-      border-right: 1px solid var(--amber-grid);
-      border-bottom: 1px solid rgba(235, 189, 49, 0.2);
-      white-space: nowrap;
-      padding: 2px 2px !important;
-    }
-    table.data-table td:last-child {
-      border-right: none;
-    }
-    table.data-table tbody tr:hover td {
-      background-color: rgba(235, 189, 49, 0.05);
-    }
-  </style>
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 9px 16px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-yellow {
+            background-color: var(--accent-yellow);
+            color: #000000;
+            font-weight: bold;
+        }
+
+        .btn-yellow:hover {
+            background-color: #d49400;
+        }
+
+        .btn-secondary {
+            background-color: #ffffff;
+            color: var(--primary-dark);
+            border: 1px solid var(--accent-yellow);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--accent-yellow-light);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: #ffffff;
+        }
+
+        .btn-danger:hover {
+            background-color: #b71c1c;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1.5px solid var(--accent-yellow);
+            color: var(--accent-yellow);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--accent-yellow);
+            color: #000000;
+        }
+
+        h2.section-title {
+            color: var(--accent-yellow);
+            font-size: 1.2rem;
+            border-bottom: 2px solid var(--accent-yellow);
+            padding-bottom: 8px;
+            margin-top: 35px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .controls-panel {
+            background-color: var(--primary-dark);
+            border: 2px solid var(--accent-yellow);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .controls-title {
+            font-weight: bold;
+            color: var(--accent-yellow);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .slicer-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .btn-slicer {
+            background-color: var(--primary-color);
+            border: 1.5px solid var(--accent-yellow);
+            color: var(--accent-yellow);
+            padding: 7px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-slicer:hover {
+            background-color: var(--accent-yellow);
+            color: #000000;
+        }
+
+        .btn-slicer.active {
+            background-color: var(--accent-yellow);
+            color: #000000;
+            box-shadow: 0 2px 8px rgba(255, 183, 3, 0.4);
+            border-color: #ffffff;
+        }
+
+        .btn-slicer.all-btn {
+            border-color: var(--accent-yellow);
+            color: var(--accent-yellow);
+        }
+
+        .btn-slicer.all-btn.active {
+            background-color: var(--accent-yellow);
+            color: #000000;
+        }
+
+        .input-select, .input-number, .input-text {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1.5px solid var(--accent-yellow);
+            background-color: var(--primary-color);
+            color: #ffffff;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .chart-card {
+            background: var(--primary-dark);
+            border: 2px solid var(--accent-yellow);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .chart-card h3 {
+            margin-top: 0;
+            color: var(--accent-yellow);
+            font-size: 1rem;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 280px;
+            width: 100%;
+        }
+
+        .table-responsive {
+            max-height: 480px;
+            overflow-y: auto;
+            border: 2px solid var(--accent-yellow);
+            border-radius: 8px;
+            margin-bottom: 25px;
+            background: var(--primary-dark);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            text-align: center;
+        }
+
+        thead th {
+            position: sticky;
+            top: 0;
+            background-color: var(--primary-color);
+            color: var(--accent-yellow);
+            padding: 12px 8px;
+            font-weight: 600;
+            border: 1.5px solid var(--accent-yellow);
+            z-index: 10;
+        }
+
+        thead th.col-total {
+            background-color: var(--accent-yellow);
+            color: #000000;
+            border-color: #ffffff;
+        }
+        
+        thead th.col-details { background-color: #14365d; }
+
+        tfoot tr td {
+            font-weight: bold;
+            background-color: var(--primary-color);
+            color: #ffffff;
+            padding: 10px;
+            border: 1.5px solid var(--accent-yellow);
+        }
+
+        tbody tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.03); }
+        tbody tr:hover { background-color: rgba(255, 183, 3, 0.15); }
+
+        td {
+            padding: 8px 6px;
+            border: 1.5px solid var(--accent-yellow);
+            color: #ffffff;
+        }
+
+        td.time-col {
+            font-weight: bold;
+            background-color: var(--primary-dark);
+            color: var(--accent-yellow);
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            white-space: nowrap;
+            border-right: 2px solid var(--accent-yellow);
+        }
+
+        td.total-col {
+            background-color: rgba(255, 183, 3, 0.2);
+            color: var(--accent-yellow);
+            font-weight: bold;
+        }
+
+        td.details-col {
+            text-align: left;
+            font-size: 0.82rem;
+            color: #e0e0e0;
+            max-width: 500px;
+        }
+
+        .count-badge {
+            display: inline-block;
+            background-color: var(--accent-yellow);
+            color: #000000;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .zero-count { color: #666; }
+        .none-text { color: #888; font-style: italic; }
+
+        .status-ok { color: var(--success-color); font-weight: bold; }
+        .status-deficit { color: var(--danger-color); font-weight: bold; }
+        .status-tight { color: var(--warning-color); font-weight: bold; }
+
+        .recommendation-card {
+            background-color: var(--primary-dark);
+            border-left: 5px solid var(--accent-yellow);
+            border-top: 1px solid var(--accent-yellow);
+            border-right: 1px solid var(--accent-yellow);
+            border-bottom: 1px solid var(--accent-yellow);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+            color: #ffffff;
+        }
+
+        .recommendation-card h3 {
+            margin: 0 0 8px 0;
+            color: var(--accent-yellow);
+            font-size: 1rem;
+        }
+
+        .recommendation-card p {
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 950px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+            border: 2px solid var(--accent-yellow);
+        }
+
+        .modal-header {
+            background-color: var(--primary-dark);
+            color: #ffffff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--accent-yellow);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--accent-yellow);
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+            color: #ffffff;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            background: var(--primary-dark);
+            border-top: 2px solid var(--accent-yellow);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--accent-yellow);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 5px;
+            border-bottom: 2px solid var(--accent-yellow);
+            margin-bottom: 15px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--accent-yellow);
+            background: var(--primary-dark);
+            color: var(--accent-yellow);
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 6px 6px 0 0;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-yellow);
+            color: #000;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .saved-weeks-panel {
+            background: var(--primary-dark);
+            border: 1.5px solid var(--accent-yellow);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .saved-weeks-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .saved-week-chip {
+            background: var(--primary-color);
+            border: 1px solid var(--accent-yellow);
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #ffffff;
+        }
+
+        .saved-week-chip button {
+            background: none;
+            border: none;
+            color: var(--accent-yellow);
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0 2px;
+        }
+
+        .saved-week-chip .btn-del-period {
+            color: var(--danger-color);
+        }
+
+        .mgmt-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .agent-list-table {
+            width: 100%;
+            font-size: 0.85rem;
+        }
+
+        .agent-list-table th {
+            background-color: var(--primary-color);
+            color: var(--accent-yellow);
+            padding: 8px;
+            border: 1.5px solid var(--accent-yellow);
+        }
+
+        .agent-list-table td { padding: 8px; border: 1.5px solid var(--accent-yellow); }
+
+        .agent-row-draggable {
+            cursor: grab;
+            transition: background-color 0.15s;
+        }
+
+        .agent-row-draggable:active {
+            cursor: grabbing;
+        }
+
+        .agent-row-draggable.dragging {
+            opacity: 0.5;
+            background-color: rgba(255, 183, 3, 0.3) !important;
+        }
+
+        .drag-handle {
+            cursor: grab;
+            margin-right: 8px;
+            color: var(--accent-yellow);
+            font-weight: bold;
+            user-select: none;
+        }
+
+        .badge-dept {
+            background: rgba(255, 183, 3, 0.2);
+            color: var(--accent-yellow);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            border: 1px solid var(--accent-yellow);
+        }
+
+        .badge-act {
+            background: var(--primary-color);
+            color: #ffffff;
+            border: 1px solid var(--accent-yellow);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 4px;
+            display: inline-block;
+            margin-bottom: 2px;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group.full { grid-column: span 2; }
+
+        .form-group label {
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: var(--accent-yellow);
+        }
+
+        .hour-chips {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 6px;
+            max-height: 180px;
+            overflow-y: auto;
+            border: 1.5px solid var(--accent-yellow);
+            padding: 8px;
+            border-radius: 6px;
+            background: var(--primary-dark);
+        }
+
+        .chip-checkbox {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4px;
+            font-size: 0.75rem;
+            background: var(--primary-color);
+            border: 1px solid var(--accent-yellow);
+            padding: 3px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #ffffff;
+        }
+
+        .chip-checkbox input { cursor: pointer; }
+        .auth-card { max-width: 400px; text-align: center; }
+    </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased">
+<body>
 
-  <div id="toast" class="toast-msg"><i class="fa-solid fa-check-circle mr-2"></i><span id="toast-text">Data Saved Successfully!</span></div>
-
-  <!-- MAIN CONTENT AREA -->
-  <main class="flex-1 flex flex-col h-screen overflow-y-auto custom-scrollbar">
-    
-    <!-- TOP HEADER / CONTROL BAR -->
-    <header class="bg-[#1c2234] border-b border-[#2a344d] p-3 sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3">
-      
-      <!-- LOGO & BRANDING -->
-      <div class="flex items-center space-x-3">
-        <div class="w-9 h-9 bg-[#20283d] rounded-full flex items-center justify-center p-1.5 shadow-md border border-slate-700/60 flex-shrink-0">
-          <svg viewBox="0 0 260 180" class="w-full h-full text-[#ebbd31] fill-current">
-            <path d="M 52 0 L 98 0 L 46 180 L 0 180 Z M 162 0 L 208 0 L 260 180 L 214 180 Z M 70 80 L 188 80 L 181 120 L 59 120 Z" />
-          </svg>
-        </div>
-        <div>
-          <h1 class="font-bold text-base tracking-wide text-white leading-tight">HIGHWAY</h1>
-          <p class="text-[10px] text-[#ebbd31] font-medium tracking-wider">QA DASHBOARD</p>
-        </div>
-      </div>
-
-      <!-- CENTER DEPARTMENTS & NOTES NAVIGATION -->
-      <div class="flex items-center bg-[#141824] p-1 rounded-xl border border-[#2a344d] space-x-1">
-        <button onclick="switchTab('phones')" id="btn-tab-phones" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors bg-[#ebbd31] text-slate-950 shadow-md">
-          <i class="fa-solid fa-headset text-xs"></i>
-          <span>Customer Support - Phones</span>
-        </button>
-
-        <button onclick="switchTab('cases')" id="btn-tab-cases" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400">
-          <i class="fa-solid fa-folder-open text-xs"></i>
-          <span>Customer Support - Cases</span>
-        </button>
-
-        <button onclick="switchTab('notes')" id="btn-tab-notes" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400">
-          <i class="fa-solid fa-lightbulb text-xs text-[#ebbd31]"></i>
-          <span>Notes & Insights of the Month</span>
-        </button>
-      </div>
-
-      <!-- Date Controls & Save Button -->
-      <div class="flex items-center space-x-2 flex-wrap">
-        <div class="flex items-center space-x-1.5 bg-[#141824] px-2.5 py-1 rounded-lg border border-[#2a344d]">
-          <label class="text-[10px] text-slate-400 font-medium">MONTH:</label>
-          <select id="monthSelect" onchange="changePeriod()" class="bg-transparent text-[#ebbd31] text-xs font-semibold focus:outline-none cursor-pointer">
-            <option value="January" class="bg-[#1c2234] text-white">January</option>
-            <option value="February" class="bg-[#1c2234] text-white">February</option>
-            <option value="March" class="bg-[#1c2234] text-white">March</option>
-            <option value="April" class="bg-[#1c2234] text-white">April</option>
-            <option value="May" class="bg-[#1c2234] text-white">May</option>
-            <option value="June" class="bg-[#1c2234] text-white">June</option>
-            <option value="July" class="bg-[#1c2234] text-white">July</option>
-            <option value="August" class="bg-[#1c2234] text-white">August</option>
-            <option value="September" class="bg-[#1c2234] text-white">September</option>
-            <option value="October" class="bg-[#1c2234] text-white" selected>October</option>
-            <option value="November" class="bg-[#1c2234] text-white">November</option>
-            <option value="December" class="bg-[#1c2234] text-white">December</option>
-          </select>
-        </div>
-
-        <div class="flex items-center space-x-1.5 bg-[#141824] px-2.5 py-1 rounded-lg border border-[#2a344d]">
-          <label class="text-[10px] text-slate-400 font-medium">WEEK:</label>
-          <select id="weekSelect" onchange="changePeriod()" class="bg-transparent text-[#ebbd31] text-xs font-semibold focus:outline-none cursor-pointer">
-            <option value="1" class="bg-[#1c2234] text-white">1</option>
-            <option value="2" class="bg-[#1c2234] text-white">2</option>
-            <option value="3" class="bg-[#1c2234] text-white" selected>3</option>
-            <option value="4" class="bg-[#1c2234] text-white">4</option>
-            <option value="5" class="bg-[#1c2234] text-white">5</option>
-          </select>
-        </div>
-
-        <button onclick="saveAndProcessWeek()" class="inline-flex items-center space-x-1.5 bg-[#ebbd31] hover:bg-[#d1a320] text-slate-950 font-bold px-3 py-1 rounded-lg text-xs transition-all shadow-md amber-glow">
-          <i class="fa-solid fa-cloud-arrow-up text-slate-950"></i>
-          <span>Save Week</span>
-        </button>
-      </div>
-
-      <!-- Action Button Combo -->
-      <div class="flex flex-col items-end space-y-1">
-        <a id="evaluationFormBtn" href="https://docs.google.com/forms/d/e/1FAIpQLSfRjVZUd6TyQHCQgiuL6VVuZFDtL1GPHmMFxETpyCEBjgiaHg/viewform" target="_blank" class="inline-flex items-center space-x-1.5 bg-[#ebbd31] hover:bg-[#d1a320] text-slate-950 font-bold px-3 py-1 rounded-lg text-xs transition-all shadow-md amber-glow">
-          <i class="fa-solid fa-pen-to-square"></i>
-          <span id="formBtnText">NEW QA PHONES EVALUATION</span>
-        </a>
-        <button onclick="exportToExcel()" class="inline-flex items-center space-x-1 text-emerald-400 hover:text-emerald-300 font-semibold text-[10px] transition-colors">
-          <i class="fa-solid fa-file-excel"></i>
-          <span>Download Excel Report</span>
-        </button>
-      </div>
-    </header>
-
-    <!-- DASHBOARD BODY -->
-    <div class="p-4 space-y-5">
-
-      <!-- GLOBAL KPIS -->
-      <div id="kpi-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-3 flex items-center justify-between">
-          <div>
-            <p class="text-[11px] text-slate-400 font-medium">Avg. QA Score</p>
-            <h3 id="kpi-qa1" class="text-xl font-bold text-[#ebbd31] mt-0.5">0</h3>
-          </div>
-          <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-[#ebbd31] flex items-center justify-center">
-            <i class="fa-solid fa-chart-line text-sm"></i>
-          </div>
-        </div>
-
-        <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-3 flex items-center justify-between">
-          <div>
-            <p class="text-[11px] text-slate-400 font-medium" id="kpi-label-2">Avg. QA 2 Score</p>
-            <h3 id="kpi-qa2" class="text-xl font-bold text-[#ebbd31] mt-0.5">0</h3>
-          </div>
-          <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-[#ebbd31] flex items-center justify-center">
-            <i class="fa-solid fa-award text-sm"></i>
-          </div>
-        </div>
-
-        <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-3 flex items-center justify-between">
-          <div>
-            <p class="text-[11px] text-slate-400 font-medium" id="kpi-label-3">Total Volume</p>
-            <h3 id="kpi-total" class="text-xl font-bold text-white mt-0.5">0</h3>
-          </div>
-          <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
-            <i class="fa-solid fa-folder text-sm"></i>
-          </div>
-        </div>
-
-        <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-3 flex items-center justify-between">
-          <div>
-            <p class="text-[11px] text-slate-400 font-medium" id="kpi-label-4">Avg. Calls / Day</p>
-            <h3 id="kpi-daily" class="text-xl font-bold text-white mt-0.5">0</h3>
-          </div>
-          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-            <i class="fa-solid fa-calculator text-sm"></i>
-          </div>
-        </div>
-      </div>
-
-      <!-- SEARCH BAR & THREE CHART CATEGORY SELECTOR -->
-      <div id="search-chart-bar" class="flex flex-col md:flex-row justify-between items-center bg-[#1c2234] p-2.5 rounded-xl border border-[#2a344d] gap-3">
-        <div class="relative w-full md:w-72">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-          <input type="text" id="searchInput" onkeyup="filterTables()" placeholder="Search agent, leader, task, branch..." class="w-full bg-[#141824] border border-[#2a344d] rounded-lg pl-8 pr-3 py-1 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#ebbd31]">
-        </div>
-
-        <div class="flex items-center space-x-2 w-full md:w-auto">
-          <label class="text-[11px] text-slate-400 font-medium whitespace-nowrap"><i class="fa-solid fa-chart-column text-[#ebbd31] mr-1"></i>CHART CATEGORY:</label>
-          <select id="chartMetricSelect" onchange="updateAllCharts()" class="bg-[#141824] border border-[#2a344d] text-[#ebbd31] text-xs font-semibold px-2.5 py-1 rounded-lg focus:outline-none cursor-pointer w-full md:w-auto">
-          </select>
-        </div>
-      </div>
-
-      <!-- VIEW 1: PHONES TAB -->
-      <div id="view-phones" class="space-y-6">
-        <!-- Table 1: GUA / COL -->
-        <div class="bg-[#1c2234] rounded-xl border border-[#2a344d] overflow-hidden shadow-xl">
-          <div class="p-3 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
-            <h2 class="text-xs font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - GUA / COL</h2>
-            <div class="flex items-center space-x-2">
-              <button onclick="addAgentRow('table-gua-col')" class="px-2 py-0.5 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-md text-[11px] font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
-                <i class="fa-solid fa-plus text-[9px]"></i>
-                <span>Add Agent</span>
-              </button>
-              <span class="text-[10px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">20 Agents</span>
+<div class="container">
+    <div class="header">
+        <div class="header-branding">
+            <div class="logo-circle">
+                <i class="fa-solid fa-award logo-icon"></i>
             </div>
-          </div>
-          <div class="p-3 border-b border-[#2a344d] bg-[#141824]/40 h-52 relative">
-            <canvas id="chart-gua-col"></canvas>
-          </div>
-          <div class="overflow-x-auto custom-scrollbar p-1">
-            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-gua-col">
-              <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
-                <tr>
-                  <th class="p-2 min-w-[120px]">Agent Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
-                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA 1</th><th class="p-2 text-center text-[#ebbd31] col-qa">QA 2</th><th class="p-2 text-center text-[#ebbd31] col-qa">AVG QA</th>
-                  <th class="p-2 text-center col-num">Inbound</th><th class="p-2 text-center col-num">Outbound</th><th class="p-2 text-center col-num">Total</th><th class="p-2 text-center col-aht">AHT</th><th class="p-2 text-center col-num">Avg/Day</th>
-                  <th class="p-2 text-center col-drop">Abnd Hold</th><th class="p-2 text-center col-drop">Declined</th><th class="p-2 text-center col-drop">Missed</th>
-                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center text-[#ebbd31] min-w-[140px]">Resolution</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[55px]">Actions</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Table 2: PAN -->
-        <div class="bg-[#1c2234] rounded-xl border border-[#2a344d] overflow-hidden shadow-xl">
-          <div class="p-3 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
-            <h2 class="text-xs font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - PAN</h2>
-            <div class="flex items-center space-x-2">
-              <button onclick="addAgentRow('table-pan')" class="px-2 py-0.5 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-md text-[11px] font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
-                <i class="fa-solid fa-plus text-[9px]"></i>
-                <span>Add Agent</span>
-              </button>
-              <span class="text-[10px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">16 Agents</span>
-            </div>
-          </div>
-          <div class="p-3 border-b border-[#2a344d] bg-[#141824]/40 h-52 relative">
-            <canvas id="chart-pan"></canvas>
-          </div>
-          <div class="overflow-x-auto custom-scrollbar p-1">
-            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-pan">
-              <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
-                <tr>
-                  <th class="p-2 min-w-[120px]">Agent Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
-                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA 1</th><th class="p-2 text-center text-[#ebbd31] col-qa">QA 2</th><th class="p-2 text-center text-[#ebbd31] col-qa">AVG QA</th>
-                  <th class="p-2 text-center col-num">Inbound</th><th class="p-2 text-center col-num">Outbound</th><th class="p-2 text-center col-num">Total</th><th class="p-2 text-center col-aht">AHT</th><th class="p-2 text-center col-num">Avg/Day</th>
-                  <th class="p-2 text-center col-drop">Abnd Hold</th><th class="p-2 text-center col-drop">Declined</th><th class="p-2 text-center col-drop">Missed</th>
-                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center text-[#ebbd31] min-w-[140px]">Resolution</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[55px]">Actions</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Table 3: MX - PHONES -->
-        <div class="bg-[#1c2234] rounded-xl border border-[#2a344d] overflow-hidden shadow-xl">
-          <div class="p-3 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
-            <h2 class="text-xs font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - MX - Phones</h2>
-            <div class="flex items-center space-x-2">
-              <button onclick="addAgentRow('table-mx-phones')" class="px-2 py-0.5 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-md text-[11px] font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
-                <i class="fa-solid fa-plus text-[9px]"></i>
-                <span>Add Agent</span>
-              </button>
-              <span class="text-[10px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">7 Agents</span>
-            </div>
-          </div>
-          <div class="p-3 border-b border-[#2a344d] bg-[#141824]/40 h-52 relative">
-            <canvas id="chart-mx-phones"></canvas>
-          </div>
-          <div class="overflow-x-auto custom-scrollbar p-1">
-            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-mx-phones">
-              <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
-                <tr>
-                  <th class="p-2 min-w-[120px]">Agent Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
-                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA 1</th><th class="p-2 text-center text-[#ebbd31] col-qa">QA 2</th><th class="p-2 text-center text-[#ebbd31] col-qa">AVG QA</th>
-                  <th class="p-2 text-center col-num">Inbound</th><th class="p-2 text-center col-num">Outbound</th><th class="p-2 text-center col-num">Total</th><th class="p-2 text-center col-aht">AHT</th><th class="p-2 text-center col-num">Avg/Day</th>
-                  <th class="p-2 text-center col-drop">Abnd Hold</th><th class="p-2 text-center col-drop">Declined</th><th class="p-2 text-center col-drop">Missed</th>
-                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center text-[#ebbd31] min-w-[140px]">Resolution</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[55px]">Actions</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- VIEW 2: CASES TAB -->
-      <div id="view-cases" class="space-y-6 hidden">
-        <!-- Table 1: GUA / COL / PHI CASES -->
-        <div class="bg-[#1c2234] rounded-xl border border-[#2a344d] overflow-hidden shadow-xl">
-          <div class="p-3 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
-            <h2 class="text-xs font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - GUA / COL / PHI</h2>
-            <div class="flex items-center space-x-2">
-              <button onclick="addCasesRow('table-cases-gua')" class="px-2 py-0.5 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-md text-[11px] font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
-                <i class="fa-solid fa-plus text-[9px]"></i>
-                <span>Add Agent</span>
-              </button>
-              <span class="text-[10px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">27 Agents</span>
-            </div>
-          </div>
-          <div class="p-3 border-b border-[#2a344d] bg-[#141824]/40 h-52 relative">
-            <canvas id="chart-cases-gua"></canvas>
-          </div>
-          <div class="overflow-x-auto custom-scrollbar p-1">
-            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-cases-gua">
-              <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
-                <tr>
-                  <th class="p-2 min-w-[120px]">Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
-                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA Total</th><th class="p-2 text-center col-num">Convs</th><th class="p-2 text-center col-num">Resp Time</th><th class="p-2 text-center col-num">SLA Missed</th><th class="p-2 text-center col-num">CSAT</th><th class="p-2 text-center col-num">DSAT</th><th class="p-2 text-center col-num">Good</th><th class="p-2 text-center col-num">Bad</th><th class="p-2 text-center col-num">Total Surv</th>
-                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center text-[#ebbd31] min-w-[140px]">Resolution</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[55px]">Actions</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Table 2: MX CASES -->
-        <div class="bg-[#1c2234] rounded-xl border border-[#2a344d] overflow-hidden shadow-xl">
-          <div class="p-3 bg-[#141824] border-b border-[#2a344d] flex justify-between items-center">
-            <h2 class="text-xs font-bold text-[#ebbd31] tracking-wider uppercase">Agent Quality & Operational Metrics - MX - CASES</h2>
-            <div class="flex items-center space-x-2">
-              <button onclick="addCasesRow('table-cases-mx')" class="px-2 py-0.5 bg-amber-500/10 text-[#ebbd31] hover:bg-amber-500/20 rounded-md text-[11px] font-semibold border border-amber-500/30 transition-colors flex items-center space-x-1">
-                <i class="fa-solid fa-plus text-[9px]"></i>
-                <span>Add Agent</span>
-              </button>
-              <span class="text-[10px] bg-[#2a344d] text-slate-300 px-2 py-0.5 rounded-full font-mono agent-count">3 Agents</span>
-            </div>
-          </div>
-          <div class="p-3 border-b border-[#2a344d] bg-[#141824]/40 h-52 relative">
-            <canvas id="chart-cases-mx"></canvas>
-          </div>
-          <div class="overflow-x-auto custom-scrollbar p-1">
-            <table class="w-full text-xs text-left text-slate-300 data-table" id="table-cases-mx">
-              <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
-                <tr>
-                  <th class="p-2 min-w-[120px]">Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
-                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA Total</th><th class="p-2 text-center col-num">Convs</th><th class="p-2 text-center col-num">Resp Time</th><th class="p-2 text-center col-num">SLA Missed</th><th class="p-2 text-center col-num">CSAT</th><th class="p-2 text-center col-num">DSAT</th><th class="p-2 text-center col-num">Good</th><th class="p-2 text-center col-num">Bad</th><th class="p-2 text-center col-num">Total Surv</th>
-                  <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center text-[#ebbd31] min-w-[140px]">Resolution</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[55px]">Actions</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- VIEW 3: NOTES & INSIGHTS OF THE MONTH TAB -->
-      <div id="view-notes" class="space-y-6 hidden">
-        <div class="bg-[#1c2234] border border-[#2a344d] rounded-xl p-5 shadow-xl space-y-6">
-          
-          <!-- MONTH & WEEK SPECIFIC NOTES TEXT BOX -->
-          <div class="bg-[#141824] border border-[#2a344d] rounded-xl p-4 space-y-3">
-            <div class="flex items-center justify-between">
-              <h3 class="text-xs font-bold text-[#ebbd31] uppercase tracking-wider flex items-center space-x-2">
-                <i class="fa-solid fa-note-sticky text-base"></i>
-                <span>General Notes & Insights for <span id="currentPeriodLabel" class="text-white underline decoration-[#ebbd31]">October - Week 3</span></span>
-              </h3>
-              <button onclick="saveMonthlyNote()" class="inline-flex items-center space-x-1.5 bg-[#ebbd31] hover:bg-[#d1a320] text-slate-950 font-bold px-3 py-1 rounded-lg text-xs transition-all shadow-md">
-                <i class="fa-solid fa-floppy-disk"></i>
-                <span>Save Note</span>
-              </button>
-            </div>
-            <textarea id="periodNotesArea" placeholder="Write general observations, monthly insights, quality trends, or department targets for this week/month..." class="w-full bg-[#1c2234] border border-[#2a344d] rounded-lg p-3 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#ebbd31] min-h-[110px] resize-y custom-scrollbar leading-relaxed"></textarea>
-          </div>
-
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#2a344d] pb-4">
             <div>
-              <h2 class="text-lg font-bold text-[#ebbd31] flex items-center space-x-2">
-                <i class="fa-solid fa-brain"></i>
-                <span>Agent Specific QA Profile & Insights</span>
-              </h2>
-              <p class="text-xs text-slate-400 mt-0.5">Search and analyze individual agent QA metrics, action plans, resolutions, and AI insights.</p>
+                <h1>HIGHWAY QA DASHBOARD</h1>
+                <small style="opacity: 0.85;">Workforce Management, Hourly Analytics &amp; 15-Min Agent Schedules</small>
             </div>
-
-            <!-- AGENT SEARCH / DROPDOWN SELECTOR -->
-            <div class="relative w-full md:w-80">
-              <label class="text-[10px] text-slate-400 font-semibold block mb-1">SELECT OR SEARCH AGENT:</label>
-              <select id="agentNotesSelector" onchange="loadAgentNotesProfile()" class="w-full bg-[#141824] border border-[#ebbd31] text-[#ebbd31] font-bold text-xs rounded-lg p-2 focus:outline-none cursor-pointer shadow-md">
-                <option value="">-- Choose Agent --</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- AGENT PROFILE CONTENT -->
-          <div id="agentProfileContainer" class="hidden space-y-6">
-            
-            <!-- TOP METRIC CARDS FOR AGENT -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div class="bg-[#141824] border border-[#2a344d] rounded-xl p-4">
-                <p class="text-xs text-slate-400 font-medium">Department / Source</p>
-                <h4 id="agent-dept" class="text-sm font-bold text-white mt-1">-</h4>
-              </div>
-
-              <div class="bg-[#141824] border border-[#2a344d] rounded-xl p-4">
-                <p class="text-xs text-slate-400 font-medium">AVG QA Score of the Month</p>
-                <h3 id="agent-avg-qa" class="text-2xl font-bold text-[#ebbd31] mt-1">-</h3>
-              </div>
-
-              <div class="bg-[#141824] border border-[#2a344d] rounded-xl p-4">
-                <p class="text-xs text-slate-400 font-medium">AVG AHT of the Month</p>
-                <h3 id="agent-avg-aht" class="text-2xl font-bold text-sky-400 mt-1">-</h3>
-              </div>
-
-              <div class="bg-[#141824] border border-[#2a344d] rounded-xl p-4">
-                <p class="text-xs text-slate-400 font-medium">Assigned Leader & Branch</p>
-                <h4 id="agent-leader-branch" class="text-sm font-bold text-slate-200 mt-1">-</h4>
-              </div>
-            </div>
-
-            <!-- ACTION PLAN & RESOLUTIONS SUMMARY -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="bg-[#141824] border border-[#2a344d] rounded-xl p-4 space-y-2">
-                <h3 class="text-xs font-bold text-[#ebbd31] uppercase tracking-wider flex items-center space-x-1.5">
-                  <i class="fa-solid fa-list-check"></i>
-                  <span>Action Plan Details</span>
-                </h3>
-                <div id="agent-action-plan" class="bg-[#1c2234] border border-[#2a344d] rounded-lg p-3 text-xs text-slate-200 whitespace-pre-wrap font-medium">
-                  -
-                </div>
-              </div>
-
-              <div class="bg-[#141824] border border-[#2a344d] rounded-xl p-4 space-y-2">
-                <h3 class="text-xs font-bold text-[#ebbd31] uppercase tracking-wider flex items-center space-x-1.5">
-                  <i class="fa-solid fa-handshake"></i>
-                  <span>Resolutions for Action Plan</span>
-                </h3>
-                <div id="agent-resolution" class="bg-[#1c2234] border border-[#2a344d] rounded-lg p-3 text-xs text-slate-200 whitespace-pre-wrap font-medium">
-                  -
-                </div>
-              </div>
-            </div>
-
-            <!-- AI RECOMMENDATIONS BOX -->
-            <div class="bg-gradient-to-r from-amber-500/10 via-[#1c2234] to-blue-500/10 border border-[#ebbd31]/40 rounded-xl p-5 space-y-3 shadow-lg">
-              <div class="flex items-center space-x-2">
-                <i class="fa-solid fa-wand-magic-sparkles text-[#ebbd31] text-lg"></i>
-                <h3 class="text-sm font-bold text-[#ebbd31] tracking-wide uppercase">AI Recommendations to Improve Agent's QA</h3>
-              </div>
-              <ul id="agent-ai-recommendations" class="space-y-2 text-xs text-slate-300 list-disc list-inside pl-1 leading-relaxed">
-              </ul>
-            </div>
-
-          </div>
-
-          <!-- PLACEHOLDER WHEN NO AGENT SELECTED -->
-          <div id="agentPlaceholder" class="text-center py-12 text-slate-500 space-y-2">
-            <i class="fa-solid fa-user-gear text-4xl mb-2 text-slate-600"></i>
-            <p class="text-sm font-medium">Select an agent from the dropdown menu above to view their monthly profile, notes, and AI insights.</p>
-          </div>
-
         </div>
-      </div>
-
+        <div class="header-actions">
+            <button class="btn btn-secondary" id="btnOpenImport">Paste Team Data Tables</button>
+            <button class="btn btn-yellow" id="btnOpenMgmt">Manage Agents &amp; Schedules</button>
+        </div>
     </div>
-  </main>
 
-  <script>
-    // FIREBASE INITIALIZATION
+    <!-- Controls Panel -->
+    <div class="controls-panel">
+        <div class="control-group">
+            <span class="controls-title">Select Period</span>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <select id="monthSelect" class="input-select" style="font-weight: bold;">
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September" selected>September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                </select>
+
+                <select id="weekSelect" class="input-select" style="font-weight: bold;">
+                    <option value="Week 1" selected>Week 1</option>
+                    <option value="Week 2">Week 2</option>
+                    <option value="Week 3">Week 3</option>
+                    <option value="Week 4">Week 4</option>
+                    <option value="Week 5">Week 5</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <span class="controls-title">Filter by Department</span>
+            <div class="slicer-buttons" id="slicerContainer">
+                <button class="btn-slicer all-btn active" data-dept="ALL">All Departments</button>
+                <button class="btn-slicer" data-dept="OBS - Phones">OBS - Phones</button>
+                <button class="btn-slicer" data-dept="OBS - Cases">OBS - Cases</button>
+                <button class="btn-slicer" data-dept="INS">INS</button>
+                <button class="btn-slicer" data-dept="ELD">ELD</button>
+                <button class="btn-slicer" data-dept="LL+">LL+</button>
+                <button class="btn-slicer" data-dept="TFX">TFX</button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <span class="controls-title">Staffing Parameters</span>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <label style="font-size: 0.8rem; font-weight: bold; color: var(--accent-yellow);">AHT (min):</label>
+                <input type="number" id="ahtInput" class="input-number" value="5" min="1" max="60" style="width: 55px;">
+                <label style="font-size: 0.8rem; font-weight: bold; color: var(--accent-yellow);">Occ (%):</label>
+                <input type="number" id="occInput" class="input-number" value="85" min="50" max="100" style="width: 55px;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Visualizations -->
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3 id="chart1Title">Consolidated Call Volume vs. Capacity (September - Week 1)</h3>
+            <div class="chart-container">
+                <canvas id="volumeCapacityChart"></canvas>
+            </div>
+        </div>
+        <div class="chart-card">
+            <h3 id="chart2Title">Department Breakdown: Headcount vs. Away (Peak Hour)</h3>
+            <div class="chart-container">
+                <canvas id="deptDistributionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table 1: Schedule & Away Roster -->
+    <h2 class="section-title">
+        <span>1. Away Agents Matrix by Hourly Time Interval</span>
+    </h2>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Time Slot</th>
+                    <th class="dept-col" data-dept="OBS - Phones">OBS - Phones</th>
+                    <th class="dept-col" data-dept="OBS - Cases">OBS - Cases</th>
+                    <th class="dept-col" data-dept="INS">INS</th>
+                    <th class="dept-col" data-dept="ELD">ELD</th>
+                    <th class="dept-col" data-dept="LL+">LL+</th>
+                    <th class="dept-col" data-dept="TFX">TFX</th>
+                    <th class="col-total">Total Away Agents</th>
+                    <th class="col-details">Away Agents &amp; Activity Details</th>
+                </tr>
+            </thead>
+            <tbody id="scheduleTableBody"></tbody>
+            <tfoot>
+                <tr>
+                    <td>TOTAL ROSTER</td>
+                    <td class="dept-foot" data-dept="OBS - Phones" id="foot-OBS - Phones">27</td>
+                    <td class="dept-foot" data-dept="OBS - Cases" id="foot-OBS - Cases">10</td>
+                    <td class="dept-foot" data-dept="INS" id="foot-INS">21</td>
+                    <td class="dept-foot" data-dept="ELD" id="foot-ELD">29</td>
+                    <td class="dept-foot" data-dept="LL+" id="foot-LL+">8</td>
+                    <td class="dept-foot" data-dept="TFX" id="foot-TFX">3</td>
+                    <td id="footTotal" style="background-color: var(--accent-yellow); color: black;">98</td>
+                    <td id="footNote" style="text-align: left; font-style: italic;">Selected Headcount Total = 98 Agents</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Table 2: Call Volume Metrics -->
+    <h2 class="section-title">
+        <span>2. Consolidated Call Volume Metrics (<span class="periodLabel">September - Week 1</span>)</span>
+    </h2>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Time Slot</th>
+                    <th>Avg. Answered</th>
+                    <th>Avg. Abnd. in Queue</th>
+                    <th>Avg. Abnd. in CSAT</th>
+                    <th>Avg. Abnd. on Hold</th>
+                    <th style="background-color: var(--accent-yellow); color: #000;">Avg. Total Volume</th>
+                    <th>Max Historical</th>
+                </tr>
+            </thead>
+            <tbody id="volumeTableBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Table 3: Capacity & Staffing Gap -->
+    <h2 class="section-title">
+        <span>3. Staffing Requirements &amp; Coverage Gap (<span class="periodLabel">September - Week 1</span>)</span>
+    </h2>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Time Slot</th>
+                    <th style="background-color: var(--accent-yellow); color: #000;">Avg Call Volume</th>
+                    <th>Available Phone Agents</th>
+                    <th>Required Phone Agents</th>
+                    <th>Net Gap / Coverage</th>
+                    <th>Recommended Action</th>
+                </tr>
+            </thead>
+            <tbody id="comparisonTableBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Section 4: Operational Recommendations -->
+    <h2 class="section-title">4. Operational Recommendations &amp; Staffing Insights</h2>
+    <div id="recommendationsContainer"></div>
+</div>
+
+<!-- MODAL: Import Team Volume Tables -->
+<div class="modal-overlay" id="importModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Paste Call Volume Tables &amp; Period Manager</h3>
+            <button class="close-btn" id="btnCloseImport">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="saved-weeks-panel">
+                <span style="font-weight:bold; font-size:0.85rem; color:var(--accent-yellow);">Saved Periods in Database:</span>
+                <div class="saved-weeks-list" id="savedPeriodsContainer">
+                    <span style="font-size:0.8rem; color:#aaa;">No periods saved yet.</span>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:15px; margin-bottom:15px; background:var(--primary-dark); padding:10px; border-radius:6px; align-items:center; border: 1.5px solid var(--accent-yellow);">
+                <label style="font-weight:bold; font-size:0.85rem; color: var(--accent-yellow);">Target Month:</label>
+                <select id="importMonthSelect" class="input-select">
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September" selected>September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                </select>
+
+                <label style="font-weight:bold; font-size:0.85rem; color: var(--accent-yellow);">Target Week:</label>
+                <select id="importWeekSelect" class="input-select">
+                    <option value="Week 1" selected>Week 1</option>
+                    <option value="Week 2">Week 2</option>
+                    <option value="Week 3">Week 3</option>
+                    <option value="Week 4">Week 4</option>
+                    <option value="Week 5">Week 5</option>
+                </select>
+            </div>
+
+            <p style="font-size:0.85rem; color:#ccc; margin-top:0;">Paste data directly from Excel for each queue tab below.</p>
+            
+            <div class="tab-buttons" id="teamImportTabs">
+                <button class="tab-btn active" data-tab="tab-obs">OBS Phones</button>
+                <button class="tab-btn" data-tab="tab-ins">INS Phones</button>
+                <button class="tab-btn" data-tab="tab-eld">ELD Phones</button>
+                <button class="tab-btn" data-tab="tab-ll">LL+</button>
+                <button class="tab-btn" data-tab="tab-tfx">TFX</button>
+            </div>
+
+            <div class="tab-content active" id="tab-obs">
+                <div class="form-group">
+                    <label>OBS Phones Volume Data:</label>
+                    <textarea class="input-text team-volume-input" id="volumeText_obs" style="height: 180px; font-family: monospace; font-size:0.8rem;"></textarea>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-ins">
+                <div class="form-group">
+                    <label>INS Phones Volume Data:</label>
+                    <textarea class="input-text team-volume-input" id="volumeText_ins" style="height: 180px; font-family: monospace; font-size:0.8rem;"></textarea>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-eld">
+                <div class="form-group">
+                    <label>ELD Phones Volume Data:</label>
+                    <textarea class="input-text team-volume-input" id="volumeText_eld" style="height: 180px; font-family: monospace; font-size:0.8rem;"></textarea>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-ll">
+                <div class="form-group">
+                    <label>LL+ Volume Data:</label>
+                    <textarea class="input-text team-volume-input" id="volumeText_ll" style="height: 180px; font-family: monospace; font-size:0.8rem;"></textarea>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-tfx">
+                <div class="form-group">
+                    <label>TFX Volume Data:</label>
+                    <textarea class="input-text team-volume-input" id="volumeText_tfx" style="height: 180px; font-family: monospace; font-size:0.8rem;"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" id="btnCancelImport">Cancel</button>
+            <button class="btn btn-yellow" id="btnApplyImport">Save &amp; Update Dashboard</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Authentication -->
+<div class="modal-overlay" id="authModal">
+    <div class="modal-card auth-card">
+        <div class="modal-header">
+            <h3>Management Authentication</h3>
+            <button class="close-btn" id="btnCloseAuth">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p style="font-size:0.9rem;">Please enter the administrative password to edit or delete agent schedules:</p>
+            <div class="form-group">
+                <input type="password" id="authPasswordInput" class="input-text" placeholder="Access Password" style="text-align:center; font-size:1rem;">
+                <span id="authErrorMsg" style="color:var(--danger-color); font-size:0.8rem; display:none; margin-top:5px;">Incorrect password. Try again.</span>
+            </div>
+        </div>
+        <div class="modal-footer" style="justify-content:center;">
+            <button class="btn btn-yellow" id="btnSubmitAuth">Verify Access</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Manage Agents & Schedules -->
+<div class="modal-overlay" id="mgmtModal">
+    <div class="modal-card" style="max-width: 950px;">
+        <div class="modal-header">
+            <h3>Agent Roster &amp; Away Schedules Management (Drag to Reorder)</h3>
+            <button class="close-btn" id="btnCloseMgmt">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="mgmt-toolbar">
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <label style="font-weight:bold; font-size:0.85rem; color: var(--accent-yellow);">Select Department:</label>
+                    <select id="mgmtDeptSelect" class="input-select">
+                        <option value="OBS - Phones">OBS - Phones</option>
+                        <option value="OBS - Cases">OBS - Cases</option>
+                        <option value="INS">INS</option>
+                        <option value="ELD">ELD</option>
+                        <option value="LL+">LL+</option>
+                        <option value="TFX">TFX</option>
+                    </select>
+                </div>
+                <button class="btn btn-yellow btn-sm" id="btnAddNewAgentForm">+ Add New Agent</button>
+            </div>
+
+            <div id="agentFormCard" style="display:none; background:var(--primary-dark); border:1.5px solid var(--accent-yellow); padding:15px; border-radius:8px; margin-bottom:15px;">
+                <h4 id="agentFormTitle" style="margin-top:0; margin-bottom:10px; color:var(--accent-yellow);">Add Agent</h4>
+                <input type="hidden" id="editAgentId" value="">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Agent Name:</label>
+                        <input type="text" id="agentNameInput" class="input-text" placeholder="First Last">
+                    </div>
+                    <div class="form-group">
+                        <label>Department:</label>
+                        <select id="agentDeptInput" class="input-select">
+                            <option value="OBS - Phones">OBS - Phones</option>
+                            <option value="OBS - Cases">OBS - Cases</option>
+                            <option value="INS">INS</option>
+                            <option value="ELD">ELD</option>
+                            <option value="LL+">LL+</option>
+                            <option value="TFX">TFX</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label>Select Away Intervals (15-Min Granularity):</label>
+                        <div class="hour-chips" id="hourChipsContainer"></div>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:8px;">
+                    <button class="btn btn-outline btn-sm" id="btnCancelAgentForm">Cancel</button>
+                    <button class="btn btn-yellow btn-sm" id="btnSaveAgent">Save Agent</button>
+                </div>
+            </div>
+
+            <div class="table-responsive" style="max-height: 350px;">
+                <table class="agent-list-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 30px;"></th>
+                            <th>Agent Name</th>
+                            <th>Department</th>
+                            <th>Away Hours &amp; Activities</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mgmtAgentsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="btnCloseMgmtFooter">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- FIREBASE SDK ENGINE -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-database.js";
+
     const firebaseConfig = {
-      apiKey: "AIzaSyDDsFXl3H1eJwno67MSpBcpnik7vqPnyT4",
-      authDomain: "qadashboardhighway.firebaseapp.com",
-      databaseURL: "https://qadashboardhighway-default-rtdb.firebaseio.com",
-      projectId: "qadashboardhighway",
-      storageBucket: "qadashboardhighway.firebasestorage.app",
-      messagingSenderId: "1052597531279",
-      appId: "1:1052597531279:web:8968dd441e2aba41f676fa",
-      measurementId: "G-PBMX4ZPVLR"
+        apiKey: "AIzaSyAmB9PhTd_Dz68rTZQZlRS1mcfAy1SQxgo",
+        authDomain: "volumevsavailability.firebaseapp.com",
+        databaseURL: "https://volumevsavailability-default-rtdb.firebaseio.com",
+        projectId: "volumevsavailability",
+        storageBucket: "volumevsavailability.firebasestorage.app",
+        messagingSenderId: "536106438860",
+        appId: "1:536106438860:web:a7b62c957028813d9f3269",
+        measurementId: "G-YDZ8542ENX"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const rtdb = firebase.database();
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-    // BASE DATASETS
-    const phonesGuaColData = [
-      ["Acsa Esquivel", "Insurance phones", "Guatemala", "Andrea", "8:00 AM - 5:00 PM"],
-      ["Alexander Alvarado", "Phones", "Colombia", "Nury", "8:00 AM - 5:00 PM"],
-      ["Ana Melendez", "Insurance phones", "Guatemala", "Kevin Lopez", "6:00 AM - 3:00 PM"],
-      ["Andrea Gonzalez", "Phones", "Colombia", "Nury", "8:00 AM - 5:00 PM"],
-      ["Cesar Lopez", "Insurance phones", "Guatemala", "Kevin Lopez", "9:00 AM - 6:00 PM"],
-      ["Esvin Gomez", "ELD cases", "Guatemala", "Diego Gonzalez", "7:00 AM - 4:00 PM"],
-      ["Froy Gonzalez", "ELD phones", "Guatemala", "Jonathan", "9:00 AM - 6:00 PM"],
-      ["Gustavo Lopez", "Insurance phones", "Guatemala", "Andrea", "6:00 AM - 3:00 PM"],
-      ["Iverth Anthony Monterroso", "ELD cases", "Guatemala", "Jonathan", "8:00 AM - 5:00 PM"],
-      ["Kener Lee", "Insurance", "Guatemala", "Andrea", "8:00 AM - 5:00 PM"],
-      ["Kevin Acabal", "ELD phones", "Guatemala", "Diego Gonzalez", "6:00 AM - 3:00 PM"],
-      ["Kevin Durango", "Phones", "Colombia", "Nury", "8:00 AM - 5:00 PM"],
-      ["Luis Ajche", "ELD phones", "Guatemala", "Jonathan", "8:00 AM - 5:00 PM"],
-      ["Luis Gonzalez", "ELD phones", "Guatemala", "Jonathan", "8:00 AM - 5:00 PM"],
-      ["Manfredo Monterroso", "Insurance phones", "Guatemala", "Andrea", "6:00 AM - 3:00 PM"],
-      ["Melanie Garcia", "ELD phones", "Guatemala", "Jonathan", "8:00 AM - 5:00 PM"],
-      ["Samantha Chinchilla", "ELD phones", "Guatemala", "Jonathan", "6:00 AM - 3:00 PM"],
-      ["Sebastian Quiñonez", "ELD cases", "Guatemala", "Jonathan", "7:00 AM - 4:00 PM"],
-      ["Sergio Chiguil", "ELD phones", "Guatemala", "Diego Gonzales", "5:00 AM - 2:00 PM"],
-      ["Sharon Olivares", "ELD phones", "Guatemala", "Jonathan", "6:00 AM - 3:00 PM"]
-    ];
+    const dbRefVolume = ref(db, 'wfm_data/multiPeriodVolumeDB');
+    const dbRefRawTexts = ref(db, 'wfm_data/rawTextsDB');
+    const dbRefAgents = ref(db, 'wfm_data/masterAgentsDB');
+    const dbRefActiveNav = ref(db, 'wfm_data/activeNavigation');
 
-    const phonesPanData = [
-      ["Alexander Santamaria", "Phones", "Panama", "Daniela Cerezo", "6:00 AM - 3:30 PM"],
-      ["Benneth Smith", "ELD phones", "Panama", "Eduardo Bellamy", "6:30 AM - 4:00 PM"],
-      ["Dana Redwood", "Insurance", "Panama", "Daniela Cerezo", "7:00 AM - 4:30 PM"],
-      ["Dean Spencer", "Phones", "Panama", "Daniela Cerezo", "5:00 AM - 2:30 PM"],
-      ["Felix Torres", "Phones", "Panama", "Daniela Cerezo", "8:30 AM - 6:00 PM"],
-      ["Jesus Rios", "ELD phones", "Panama", "Eduardo Bellamy", "7:00 AM - 4:30 PM"],
-      ["Jose Rodriguez", "ELD phones", "Panama", "Eduardo Bellamy", "8:30 AM - 6:00 PM"],
-      ["Kellyneth Estrada", "Phones", "Panama", "Daniela Cerezo", "5:30 AM - 3:00 PM"],
-      ["Kevin Williams", "Phones", "Panama", "Eduardo Bellamy", "8:30 AM - 6:00 PM"],
-      ["Keyren Fuertes", "Insurance", "Panama", "Daniela Cerezo", "5:00 AM - 2:30 PM"],
-      ["Marcos Botello", "ELD phones", "Panama", "Eduardo Bellamy", "8:30 AM - 6:00 PM"],
-      ["Marie Claire Perez", "ELD phones", "Panama", "Eduardo Bellamy", "7:30 AM - 5:00 PM"],
-      ["Marielys Tejada", "Insurance", "Panama", "Daniela Cerezo", "8:30 AM - 6:00 PM"],
-      ["Sonia Jimenez", "ELD phones", "Panama", "Eduardo Bellamy", "8:30 AM - 6:00 PM"],
-      ["Stephanie Temple", "Phones", "Panama", "Daniela Cerezo", "6:00 AM - 3:30 PM"],
-      ["Zinedine Moscote", "Phones", "Panama", "Daniela Cerezo", "7:00 AM - 4:30 PM"]
-    ];
+    let isRemoteUpdate = false;
 
-    const phonesMxData = [
-      ["Cesar Larios", "Phones", "Mexico", "Carlos Rios", "7:00 AM - 4:00 PM"],
-      ["Danae Fergoso", "Phones", "Mexico", "Sabdy Alvarez", "8:00 AM - 5:00 PM"],
-      ["Daniel Pelayo", "Phones", "Mexico", "Sabdy Alvarez", "9:00 AM - 6:00 PM"],
-      ["Israel Arias", "Phones", "Mexico", "Carlos Rios", "7:00 AM - 4:00 PM"],
-      ["Kevin Ibarra", "Phones", "Mexico", "Carlos Rios", "7:00 AM - 4:00 PM"],
-      ["Omar Jimenez", "Phones", "Mexico", "Carlos Rios", "9:00 AM - 6:00 PM"],
-      ["Raul Torne", "Phones", "Mexico", "Sabdy Alvarez", "8:00 AM - 5:00 PM"]
-    ];
+    const depts = ['OBS - Phones', 'OBS - Cases', 'INS', 'ELD', 'LL+', 'TFX'];
+    
+    let deptRosterCounts = {
+        'OBS - Phones': 27,
+        'OBS - Cases': 10,
+        'INS': 21,
+        'ELD': 29,
+        'LL+': 8,
+        'TFX': 3
+    };
 
-    const casesGuaColPhiData = [
-      ["Alejandra Manco", "Cases", "Colombia", "Nury", "8:00 AM - 5:00 PM"],
-      ["Ann Jules Dayuta", "Cases", "Philipines", "Jennifer J", "11:00 AM - 8:00 PM"],
-      ["Ariel Mazate", "Insurance cases", "Guatemala", "Andrea", "6:00 AM - 3:00 PM"],
-      ["Brandon Vasquez", "ELD cases", "Guatemala", "Jonathan", "8:00 AM - 5:00 PM"],
-      ["Celina Franco", "ELD phones", "Guatemala", "Jonathan", "6:00 AM - 3:00 PM"],
-      ["Diana Orozco", "Cases", "Guatemala", "Karen", "6:00 AM - 3:00 PM"],
-      ["Edgar Linares", "ELD cases", "Guatemala", "Jonathan", "7:00 AM - 4:00 PM"],
-      ["Emely Hernandez", "Cases", "Guatemala", "Karen", "6:00 AM - 3:00 PM"],
-      ["Emilia Chajon", "Cases", "Guatemala", "Karen", "5:00 AM - 2:00 PM"],
-      ["Eunice Sir", "Insurance cases", "Guatemala", "Andrea", "8:00 AM - 5:00 PM"],
-      ["Jorge Najera", "ELD cases", "Guatemala", "Jonathan", "9:00 AM - 6:00 PM"],
-      ["Jorge Saban", "Phones", "Guatemala", "Karen", "7:00 AM - 4:00 PM"],
-      ["Josue Sucuc", "ELD cases", "Guatemala", "Jonathan", "6:00 AM - 3:00 PM"],
-      ["Juan Carlos Avedaño", "Insurance cases", "Guatemala", "Andrea", "7:00 AM - 4:00 PM"],
-      ["Kathering Santos", "Insurance cases", "Guatemala", "Andrea", "8:00 AM - 5:00 PM"],
-      ["Kyle Abad", "Cases", "Philipines", "Jennifer J", "10:00 PM - 7:00 AM"],
-      ["Lucia Herrera", "Cases", "Guatemala", "Karen", "7:00 AM - 4:00 PM"],
-      ["Luis Alexander Leon", "Insurance", "Colombia", "Nury", "8:00 AM - 5:00 PM"],
-      ["Lynda Escobedo", "Insurance cases", "Guatemala", "Kevin Lopez", "6:00 AM - 3:00 PM"],
-      ["Marco Lopez", "Insurance cases", "Guatemala", "Kevin Lopez", "7:00 AM - 4:00 PM"],
-      ["Marianne Abigaile", "Cases", "Philipines", "Jennifer J", "5:00 PM - 2:00 AM"],
-      ["Michelle Marquez", "Insurance", "Colombia", "Nury", "8:00 AM - 5:00 PM"],
-      ["Mary Joy Rafols", "Cases", "Philipines", "Jennifer J", "10:00 PM - 7:00 AM"],
-      ["Monica Prado", "Insurance cases", "Guatemala", "Kevin Lopez", "6:00 AM - 3:00 PM"],
-      ["Otto de la Cruz", "Insurance cases", "Guatemala", "Andrea", "6:00 AM - 3:00 PM"],
-      ["Pablo Saquilmer", "Cases", "Guatemala", "Karen", "6:00 AM - 3:00 PM"],
-      ["Rudy Herrera", "Cases", "Guatemala", "Karen", "10:00 AM - 7:00 PM"]
-    ];
-
-    const casesMxData = [
-      ["Galilea Gutierrez", "Cases", "Mexico", "Carlos Rios", "7:00 AM - 4:00 PM"],
-      ["Joseth Huerta", "Cases", "Mexico", "Carlos Rios", "6:00 AM - 3:00 PM"],
-      ["Alondra Mendoza", "Cases", "Mexico", "Sabdy Alvarez", "9:00 AM - 6:00 PM"]
-    ];
-
-    let currentTab = 'phones';
-    const chartInstances = {};
-
-    function updateCommentPopover(textarea) {
-      const popover = textarea.nextElementSibling;
-      if (popover) {
-        popover.innerText = textarea.value || "Sin comentarios...";
-      }
-    }
-
-    function handleCommentFocus(textarea) {
-      setTimeout(() => {
-        textarea.select();
-      }, 50);
-    }
-
-    // MANEJO DINÁMICO DE RESOLUTION SEGÚN LA SELECCIÓN DE ACTION PLAN
-    function renderResolutionCell(selectElem, savedVal = '') {
-      const val = selectElem.value;
-      const td = selectElem.closest('tr').querySelector('.td-resolution');
-      if (!td) return;
-
-      if (val === 'N/A') {
-        td.innerHTML = `<span class="text-slate-500 font-mono text-[11px] px-2">N/A</span><input type="hidden" class="res-val" value="N/A">`;
-      } 
-      else if (val === 'Coaching' || val === 'Feedback') {
-        const textVal = (savedVal && savedVal !== 'N/A') ? savedVal : '';
-        td.innerHTML = `
-          <div class="resolution-container">
-            <textarea placeholder="Write ${val.toLowerCase()} details..." class="cell-input cell-comment-area res-val text-slate-300 text-[11px]" onfocus="handleCommentFocus(this)" oninput="updateCommentPopover(this)">${textVal}</textarea>
-            <div class="comment-popover">${textVal || "No details added..."}</div>
-          </div>`;
-      } 
-      else if (val === 'Accountability Session') {
-        let parts = savedVal.split(' | Insights: ');
-        let dateVal = parts[0] || new Date().toISOString().split('T')[0];
-        let textVal = parts[1] || 'Insights of the Session: ';
-        if (!textVal.startsWith('Insights of the Session:')) {
-          textVal = 'Insights of the Session: ' + textVal;
-        }
-
-        td.innerHTML = `
-          <div class="flex flex-col space-y-1 p-0.5 resolution-container">
-            <input type="date" value="${dateVal}" class="res-date cell-input text-[10px] text-[#ebbd31] font-semibold bg-[#141824] border border-[#2a344d] rounded px-1 py-0.5">
-            <textarea class="cell-input cell-comment-area res-text text-slate-300 text-[10px]" onfocus="handleCommentFocus(this)" oninput="updateCommentPopover(this)">${textVal}</textarea>
-            <div class="comment-popover">${dateVal} - ${textVal}</div>
-          </div>`;
-      } 
-      else if (val === 'Disciplinary Action') {
-        let parts = savedVal.split(' | Reason: ');
-        let optVal = parts[0] || 'Accountability';
-        let textVal = parts[1] || 'Reason: ';
-        if (!textVal.startsWith('Reason:')) {
-          textVal = 'Reason: ' + textVal;
-        }
-
-        const opts = ['Accountability', 'Verbal Warning', 'Written', 'Suspension & Removal'];
-        const optionsHtml = opts.map(o => `<option value="${o}" ${o === optVal ? 'selected' : ''}>${o}</option>`).join('');
-
-        td.innerHTML = `
-          <div class="flex flex-col space-y-1 p-0.5 resolution-container">
-            <select class="res-opt cell-input text-[#ebbd31] text-[10px] font-semibold bg-[#141824] border border-[#2a344d] rounded px-1 py-0.5">
-              ${optionsHtml}
-            </select>
-            <textarea class="cell-input cell-comment-area res-text text-slate-300 text-[10px]" onfocus="handleCommentFocus(this)" oninput="updateCommentPopover(this)">${textVal}</textarea>
-            <div class="comment-popover">${optVal} - ${textVal}</div>
-          </div>`;
-      }
-    }
-
-    function getResolutionValue(tr) {
-      const td = tr.querySelector('.td-resolution');
-      if (!td) return 'N/A';
-
-      const hidden = td.querySelector('input.res-val');
-      if (hidden) return hidden.value;
-
-      const singleArea = td.querySelector('textarea.res-val');
-      if (singleArea) return singleArea.value;
-
-      const resDate = td.querySelector('.res-date');
-      const resText = td.querySelector('.res-text');
-      if (resDate && resText) return `${resDate.value} | Insights: ${resText.value}`;
-
-      const resOpt = td.querySelector('.res-opt');
-      if (resOpt && resText) return `${resOpt.value} | Reason: ${resText.value}`;
-
-      return 'N/A';
-    }
-
-    // CONDITIONAL FORMATTING FUNCTIONS
-    function applyConditionalFormatting(input, type) {
-      if (!input) return;
-      const val = parseFloat(input.innerText || input.value) || 0;
-      input.classList.remove('cond-green', 'cond-yellow', 'cond-orange', 'cond-red');
-
-      if (type === 'qa') {
-        if (val >= 95) input.classList.add('cond-green');
-        else if (val >= 85) input.classList.add('cond-yellow');
-        else if (val >= 65) input.classList.add('cond-orange');
-        else input.classList.add('cond-red');
-      } else if (type === 'abandonOrMissed') {
-        if (val <= 2) input.classList.add('cond-green');
-        else input.classList.add('cond-red');
-      } else if (type === 'declined') {
-        if (val === 0) input.classList.add('cond-green');
-        else input.classList.add('cond-red');
-      }
-    }
-
-    function updateMetricSelectOptions() {
-      const select = document.getElementById('chartMetricSelect');
-      select.innerHTML = '';
-
-      if (currentTab === 'phones') {
-        select.innerHTML = `
-          <option value="group1">1. QA Performance (QA 1 vs QA 2 vs AVG QA)</option>
-          <option value="group2">2. Call Volumes & Handle Times (Inbound, Outbound, Total, Avg/Day & AHT)</option>
-          <option value="group3">3. Call Drops & Misses (Abnd Hold, Declined & Missed)</option>
-        `;
-      } else {
-        select.innerHTML = `
-          <option value="group1">1. QA Performance (QA Total)</option>
-          <option value="group2">2. Case Activity & CSAT/DSAT (Conversations, CSAT, DSAT & First Response Mins)</option>
-          <option value="group3">3. Surveys & SLA Misses (Good, Bad & Total Surveys)</option>
-        `;
-      }
-    }
-
-    function switchTab(tab) {
-      currentTab = tab;
-      const btnPhones = document.getElementById('btn-tab-phones');
-      const btnCases = document.getElementById('btn-tab-cases');
-      const btnNotes = document.getElementById('btn-tab-notes');
-      const viewPhones = document.getElementById('view-phones');
-      const viewCases = document.getElementById('view-cases');
-      const viewNotes = document.getElementById('view-notes');
-      const kpiContainer = document.getElementById('kpi-container');
-      const searchChartBar = document.getElementById('search-chart-bar');
-      const formBtnText = document.getElementById('formBtnText');
-      const evalBtn = document.getElementById('evaluationFormBtn');
-
-      updateMetricSelectOptions();
-
-      // Reset Active Styles
-      btnPhones.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400";
-      btnCases.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400";
-      btnNotes.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-slate-400 hover:bg-[#1c2234] hover:text-amber-400";
-
-      viewPhones.classList.add('hidden');
-      viewCases.classList.add('hidden');
-      viewNotes.classList.add('hidden');
-      kpiContainer.classList.remove('hidden');
-      searchChartBar.classList.remove('hidden');
-
-      if (tab === 'phones') {
-        btnPhones.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors bg-[#ebbd31] text-slate-950 shadow-md";
-        viewPhones.classList.remove('hidden');
-        formBtnText.innerText = "NEW QA PHONES EVALUATION";
-        evalBtn.href = "https://docs.google.com/forms/d/e/1FAIpQLSfRjVZUd6TyQHCQgiuL6VVuZFDtL1GPHmMFxETpyCEBjgiaHg/viewform";
-        
-        document.getElementById('kpi-label-2').innerText = 'Avg. QA 2 Score';
-        document.getElementById('kpi-label-3').innerText = 'Total Volume';
-        document.getElementById('kpi-label-4').innerText = 'Avg. Calls / Day';
-        calculateGlobalKPIs();
-        updateAllCharts();
-        loadWeekFromFirebase();
-      } else if (tab === 'cases') {
-        btnCases.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors bg-[#ebbd31] text-slate-950 shadow-md";
-        viewCases.classList.remove('hidden');
-        formBtnText.innerText = "NEW QA CASES EVALUATION";
-        evalBtn.href = "https://docs.google.com/forms/d/e/1FAIpQLSdNqvd20SHKNrkyLi4IgxmyCfZQW0dde0xV7RzcIpOinKOMTg/viewform";
-
-        document.getElementById('kpi-label-2').innerText = 'Avg. CSAT Score';
-        document.getElementById('kpi-label-3').innerText = 'Total Conversations';
-        document.getElementById('kpi-label-4').innerText = 'Avg. Response Time';
-        calculateGlobalKPIs();
-        updateAllCharts();
-        loadWeekFromFirebase();
-      } else if (tab === 'notes') {
-        btnNotes.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors bg-[#ebbd31] text-slate-950 shadow-md";
-        viewNotes.classList.remove('hidden');
-        kpiContainer.classList.add('hidden');
-        searchChartBar.classList.add('hidden');
-        populateAgentNotesDropdown();
-        loadMonthlyNoteFromFirebase();
-      }
-    }
-
-    function renderPhonesTable(tableId, rawData) {
-      const tbody = document.querySelector(`#${tableId} tbody`);
-      tbody.innerHTML = '';
-      rawData.forEach((agent) => appendPhoneRowToTable(tableId, agent));
-      updateAgentCount(tableId);
-    }
-
-    function appendPhoneRowToTable(tableId, agent = ["New Agent", "Task", "Branch", "Leader", "Schedule"]) {
-      const tbody = document.querySelector(`#${tableId} tbody`);
-      const tr = document.createElement('tr');
-      tr.className = "hover:bg-slate-800/40 transition-colors";
-
-      const qa1 = parseFloat(agent[5]) || 0;
-      const qa2 = parseFloat(agent[6]) || 0;
-      const avgQa = (qa1 > 0 && qa2 > 0) ? Math.round((qa1 + qa2) / 2) : Math.round(qa1 || qa2 || 0);
-
-      const totalCalls = (parseInt(agent[7]||0) + parseInt(agent[8]||0));
-      const avgDailyCalls = Math.round(totalCalls / 5);
-      const actionPlan = agent[13] || 'N/A';
-      const resolutionVal = agent[14] || 'N/A';
-      const commentText = agent[15] || '';
-
-      tr.innerHTML = `
-        <td class="p-1"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="renderTableChart('${tableId}')"></td>
-        <td class="p-1"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text cell-task text-slate-300"></td>
-        <td class="p-1"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text cell-branch text-slate-300"></td>
-        <td class="p-1"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text cell-leaders text-slate-300"></td>
-        <td class="p-1"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text cell-schedule text-slate-400 text-[10px]"></td>
-        
-        <td class="p-1 text-center col-qa"><input type="number" value="${qa1}" min="0" max="100" class="cell-input qa1 font-bold" oninput="updateCalculations(this)"></td>
-        <td class="p-1 text-center col-qa"><input type="number" value="${qa2}" min="0" max="100" class="cell-input qa2 font-bold" oninput="updateCalculations(this)"></td>
-        <td class="p-1 text-center col-qa font-bold text-[#ebbd31] avg-qa">${avgQa}</td>
-
-        <td class="p-1 text-center col-num"><input type="number" value="${agent[7] || 0}" class="cell-input inbound" oninput="updateCalculations(this)"></td>
-        <td class="p-1 text-center col-num"><input type="number" value="${agent[8] || 0}" class="cell-input outbound" oninput="updateCalculations(this)"></td>
-        <td class="p-1 text-center font-bold text-white total-calls col-num">${totalCalls}</td>
-        <td class="p-1 text-center col-aht"><input type="text" value="${agent[9] || '00:00:00'}" class="cell-input text-center font-mono text-[11px] aht-input"></td>
-        <td class="p-1 text-center font-bold text-[#ebbd31]/90 avg-daily col-num">${avgDailyCalls}</td>
-        <td class="p-1 text-center col-drop"><input type="number" value="${agent[10] || 0}" class="cell-input abandon" oninput="updateCalculations(this)"></td>
-        <td class="p-1 text-center col-drop"><input type="number" value="${agent[11] || 0}" class="cell-input declined" oninput="updateCalculations(this)"></td>
-        <td class="p-1 text-center col-drop"><input type="number" value="${agent[12] || 0}" class="cell-input missed" oninput="updateCalculations(this)"></td>
-
-        <td class="p-1 text-center">
-          <select class="cell-input action-plan-select text-[#ebbd31] font-medium text-[10px]" onchange="renderResolutionCell(this)">
-            <option value="N/A" ${actionPlan === 'N/A' ? 'selected' : ''}>N/A</option>
-            <option value="Coaching" ${actionPlan === 'Coaching' ? 'selected' : ''}>Coaching</option>
-            <option value="Feedback" ${actionPlan === 'Feedback' ? 'selected' : ''}>Feedback</option>
-            <option value="Accountability Session" ${actionPlan === 'Accountability Session' ? 'selected' : ''}>Accountability Session</option>
-            <option value="Disciplinary Action" ${actionPlan === 'Disciplinary Action' ? 'selected' : ''}>Disciplinary Action</option>
-          </select>
-        </td>
-
-        <td class="p-1 text-center td-resolution min-w-[140px]"></td>
-
-        <td class="p-1">
-          <div class="comment-container">
-            <textarea placeholder="Add comments..." class="cell-input cell-comment-area text-slate-300" onfocus="handleCommentFocus(this)" oninput="updateCommentPopover(this)">${commentText}</textarea>
-            <div class="comment-popover">${commentText || "Sin comentarios..."}</div>
-          </div>
-        </td>
-        
-        <td class="p-1 text-center">
-          <div class="flex items-center justify-center space-x-1">
-            <button onclick="saveRow(this)" class="text-amber-400 hover:text-amber-300 p-1 transition-colors" title="Save Row">
-              <i class="fa-solid fa-floppy-disk text-xs"></i>
-            </button>
-            <button onclick="deleteAgentRow(this, '${tableId}')" class="text-rose-400 hover:text-rose-300 p-1 transition-colors" title="Delete Agent">
-              <i class="fa-solid fa-trash-can text-xs"></i>
-            </button>
-          </div>
-        </td>
-      `;
-
-      tbody.appendChild(tr);
-
-      const selectElem = tr.querySelector('.action-plan-select');
-      if (selectElem) renderResolutionCell(selectElem, resolutionVal);
-
-      // Apply conditional formatting including AVG QA
-      applyConditionalFormatting(tr.querySelector('.qa1'), 'qa');
-      applyConditionalFormatting(tr.querySelector('.qa2'), 'qa');
-      applyConditionalFormatting(tr.querySelector('.avg-qa'), 'qa');
-      applyConditionalFormatting(tr.querySelector('.abandon'), 'abandonOrMissed');
-      applyConditionalFormatting(tr.querySelector('.missed'), 'abandonOrMissed');
-      applyConditionalFormatting(tr.querySelector('.declined'), 'declined');
-    }
-
-    function renderCasesTable(tableId, rawData) {
-      const tbody = document.querySelector(`#${tableId} tbody`);
-      tbody.innerHTML = '';
-      rawData.forEach((agent) => appendCasesRowToTable(tableId, agent));
-      updateAgentCount(tableId);
-    }
-
-    function appendCasesRowToTable(tableId, agent = ["New Agent", "Task", "Branch", "Leader", "Schedule"]) {
-      const tbody = document.querySelector(`#${tableId} tbody`);
-      const tr = document.createElement('tr');
-      tr.className = "hover:bg-slate-800/40 transition-colors";
-
-      const actionPlan = agent[13] || 'N/A';
-      const resolutionVal = agent[14] || 'N/A';
-      const commentText = agent[15] || '';
-
-      tr.innerHTML = `
-        <td class="p-1"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="renderTableChart('${tableId}')"></td>
-        <td class="p-1"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text cell-task text-slate-300"></td>
-        <td class="p-1"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text cell-branch text-slate-300"></td>
-        <td class="p-1"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text cell-leaders text-slate-300"></td>
-        <td class="p-1"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text cell-schedule text-slate-400 text-[10px]"></td>
-        
-        <td class="p-1 text-center col-qa"><input type="number" value="${agent[5] || 0}" min="0" max="100" class="cell-input qaTotal font-bold" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center col-num"><input type="number" value="${agent[6] || 0}" class="cell-input convReplied font-semibold text-white" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center col-num"><input type="number" value="${agent[7] || 0}" class="cell-input avgResponseTime" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center col-num"><input type="number" value="${agent[8] || 0}" class="cell-input slaMissed" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center col-num"><input type="number" value="${agent[9] || 0}" class="cell-input csat text-emerald-400 font-bold" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center col-num"><input type="number" value="${agent[10] || 0}" class="cell-input dsat text-rose-400 font-bold" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center col-num"><input type="number" value="${agent[11] || 0}" class="cell-input surveyGood" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center col-num"><input type="number" value="${agent[12] || 0}" class="cell-input surveyBad" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center font-bold text-white totalSurveys col-num">${(parseInt(agent[11]||0) + parseInt(agent[12]||0))}</td>
-
-        <td class="p-1 text-center">
-          <select class="cell-input action-plan-select text-[#ebbd31] font-medium text-[10px]" onchange="renderResolutionCell(this)">
-            <option value="N/A" ${actionPlan === 'N/A' ? 'selected' : ''}>N/A</option>
-            <option value="Coaching" ${actionPlan === 'Coaching' ? 'selected' : ''}>Coaching</option>
-            <option value="Feedback" ${actionPlan === 'Feedback' ? 'selected' : ''}>Feedback</option>
-            <option value="Accountability Session" ${actionPlan === 'Accountability Session' ? 'selected' : ''}>Accountability Session</option>
-            <option value="Disciplinary Action" ${actionPlan === 'Disciplinary Action' ? 'selected' : ''}>Disciplinary Action</option>
-          </select>
-        </td>
-
-        <td class="p-1 text-center td-resolution min-w-[140px]"></td>
-
-        <td class="p-1">
-          <div class="comment-container">
-            <textarea placeholder="Add comments..." class="cell-input cell-comment-area text-slate-300" onfocus="handleCommentFocus(this)" oninput="updateCommentPopover(this)">${commentText}</textarea>
-            <div class="comment-popover">${commentText || "Sin comentarios..."}</div>
-          </div>
-        </td>
-        
-        <td class="p-1 text-center">
-          <div class="flex items-center justify-center space-x-1">
-            <button onclick="saveRow(this)" class="text-amber-400 hover:text-amber-300 p-1 transition-colors" title="Save Row">
-              <i class="fa-solid fa-floppy-disk text-xs"></i>
-            </button>
-            <button onclick="deleteAgentRow(this, '${tableId}')" class="text-rose-400 hover:text-rose-300 p-1 transition-colors" title="Delete Agent">
-              <i class="fa-solid fa-trash-can text-xs"></i>
-            </button>
-          </div>
-        </td>
-      `;
-
-      tbody.appendChild(tr);
-
-      const selectElem = tr.querySelector('.action-plan-select');
-      if (selectElem) renderResolutionCell(selectElem, resolutionVal);
-
-      // Apply conditional formatting for Cases
-      applyConditionalFormatting(tr.querySelector('.qaTotal'), 'qa');
-    }
-
-    // MANEJO DE GUARDADO Y CARGA DE NOTAS GENERALES DEL MES / SEMANA EN FIREBASE
-    async function saveMonthlyNote() {
-      const month = document.getElementById('monthSelect').value;
-      const week = document.getElementById('weekSelect').value;
-      const noteText = document.getElementById('periodNotesArea').value;
-      const key = `${month}_Week_${week}`;
-
-      try {
-        await rtdb.ref(`monthly_notes/${key}`).set(noteText);
-        showToast(`Notes Saved for ${month} - Week ${week}!`);
-      } catch (err) {
-        console.error("Error saving note:", err);
-        showToast("Error saving notes!");
-      }
-    }
-
-    function loadMonthlyNoteFromFirebase() {
-      const month = document.getElementById('monthSelect').value;
-      const week = document.getElementById('weekSelect').value;
-      const key = `${month}_Week_${week}`;
-      const label = document.getElementById('currentPeriodLabel');
-      if (label) label.innerText = `${month} - Week ${week}`;
-
-      rtdb.ref(`monthly_notes/${key}`).once('value').then(snapshot => {
-        const area = document.getElementById('periodNotesArea');
-        if (area) {
-          area.value = snapshot.exists() ? snapshot.val() : '';
-        }
-      }).catch(err => console.error("Error loading note:", err));
-    }
-
-    // POPULATE DROPDOWN DE AGENTES PARA PROFILE DE INSIGHTS
-    function populateAgentNotesDropdown() {
-      const select = document.getElementById('agentNotesSelector');
-      select.innerHTML = '<option value="">-- Select Agent --</option>';
-
-      const agentsList = [];
-
-      document.querySelectorAll('tbody tr').forEach(tr => {
-        const nameInput = tr.querySelector('.cell-input-name');
-        if (nameInput && nameInput.value) {
-          const name = nameInput.value.trim();
-          const isPhone = tr.querySelector('.avg-qa') !== null;
-          if (name && !agentsList.some(a => a.name === name)) {
-            agentsList.push({
-              name: name,
-              type: isPhone ? 'Phones' : 'Cases',
-              element: tr
+    function generate24HourlySlots() {
+        const slots = [];
+        for (let h = 0; h < 24; h++) {
+            let suffix = h >= 12 ? 'PM' : 'AM';
+            let h12 = h % 12;
+            if (h12 === 0) h12 = 12;
+            slots.push({
+                time12: `${h12}:00 ${suffix}`,
+                h24: h
             });
-          }
         }
-      });
-
-      agentsList.sort((a,b) => a.name.localeCompare(b.name)).forEach(ag => {
-        const opt = document.createElement('option');
-        opt.value = ag.name;
-        opt.innerText = `${ag.name} (${ag.type})`;
-        select.appendChild(opt);
-      });
+        return slots;
     }
+    const hourlySlots = generate24HourlySlots();
 
-    // CARGAR DETALLES DE PROFILE E INSIGHTS
-    function loadAgentNotesProfile() {
-      const selectedName = document.getElementById('agentNotesSelector').value;
-      const profileBox = document.getElementById('agentProfileContainer');
-      const placeholderBox = document.getElementById('agentPlaceholder');
-
-      if (!selectedName) {
-        profileBox.classList.add('hidden');
-        placeholderBox.classList.remove('hidden');
-        return;
-      }
-
-      let agentRow = null;
-      let isPhone = false;
-
-      document.querySelectorAll('tbody tr').forEach(tr => {
-        const nameInput = tr.querySelector('.cell-input-name');
-        if (nameInput && nameInput.value.trim() === selectedName) {
-          agentRow = tr;
-          isPhone = tr.querySelector('.avg-qa') !== null;
+    function generate15MinSlots() {
+        const slots = [];
+        for (let idx = 0; idx < 96; idx++) {
+            let totalMins = idx * 15;
+            let h = Math.floor(totalMins / 60);
+            let m = totalMins % 60;
+            let suffix = h >= 12 ? 'PM' : 'AM';
+            let h12 = h % 12;
+            if (h12 === 0) h12 = 12;
+            let mStr = m < 10 ? '0' + m : m;
+            slots.push({
+                time12: `${h12}:${mStr} ${suffix}`,
+                idx: idx,
+                h24: h
+            });
         }
-      });
+        return slots;
+    }
+    const agentSlots15Min = generate15MinSlots();
 
-      if (!agentRow) return;
+    const rawRosterData = [
+        // OBS - Phones (27 agents)
+        { name: "Dean Spencer", dept: "OBS - Phones", hours: { 35: "Break 1", 44: "Lunch", 45: "Lunch", 55: "Break 2" } },
+        { name: "Daneil Facey", dept: "OBS - Phones", hours: { 40: "Lunch", 41: "Lunch", 42: "Lunch", 51: "Break 2" } },
+        { name: "Shanique Kelly", dept: "OBS - Phones", hours: { 36: "Break 1", 49: "Lunch", 50: "Lunch", 51: "Lunch" } },
+        { name: "Stephanie Temple", dept: "OBS - Phones", hours: { 39: "Break 1", 48: "Lunch", 49: "Lunch", 59: "Break 2" } },
+        { name: "Kellyneth Estrada", dept: "OBS - Phones", hours: { 38: "Break 1", 52: "Lunch", 53: "Lunch", 59: "Break 2" } },
+        { name: "Alexander Santamaria", dept: "OBS - Phones", hours: { 39: "Break 1", 50: "Lunch", 51: "Lunch", 60: "Break 2" } },
+        { name: "Sonia Jimenez", dept: "OBS - Phones", hours: { 35: "Break 1", 50: "Lunch", 51: "Lunch", 60: "Break 2" } },
+        { name: "Ryan Barber", dept: "OBS - Phones", hours: { 56: "Lunch", 57: "Lunch", 58: "Lunch", 59: "Lunch" } },
+        { name: "Leona Wallace", dept: "OBS - Phones", hours: { 48: "Lunch", 49: "Lunch", 50: "Lunch", 56: "Break 2" } },
+        { name: "Vashaun Thompson", dept: "OBS - Phones", hours: { 40: "Break 1", 50: "Lunch", 51: "Lunch", 52: "Lunch" } },
+        { name: "Israel Arias", dept: "OBS - Phones", hours: { 41: "Break 1", 48: "Lunch", 49: "Lunch", 50: "Lunch", 51: "Lunch", 56: "Break 2" } },
+        { name: "Bruno Rodriguez", dept: "OBS - Phones", hours: { 40: "Break 1", 52: "Lunch", 53: "Lunch", 54: "Lunch", 55: "Lunch", 62: "Break 2" } },
+        { name: "Kevin Durango", dept: "OBS - Phones", hours: { 39: "Break 1", 52: "Lunch", 53: "Lunch", 54: "Lunch", 55: "Lunch", 62: "Break 2" } },
+        { name: "Andrea Gonzalez", dept: "OBS - Phones", hours: { 41: "Break 1", 51: "Lunch", 52: "Lunch", 53: "Lunch", 54: "Lunch", 61: "Break 2" } },
+        { name: "Alexander Jaramillo", dept: "OBS - Phones", hours: { 39: "Break 1", 51: "Lunch", 52: "Lunch", 53: "Lunch", 54: "Lunch", 61: "Break 2" } },
+        { name: "Hannah Castanon", dept: "OBS - Phones", hours: { 52: "Lunch", 53: "Lunch", 54: "Lunch", 55: "Lunch" } },
+        { name: "Julie Nguyen", dept: "OBS - Phones", hours: { 50: "Lunch", 51: "Lunch", 52: "Lunch", 53: "Lunch", 60: "Break 2" } },
+        { name: "Jaedi Morquecho", dept: "OBS - Phones", hours: {} },
+        { name: "Zinedine Moscote", dept: "OBS - Phones", hours: { 44: "Break 1", 56: "Lunch", 57: "Lunch", 64: "Break 2" } },
+        { name: "Fatin Chad", dept: "OBS - Phones", hours: { 56: "Lunch", 57: "Lunch", 58: "Lunch", 59: "Lunch" } },
+        { name: "Kalleb Solomon", dept: "OBS - Phones", hours: {} },
+        { name: "Arine Peace", dept: "OBS - Phones", hours: {} },
+        { name: "Alex Scarlett", dept: "OBS - Phones", hours: { 46: "Break 1", 56: "Lunch", 57: "Lunch", 58: "Lunch" } },
+        { name: "Raul Garcia", dept: "OBS - Phones", hours: { 45: "Break 1", 52: "Lunch", 53: "Lunch", 54: "Lunch", 55: "Lunch", 65: "Break 2" } },
+        { name: "Felix Torres", dept: "OBS - Phones", hours: { 47: "Break 1", 52: "Lunch", 53: "Lunch", 63: "Break 2" } },
+        { name: "Omar Jimenez", dept: "OBS - Phones", hours: { 50: "Break 1", 58: "Lunch", 59: "Lunch", 60: "Lunch", 61: "Lunch", 70: "Break 2" } },
+        { name: "Michelle Salmon", dept: "OBS - Phones", hours: { 54: "Break 1", 65: "Lunch", 66: "Lunch", 67: "Lunch" } },
 
-      const branch = agentRow.querySelector('.cell-branch')?.value || 'N/A';
-      const leader = agentRow.querySelector('.cell-leaders')?.value || 'N/A';
-      const actionPlan = agentRow.querySelector('.action-plan-select')?.value || 'N/A';
-      const resolution = getResolutionValue(agentRow);
+        // OBS - Cases (10 agents)
+        { name: "Emely Hernandez", dept: "OBS - Cases", hours: { 32: "Break 1", 43: "Lunch", 44: "Lunch", 45: "Lunch", 46: "Lunch", 55: "Break 2" } },
+        { name: "Pablo Saquilmer", dept: "OBS - Cases", hours: { 40: "Break 1", 50: "Lunch", 51: "Lunch", 52: "Lunch", 53: "Lunch", 57: "Break 2" } },
+        { name: "Lucia Herrera", dept: "OBS - Cases", hours: { 35: "Break 1", 50: "Lunch", 51: "Lunch", 52: "Lunch", 53: "Lunch", 57: "Break 2" } },
+        { name: "Fernando Garcia", dept: "OBS - Cases", hours: { 37: "Break 1", 47: "Lunch", 48: "Lunch", 49: "Lunch", 50: "Lunch", 57: "Break 2" } },
+        { name: "Emilia Chajon", dept: "OBS - Cases", hours: { 39: "Break 1", 49: "Lunch", 50: "Lunch", 51: "Lunch", 52: "Lunch", 59: "Break 2" } },
+        { name: "Alejandra Manco", dept: "OBS - Cases", hours: { 35: "Break 1", 53: "Lunch", 54: "Lunch", 55: "Lunch", 56: "Lunch", 60: "Break 2" } },
+        { name: "Galilea Gutierrez", dept: "OBS - Cases", hours: { 41: "Break 1", 54: "Lunch", 55: "Lunch", 56: "Lunch", 57: "Lunch", 63: "Break 2" } },
+        { name: "Jorge Saban", dept: "OBS - Cases", hours: { 42: "Break 1", 53: "Break 2", 59: "Lunch", 60: "Lunch", 61: "Lunch", 62: "Lunch" } },
+        { name: "Diana Orozco", dept: "OBS - Cases", hours: { 48: "Break 1", 60: "Break 2", 67: "Lunch", 68: "Lunch", 69: "Lunch", 70: "Lunch" } },
+        { name: "Rudy Herrera", dept: "OBS - Cases", hours: { 54: "Break 1", 64: "Break 2", 70: "Lunch", 71: "Lunch", 72: "Lunch", 73: "Lunch" } },
 
-      let qaScore = 0;
-      let ahtScore = '00:00:00';
+        // ELD Team (29 agents)
+        { name: "Sergio Chigüil", dept: "ELD", hours: { 36: "Break 1", 44: "Lunch", 45: "Lunch", 46: "Lunch", 47: "Lunch", 55: "Break 2" } },
+        { name: "Edgar Castillo", dept: "ELD", hours: { 32: "Break 1", 40: "Break 2", 48: "Lunch", 49: "Lunch", 50: "Lunch", 51: "Lunch" } },
+        { name: "Samantha Chinchilla", dept: "ELD", hours: { 40: "Break 1", 52: "Lunch", 53: "Lunch", 54: "Lunch", 55: "Lunch", 60: "Break 2" } },
+        { name: "Celina Franco", dept: "ELD", hours: { 43: "Break 1", 52: "Lunch", 53: "Lunch", 54: "Lunch", 55: "Lunch", 61: "Break 2" } },
+        { name: "Esvin Gomez", dept: "ELD", hours: { 44: "Break 1", 52: "Lunch", 53: "Lunch", 54: "Lunch", 55: "Lunch", 62: "Break 2" } },
+        { name: "Sharon Olivares", dept: "ELD", hours: { 37: "Break 1", 45: "Break 2", 56: "Lunch", 57: "Lunch", 58: "Lunch", 59: "Lunch" } },
+        { name: "Iverth Monterroso", dept: "ELD", hours: { 44: "Break 1", 52: "Lunch", 53: "Lunch", 54: "Lunch", 55: "Lunch", 60: "Break 2" } },
+        { name: "Kevin Acabal", dept: "ELD", hours: { 38: "Break 1", 46: "Break 2", 58: "Lunch", 59: "Lunch", 60: "Lunch", 61: "Lunch" } },
+        { name: "Brandon Vasquez", dept: "ELD", hours: { 40: "Break 1", 46: "Lunch", 47: "Lunch", 48: "Lunch", 49: "Lunch", 58: "Break 2" } },
+        { name: "Kenford Morris", dept: "ELD", hours: { 44: "Break 1", 54: "Lunch", 55: "Lunch", 56: "Lunch" } },
+        { name: "Benneth Smith", dept: "ELD", hours: { 40: "Break 1", 48: "Lunch", 49: "Lunch", 59: "Break 2" } },
+        { name: "Josue Sucuc", dept: "ELD", hours: { 43: "Break 1", 56: "Lunch", 57: "Lunch", 58: "Lunch", 59: "Lunch", 63: "Break 2" } },
+        { name: "Luis Gonzalez", dept: "ELD", hours: { 36: "Break 1", 52: "Break 2", 56: "Lunch", 57: "Lunch", 58: "Lunch", 59: "Lunch" } },
+        { name: "Froy Gonzalez", dept: "ELD", hours: { 40: "Break 1", 50: "Break 2", 56: "Lunch", 57: "Lunch", 58: "Lunch", 59: "Lunch" } },
+        { name: "Melanie Garcia", dept: "ELD", hours: { 46: "Break 1", 54: "Break 2", 60: "Lunch", 61: "Lunch", 62: "Lunch", 63: "Lunch" } },
+        { name: "Sebastian Quiñonez", dept: "ELD", hours: { 40: "Break 1", 56: "Lunch", 57: "Lunch", 58: "Lunch", 59: "Lunch", 63: "Break 2" } },
+        { name: "Danae Castillo", dept: "ELD", hours: { 43: "Break 1", 54: "Lunch", 55: "Lunch", 56: "Lunch", 57: "Lunch", 64: "Break 2" } },
+        { name: "Cesar Larios", dept: "ELD", hours: { 40: "Break 1", 50: "Lunch", 51: "Lunch", 52: "Lunch", 53: "Lunch", 62: "Break 2" } },
+        { name: "Jesus Rios", dept: "ELD", hours: { 38: "Break 1", 48: "Lunch", 49: "Lunch", 59: "Break 2" } },
+        { name: "Marie Perez", dept: "ELD", hours: { 39: "Break 1", 54: "Lunch", 55: "Lunch", 64: "Break 2" } },
+        { name: "Daniel Pelayo", "dept": "ELD", hours: { 42: "Break 1", 53: "Lunch", 54: "Lunch", 55: "Lunch", 56: "Lunch", 65: "Break 2" } },
+        { name: "Kevin Ibarra", dept: "ELD", hours: { 45: "Break 1", 56: "Lunch", 57: "Lunch", 58: "Lunch", 59: "Lunch", 66: "Break 2" } },
+        { name: "Jose Rodriguez", dept: "ELD", hours: { 46: "Break 1", 56: "Lunch", 57: "Lunch", 69: "Break 2" } },
+        { name: "Kevin Williams", dept: "ELD", hours: { 48: "Break 1", 54: "Lunch", 55: "Lunch", 64: "Break 2" } },
+        { name: "Luis Ajche", dept: "ELD", hours: { 48: "Break 1", 55: "Lunch", 56: "Lunch", 57: "Lunch", 58: "Lunch", 68: "Break 2" } },
+        { name: "Jorge Najera", dept: "ELD", hours: { 48: "Lunch", 49: "Lunch", 50: "Lunch", 51: "Lunch", 64: "Break 1", 71: "Break 2" } },
+        { name: "Kia Francis", dept: "ELD", hours: { 51: "Break 1", 64: "Lunch", 65: "Lunch", 66: "Lunch" } },
+        { name: "Tevin Smallwood", dept: "ELD", hours: { 51: "Break 1", 65: "Lunch", 66: "Lunch", 67: "Lunch" } },
+        { name: "Shiyan Lee", dept: "ELD", hours: { 50: "Break 1", 60: "Lunch", 61: "Lunch", 62: "Lunch" } },
 
-      if (isPhone) {
-        qaScore = parseFloat(agentRow.querySelector('.avg-qa')?.innerText) || 0;
-        ahtScore = agentRow.querySelector('.aht-input')?.value || '00:00:00';
-      } else {
-        qaScore = parseFloat(agentRow.querySelector('.qaTotal')?.value) || 0;
-        const respTime = parseFloat(agentRow.querySelector('.avgResponseTime')?.value) || 0;
-        ahtScore = `${respTime} min (Avg Response)`;
-      }
+        // INS Team (21 agents)
+        { name: "Keyren Fuertes", dept: "INS", hours: { 33: "Break 1", 45: "Lunch", 46: "Lunch", 55: "Break 2" } },
+        { name: "Otto de la Cruz", dept: "INS", hours: { 33: "Break 1", 46: "Lunch", 47: "Lunch", 48: "Lunch", 49: "Lunch", 55: "Break 2" } },
+        { name: "Manfredo Monterroso", dept: "INS", hours: { 37: "Break 1", 46: "Break 2", 54: "Lunch", 55: "Lunch", 56: "Lunch", 57: "Lunch" } },
+        { name: "Eunice Sir", dept: "INS", hours: { 35: "Break 1", 43: "Break 2", 51: "Lunch", 52: "Lunch", 53: "Lunch", 54: "Lunch" } },
+        { name: "Ana Melendez", dept: "INS", hours: { 36: "Break 1", 44: "Break 2", 52: "Lunch", 53: "Lunch", 54: "Lunch", 55: "Lunch" } },
+        { name: "Monica Lopez", dept: "INS", hours: { 37: "Break 1", 48: "Lunch", 49: "Lunch", 50: "Lunch", 51: "Lunch", 59: "Break 2" } },
+        { name: "Gustavo Lopez", dept: "INS", hours: { 35: "Break 1", 43: "Break 2", 50: "Lunch", 51: "Lunch", 52: "Lunch", 53: "Lunch" } },
+        { name: "Joseth Huerta", dept: "INS", hours: { 37: "Break 1", 46: "Lunch", 47: "Lunch", 48: "Lunch", 49: "Lunch", 56: "Break 2" } },
+        { name: "Marco Ovalle", dept: "INS", hours: { 42: "Break 1", 52: "Lunch", 53: "Lunch", 54: "Lunch", 55: "Lunch", 63: "Break 2" } },
+        { name: "Ariel Yaegui", dept: "INS", hours: { 40: "Break 1", 49: "Break 2", 57: "Lunch", 58: "Lunch", 59: "Lunch", 60: "Lunch" } },
+        { name: "Acsa Esquivel", dept: "INS", hours: { 39: "Break 1", 48: "Break 2", 54: "Lunch", 55: "Lunch", 56: "Lunch", 57: "Lunch" } },
+        { name: "Luis Leon", dept: "INS", hours: { 39: "Break 1", 49: "Lunch", 50: "Lunch", 51: "Lunch", 52: "Lunch", 60: "Break 2" } },
+        { name: "Michelle Marquez", dept: "INS", hours: { 40: "Break 1", 50: "Lunch", 51: "Lunch", 52: "Lunch", 53: "Lunch", 61: "Break 2" } },
+        { name: "Kener Lee", dept: "INS", hours: { 41: "Break 1", 49: "Break 2", 58: "Lunch", 59: "Lunch", 60: "Lunch", 61: "Lunch" } },
+        { name: "Dana Redwood", dept: "INS", hours: { 40: "Break 1", 48: "Lunch", 49: "Lunch", 60: "Break 2" } },
+        { name: "Alondra Mendoza", dept: "INS", hours: { 43: "Break 1", 52: "Lunch", 53: "Lunch", 54: "Lunch", 55: "Lunch", 62: "Break 2" } },
+        { name: "Katering Santos", dept: "INS", hours: { 44: "Break 1", 52: "Break 2", 58: "Lunch", 59: "Lunch", 60: "Lunch", 61: "Lunch" } },
+        { name: "Lynda Escobedo", dept: "INS", hours: { 44: "Break 1", 53: "Lunch", 54: "Lunch", 55: "Lunch", 56: "Lunch", 65: "Break 2" } },
+        { name: "Marielys Tejada", dept: "INS", hours: { 47: "Break 1", 54: "Lunch", 55: "Lunch", 65: "Break 2" } },
+        { name: "Cesar Colaj", dept: "INS", hours: { 48: "Break 1", 56: "Break 2", 63: "Lunch", 64: "Lunch", 65: "Lunch", 66: "Lunch" } },
+        { name: "Juan Avedaño", dept: "INS", hours: { 46: "Break 1", 57: "Break 2", 66: "Lunch", 67: "Lunch", 68: "Lunch", 69: "Lunch" } },
 
-      document.getElementById('agent-dept').innerText = isPhone ? 'Customer Support - Phones' : 'Customer Support - Cases';
-      document.getElementById('agent-avg-qa').innerText = qaScore > 0 ? `${qaScore}%` : 'N/A';
-      document.getElementById('agent-avg-aht').innerText = ahtScore;
-      document.getElementById('agent-leader-branch').innerText = `${leader} (${branch})`;
-      document.getElementById('agent-action-plan').innerText = `Action Plan: ${actionPlan}`;
-      document.getElementById('agent-resolution').innerText = `Resolution Details: ${resolution}`;
+        // LL+ Team (8 agents)
+        { name: "Julio Cortez", dept: "LL+", hours: { 32: "Break 1", 40: "Break 2", 48: "Lunch", 49: "Lunch", 50: "Lunch", 51: "Lunch" } },
+        { name: "Alex Coyote", dept: "LL+", hours: { 32: "Break 1", 40: "Break 2", 50: "Lunch", 51: "Lunch", 52: "Lunch", 53: "Lunch" } },
+        { name: "Omar Gomez", dept: "LL+", hours: { 41: "Break 1", 49: "Break 2", 54: "Lunch", 55: "Lunch", 56: "Lunch", 57: "Lunch" } },
+        { name: "Luis Escobar", dept: "LL+", hours: { 36: "Break 1", 45: "Break 2", 53: "Lunch", 54: "Lunch", 55: "Lunch", 56: "Lunch" } },
+        { name: "Andy Pineda", dept: "LL+", hours: { 38: "Break 1", 46: "Break 2", 54: "Lunch", 55: "Lunch", 56: "Lunch", 57: "Lunch" } },
+        { name: "Edgar Palomo", dept: "LL+", hours: { 41: "Break 1", 48: "Break 2", 57: "Lunch", 58: "Lunch", 59: "Lunch", 60: "Lunch" } },
+        { name: "Jonathan Pirir", dept: "LL+", hours: { 40: "Break 1", 48: "Break 2", 58: "Lunch", 59: "Lunch", 60: "Lunch", 61: "Lunch" } },
+        { name: "Yossi Martinez", dept: "LL+", hours: { 46: "Break 1", 52: "Break 2", 60: "Lunch", 61: "Lunch", 62: "Lunch", 63: "Lunch" } },
 
-      // Generación dinámica de recomendaciones IA
-      const recsContainer = document.getElementById('agent-ai-recommendations');
-      recsContainer.innerHTML = '';
+        // TFX Team (3 agents)
+        { name: "Fernando Ramirez", dept: "TFX", hours: { 38: "Break 1", 46: "Lunch", 47: "Lunch", 48: "Lunch", 49: "Lunch", 54: "Break 2" } },
+        { name: "Maria Saucedo", dept: "TFX", hours: { 50: "Break 1", 56: "Lunch", 57: "Lunch", 58: "Lunch", 59: "Lunch", 63: "Break 2" } },
+        { name: "Mariana Velasquez", dept: "TFX", hours: { 40: "Break 1", 52: "Lunch", 53: "Lunch", 54: "Lunch", 55: "Lunch", 62: "Break 2" } }
+    ];
 
-      const recs = [];
-
-      if (qaScore >= 95) {
-        recs.push(`<strong>Top Performer Strategy:</strong> ${selectedName} maintains high QA standards (${qaScore}%). Recommend pairing them with new hires for peer coaching.`);
-      } else if (qaScore >= 85) {
-        recs.push(`<strong>Consistency Booster:</strong> ${selectedName} is performing steadily (${qaScore}%). Focus feedback on fine-tuning soft skills and procedure adherence.`);
-      } else if (qaScore > 0) {
-        recs.push(`<strong>Priority Coaching Required:</strong> Current QA score (${qaScore}%) is below target. Schedule a targeted 1-on-1 accountability session to review recent failed evaluations.`);
-      } else {
-        recs.push(`<strong>Initial Baseline:</strong> No evaluations recorded yet this week. Complete at least 2 evaluations to generate tailored quality insights.`);
-      }
-
-      if (actionPlan !== 'N/A') {
-        recs.push(`<strong>Action Plan Follow-up:</strong> Active plan is set to <em>${actionPlan}</em>. Ensure resolution commitments are tracked and documented in the weekly review.`);
-      } else {
-        recs.push(`<strong>Proactive Development:</strong> No active Action Plan required. Maintain routine weekly 1-on-1 check-ins.`);
-      }
-
-      if (isPhone) {
-        recs.push(`<strong>AHT Efficiency Optimization:</strong> Review active call handle time (${ahtScore}) to optimize call control techniques without sacrificing resolution quality.`);
-      } else {
-        recs.push(`<strong>SLA & Response Speed:</strong> Monitor first response time (${ahtScore}) to ensure prompt customer engagement and SLA compliance.`);
-      }
-
-      recs.forEach(r => {
-        const li = document.createElement('li');
-        li.innerHTML = r;
-        recsContainer.appendChild(li);
-      });
-
-      placeholderBox.classList.add('hidden');
-      profileBox.classList.remove('hidden');
+    function buildDefaultMasterAgents() {
+        let idCounter = 1;
+        return rawRosterData.map(ag => {
+            return {
+                id: idCounter++,
+                name: ag.name,
+                dept: ag.dept,
+                hours: ag.hours || {}
+            };
+        });
     }
 
-    function addAgentRow(tableId) {
-      appendPhoneRowToTable(tableId);
-      updateAgentCount(tableId);
-      calculateGlobalKPIs();
-      renderTableChart(tableId);
+    let hourlyDataPattern = {};
+    let multiPeriodVolumeDB = {};
+    let rawTextsDB = {};
+    let volumeDataCombined = {};
+    let masterAgentsDB = buildDefaultMasterAgents();
+
+    function cleanKey(str) {
+        return str ? str.replace(/[^a-zA-Z0-9_]/g, '_') : 'default';
     }
 
-    function addCasesRow(tableId) {
-      appendCasesRowToTable(tableId);
-      updateAgentCount(tableId);
-      calculateGlobalKPIs();
-      renderTableChart(tableId);
-    }
+    function initFirebaseListeners() {
+        onValue(dbRefVolume, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                multiPeriodVolumeDB = data;
+            }
+            loadActivePeriodVolume();
+            renderAllUI();
+            renderSavedPeriodsList();
+        });
 
-    function saveRow(btn) {
-      saveAndProcessWeek();
-    }
+        onValue(dbRefRawTexts, (snapshot) => {
+            const data = snapshot.val();
+            if (data) rawTextsDB = data;
+        });
 
-    // EXPORT TABLES TO EXCEL
-    function exportToExcel() {
-      const month = document.getElementById('monthSelect').value;
-      const week = document.getElementById('weekSelect').value;
-      const wb = XLSX.utils.book_new();
-
-      const activeTables = currentTab === 'phones' 
-        ? ['table-gua-col', 'table-pan', 'table-mx-phones'] 
-        : ['table-cases-gua', 'table-cases-mx'];
-
-      activeTables.forEach(tableId => {
-        const table = document.getElementById(tableId);
-        if (!table) return;
-
-        const tableName = tableId.replace('table-', '').toUpperCase();
-        const rows = table.querySelectorAll('tr');
-        const sheetData = [];
-
-        rows.forEach((row) => {
-          const rowData = [];
-          const cells = row.querySelectorAll('th, td');
-          
-          cells.forEach((cell, cIdx) => {
-            if (cIdx === cells.length - 1) return;
-
-            if (cell.classList.contains('td-resolution')) {
-              rowData.push(getResolutionValue(row));
+        onValue(dbRefAgents, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                let parsed = Array.isArray(data) ? data : Object.values(data);
+                if (parsed.length > 0) masterAgentsDB = parsed;
             } else {
-              const input = cell.querySelector('input, select, textarea');
-              if (input) {
-                rowData.push(input.value);
-              } else {
-                rowData.push(cell.innerText.trim());
-              }
+                saveAgentsDBToFirebase();
             }
-          });
-          if (rowData.length > 0) sheetData.push(rowData);
+            recountRosterFromMasterDB();
+            syncPatternFromMasterDB();
+            renderAllUI();
+            if (document.getElementById('mgmtModal').classList.contains('active')) {
+                renderMgmtAgentsTable();
+            }
         });
 
-        const ws = XLSX.utils.aoa_to_sheet(sheetData);
-        XLSX.utils.book_append_sheet(wb, ws, tableName.substring(0, 31));
-      });
-
-      const fileName = `Highway_QA_${currentTab.toUpperCase()}_${month}_Week_${week}.xlsx`;
-      XLSX.writeFile(wb, fileName);
-      showToast(`Excel file downloaded: ${fileName}`);
-    }
-
-    // SAVE & PROCESS WEEK TO FIREBASE REALTIME DATABASE
-    async function saveAndProcessWeek() {
-      const month = document.getElementById('monthSelect').value;
-      const week = document.getElementById('weekSelect').value;
-      const key = `${month}_Week_${week}`;
-
-      const activeTables = currentTab === 'phones' 
-        ? ['table-gua-col', 'table-pan', 'table-mx-phones'] 
-        : ['table-cases-gua', 'table-cases-mx'];
-
-      const payload = {};
-
-      activeTables.forEach(tableId => {
-        const rows = document.querySelectorAll(`#${tableId} tbody tr`);
-        payload[tableId] = [];
-        
-        rows.forEach(row => {
-          const inputs = row.querySelectorAll('input:not(.res-val):not(.res-date):not(.res-text), select:not(.res-opt), textarea:not(.res-val):not(.res-text)');
-          const agentArr = [];
-          inputs.forEach((ip, idx) => {
-            agentArr.push(ip.value);
-            if (idx === 13) {
-              agentArr.push(getResolutionValue(row));
+        onValue(dbRefActiveNav, (snapshot) => {
+            const nav = snapshot.val();
+            if (nav && !isRemoteUpdate) {
+                isRemoteUpdate = true;
+                if (nav.month) document.getElementById('monthSelect').value = nav.month;
+                if (nav.week) document.getElementById('weekSelect').value = nav.week;
+                loadActivePeriodVolume();
+                renderAllUI();
+                isRemoteUpdate = false;
             }
-          });
-          payload[tableId].push(agentArr);
         });
-      });
-
-      try {
-        await rtdb.ref(`qa_data/${currentTab}/${key}`).set(payload);
-        await saveMonthlyNote();
-        showToast(`Week ${week} (${month}) Saved to Firebase!`);
-      } catch (err) {
-        console.error("Firebase Error: ", err);
-        showToast("Error saving to Firebase!");
-      }
     }
 
-    // LOAD WEEK DATA FROM FIREBASE REALTIME DATABASE
-    function loadWeekFromFirebase() {
-      const month = document.getElementById('monthSelect').value;
-      const week = document.getElementById('weekSelect').value;
-      const key = `${month}_Week_${week}`;
+    function saveVolumeDBToFirebase() { set(dbRefVolume, multiPeriodVolumeDB); }
+    function saveRawTextsToFirebase() { set(dbRefRawTexts, rawTextsDB); }
+    function saveAgentsDBToFirebase() { set(dbRefAgents, masterAgentsDB); }
 
-      rtdb.ref(`qa_data/${currentTab}/${key}`).once('value').then(snapshot => {
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          Object.keys(data).forEach(tableId => {
-            if (currentTab === 'phones') {
-              renderPhonesTable(tableId, data[tableId]);
+    function broadcastNavChange(month, week) {
+        if (!isRemoteUpdate) set(dbRefActiveNav, { month: month, week: week });
+    }
+
+    function recountRosterFromMasterDB() {
+        depts.forEach(d => deptRosterCounts[d] = 0);
+        masterAgentsDB.forEach(ag => {
+            if (deptRosterCounts[ag.dept] !== undefined) deptRosterCounts[ag.dept]++;
+        });
+    }
+
+    function syncPatternFromMasterDB() {
+        for (let h = 0; h < 24; h++) {
+            hourlyDataPattern[h] = {};
+            for (let d of depts) hourlyDataPattern[h][d] = [];
+        }
+
+        masterAgentsDB.forEach(ag => {
+            if (ag.hours) {
+                for (let idx in ag.hours) {
+                    let slot15Idx = parseInt(idx, 10);
+                    let hour24 = Math.floor(slot15Idx / 4);
+                    if (hour24 >= 0 && hour24 < 24 && hourlyDataPattern[hour24] && hourlyDataPattern[hour24][ag.dept]) {
+                        let exists = hourlyDataPattern[hour24][ag.dept].some(item => item.name === ag.name);
+                        if (!exists) {
+                            hourlyDataPattern[hour24][ag.dept].push({
+                                name: ag.name,
+                                act: ag.hours[idx]
+                            });
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    let selectedDepts = new Set(['ALL']);
+    let isAuthenticated = false;
+    let pendingAction = null;
+
+    let volumeCapacityChartInstance = null;
+    let deptDistributionChartInstance = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        recountRosterFromMasterDB();
+        syncPatternFromMasterDB();
+        initCharts();
+        setupEventListeners();
+        initFirebaseListeners();
+    });
+
+    function getActiveMonth() { return document.getElementById('monthSelect').value; }
+    function getActiveWeek() { return document.getElementById('weekSelect').value; }
+
+    function loadActivePeriodVolume() {
+        const monthKey = cleanKey(getActiveMonth());
+        const weekKey = cleanKey(getActiveWeek());
+
+        if (!multiPeriodVolumeDB[monthKey]) multiPeriodVolumeDB[monthKey] = {};
+        if (!multiPeriodVolumeDB[monthKey][weekKey]) {
+            multiPeriodVolumeDB[monthKey][weekKey] = { obs: {}, ins: {}, eld: {}, ll: {}, tfx: {} };
+        }
+
+        const periodStore = multiPeriodVolumeDB[monthKey][weekKey];
+        volumeDataCombined = {};
+
+        for (let h = 0; h < 24; h++) {
+            let sumAns = 0, sumAbQ = 0, sumAbCSAT = 0, sumAbH = 0;
+            ['obs', 'ins', 'eld', 'll', 'tfx'].forEach(t => {
+                if (periodStore[t] && periodStore[t][h]) {
+                    const item = periodStore[t][h];
+                    sumAns += item.ans || 0;
+                    sumAbQ += item.abQ || 0;
+                    sumAbCSAT += item.abCSAT || 0;
+                    sumAbH += item.abH || 0;
+                }
+            });
+
+            const totalVol = sumAns + sumAbQ + sumAbCSAT + sumAbH;
+            volumeDataCombined[h] = {
+                ans: sumAns,
+                abQ: sumAbQ,
+                abCSAT: sumAbCSAT,
+                abH: sumAbH,
+                tot: totalVol,
+                max: Math.round(totalVol * 1.1)
+            };
+        }
+
+        document.querySelectorAll('.periodLabel').forEach(el => el.textContent = `${getActiveMonth()} - ${getActiveWeek()}`);
+        document.getElementById('chart1Title').textContent = `Consolidated Call Volume vs. Capacity (${getActiveMonth()} - ${getActiveWeek()})`;
+    }
+
+    function renderAllUI() {
+        renderScheduleTable();
+        renderVolumeTable();
+        renderComparisonTable();
+        renderRecommendations();
+        updateCharts();
+    }
+
+    function renderScheduleTable() {
+        const tbody = document.getElementById('scheduleTableBody');
+        tbody.innerHTML = '';
+        const isAll = selectedDepts.has('ALL');
+
+        document.querySelectorAll('th.dept-col').forEach(th => {
+            const d = th.getAttribute('data-dept');
+            th.style.display = (isAll || selectedDepts.has(d)) ? '' : 'none';
+        });
+
+        document.querySelectorAll('td.dept-foot').forEach(td => {
+            const d = td.getAttribute('data-dept');
+            td.style.display = (isAll || selectedDepts.has(d)) ? '' : 'none';
+            if (deptRosterCounts[d] !== undefined) td.textContent = deptRosterCounts[d];
+        });
+
+        let totalHeadcount = 0;
+        if (isAll) {
+            totalHeadcount = Object.values(deptRosterCounts).reduce((a, b) => a + b, 0);
+        } else {
+            selectedDepts.forEach(d => {
+                if (deptRosterCounts[d]) totalHeadcount += deptRosterCounts[d];
+            });
+        }
+        document.getElementById('footTotal').textContent = totalHeadcount;
+        document.getElementById('footNote').textContent = `Selected Headcount Total = ${totalHeadcount} Agents`;
+
+        hourlySlots.forEach(slot => {
+            const tr = document.createElement('tr');
+            
+            const tdTime = document.createElement('td');
+            tdTime.className = 'time-col';
+            tdTime.textContent = slot.time12;
+            tr.appendChild(tdTime);
+
+            let rowTotalAway = 0;
+            let rowDetails = [];
+
+            depts.forEach(dept => {
+                const td = document.createElement('td');
+                td.className = 'dept-cell';
+                const isVisible = isAll || selectedDepts.has(dept);
+                td.style.display = isVisible ? '' : 'none';
+
+                let agents = (hourlyDataPattern[slot.h24] && hourlyDataPattern[slot.h24][dept]) ? hourlyDataPattern[slot.h24][dept] : [];
+                
+                if (isVisible) {
+                    rowTotalAway += agents.length;
+                    agents.forEach(ag => {
+                        rowDetails.push(`<b>${ag.name}</b> (${dept} - <i>${ag.act}</i>)`);
+                    });
+                }
+
+                td.innerHTML = agents.length > 0 
+                    ? `<span class="count-badge">${agents.length}</span>` 
+                    : `<span class="zero-count">-</span>`;
+                tr.appendChild(td);
+            });
+
+            const tdTotal = document.createElement('td');
+            tdTotal.className = 'total-col';
+            tdTotal.textContent = rowTotalAway;
+            tr.appendChild(tdTotal);
+
+            const tdDetails = document.createElement('td');
+            tdDetails.className = 'details-col';
+            tdDetails.innerHTML = rowDetails.length > 0 ? rowDetails.join(', ') : '<span class="none-text">None</span>';
+            tr.appendChild(tdDetails);
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderVolumeTable() {
+        const tbody = document.getElementById('volumeTableBody');
+        tbody.innerHTML = '';
+
+        hourlySlots.forEach(slot => {
+            const v = volumeDataCombined[slot.h24] || { ans:0, abQ:0, abCSAT:0, abH:0, tot:0, max:0 };
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="time-col">${slot.time12}</td>
+                <td>${v.ans.toFixed(1)}</td>
+                <td>${v.abQ.toFixed(1)}</td>
+                <td>${v.abCSAT.toFixed(1)}</td>
+                <td>${v.abH.toFixed(1)}</td>
+                <td style="background-color: rgba(255, 183, 3, 0.25); font-weight: bold; color: var(--accent-yellow);"><b>${v.tot.toFixed(1)}</b></td>
+                <td>${v.max}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderComparisonTable() {
+        const tbody = document.getElementById('comparisonTableBody');
+        tbody.innerHTML = '';
+
+        const aht = parseFloat(document.getElementById('ahtInput').value) || 5;
+        const occ = (parseFloat(document.getElementById('occInput').value) || 85) / 100;
+        const callsPerHourPerAgent = (60 / aht) * occ;
+
+        hourlySlots.forEach(slot => {
+            const v = volumeDataCombined[slot.h24] || { tot: 0 };
+            const phoneAway = (hourlyDataPattern[slot.h24]["OBS - Phones"]) ? hourlyDataPattern[slot.h24]["OBS - Phones"].length : 0;
+            const phoneAvail = Math.max(0, deptRosterCounts["OBS - Phones"] - phoneAway);
+
+            const reqAgents = v.tot > 0 ? Math.ceil(v.tot / callsPerHourPerAgent) : 0;
+            const gap = phoneAvail - reqAgents;
+
+            let recText = "";
+            if (gap < 0) {
+                recText = `<span class="status-deficit">Deficit of ${Math.abs(gap)} Agent(s). Add Reinforcement.</span>`;
+            } else if (gap <= 2 && reqAgents > 0) {
+                recText = `<span class="status-tight">Tight Capacity. Monitor Spikes.</span>`;
             } else {
-              renderCasesTable(tableId, data[tableId]);
+                recText = `<span class="status-ok">Optimal Coverage (+${gap} Avail.)</span>`;
             }
-          });
-          calculateGlobalKPIs();
-          updateAllCharts();
-          showToast(`Loaded Cloud Data for Week ${week} (${month})`);
-        } else {
-          if (currentTab === 'phones') {
-            renderPhonesTable('table-gua-col', phonesGuaColData);
-            renderPhonesTable('table-pan', phonesPanData);
-            renderPhonesTable('table-mx-phones', phonesMxData);
-          } else {
-            renderCasesTable('table-cases-gua', casesGuaColPhiData);
-            renderCasesTable('table-cases-mx', casesMxData);
-          }
-          calculateGlobalKPIs();
-          updateAllCharts();
-        }
-      }).catch(err => {
-        console.error("Firebase read error:", err);
-      });
 
-      loadMonthlyNoteFromFirebase();
-    }
-
-    function deleteAgentRow(btn, tableId) {
-      const tr = btn.closest('tr');
-      tr.remove();
-      updateAgentCount(tableId);
-      calculateGlobalKPIs();
-      renderTableChart(tableId);
-    }
-
-    function updateAgentCount(tableId) {
-      const count = document.querySelectorAll(`#${tableId} tbody tr`).length;
-      const countBadge = document.querySelector(`#${tableId}`).closest('.overflow-hidden').querySelector('.agent-count');
-      if (countBadge) {
-        countBadge.innerText = `${count} Agents`;
-      }
-    }
-
-    function updateCalculations(input) {
-      const tr = input.closest('tr');
-      const qa1 = parseFloat(tr.querySelector('.qa1')?.value) || 0;
-      const qa2 = parseFloat(tr.querySelector('.qa2')?.value) || 0;
-      const avgQa = (qa1 > 0 && qa2 > 0) ? Math.round((qa1 + qa2) / 2) : Math.round(qa1 || qa2 || 0);
-
-      const inbound = parseInt(tr.querySelector('.inbound')?.value) || 0;
-      const outbound = parseInt(tr.querySelector('.outbound')?.value) || 0;
-      const total = inbound + outbound;
-      const avgDaily = Math.round(total / 5);
-
-      if (tr.querySelector('.avg-qa')) {
-        tr.querySelector('.avg-qa').innerText = avgQa;
-        applyConditionalFormatting(tr.querySelector('.avg-qa'), 'qa');
-      }
-
-      if (tr.querySelector('.total-calls')) tr.querySelector('.total-calls').innerText = total;
-      if (tr.querySelector('.avg-daily')) tr.querySelector('.avg-daily').innerText = avgDaily;
-
-      // Apply conditional formatting on user input
-      applyConditionalFormatting(tr.querySelector('.qa1'), 'qa');
-      applyConditionalFormatting(tr.querySelector('.qa2'), 'qa');
-      applyConditionalFormatting(tr.querySelector('.abandon'), 'abandonOrMissed');
-      applyConditionalFormatting(tr.querySelector('.missed'), 'abandonOrMissed');
-      applyConditionalFormatting(tr.querySelector('.declined'), 'declined');
-
-      calculateGlobalKPIs();
-      
-      const table = tr.closest('table');
-      if (table) {
-        renderTableChart(table.id);
-      }
-    }
-
-    function updateCasesCalculations(input) {
-      const tr = input.closest('tr');
-      const good = parseInt(tr.querySelector('.surveyGood')?.value) || 0;
-      const bad = parseInt(tr.querySelector('.surveyBad')?.value) || 0;
-      const total = good + bad;
-
-      if (tr.querySelector('.totalSurveys')) tr.querySelector('.totalSurveys').innerText = total;
-
-      // Apply conditional formatting for Cases
-      applyConditionalFormatting(tr.querySelector('.qaTotal'), 'qa');
-
-      calculateGlobalKPIs();
-      
-      const table = tr.closest('table');
-      if (table) {
-        renderTableChart(table.id);
-      }
-    }
-
-    function calculateGlobalKPIs() {
-      let activeTables = [];
-      if (currentTab === 'phones') {
-        activeTables = ['table-gua-col', 'table-pan', 'table-mx-phones'];
-        let qa1Sum = 0, qa1Count = 0;
-        let qa2Sum = 0, qa2Count = 0;
-        let totalCalls = 0;
-
-        activeTables.forEach(tableId => {
-          const rows = document.querySelectorAll(`#${tableId} tbody tr`);
-          rows.forEach(row => {
-            const v1 = parseFloat(row.querySelector('.qa1')?.value) || 0;
-            const v2 = parseFloat(row.querySelector('.qa2')?.value) || 0;
-            const tot = parseInt(row.querySelector('.total-calls')?.innerText) || 0;
-
-            if (v1 > 0) { qa1Sum += v1; qa1Count++; }
-            if (v2 > 0) { qa2Sum += v2; qa2Count++; }
-            totalCalls += tot;
-          });
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="time-col">${slot.time12}</td>
+                <td style="background-color: rgba(255, 183, 3, 0.25); color: var(--accent-yellow);"><b>${v.tot.toFixed(1)}</b></td>
+                <td>${phoneAvail} of ${deptRosterCounts["OBS - Phones"]}</td>
+                <td>${reqAgents}</td>
+                <td>${gap >= 0 ? '+' + gap : gap}</td>
+                <td>${recText}</td>
+            `;
+            tbody.appendChild(tr);
         });
-
-        document.getElementById('kpi-qa1').innerText = qa1Count ? Math.round(qa1Sum / qa1Count) : '0';
-        document.getElementById('kpi-qa2').innerText = qa2Count ? Math.round(qa2Sum / qa2Count) : '0';
-        document.getElementById('kpi-total').innerText = totalCalls.toLocaleString();
-        document.getElementById('kpi-daily').innerText = Math.round(totalCalls / 5);
-      } else {
-        activeTables = ['table-cases-gua', 'table-cases-mx'];
-        let qaSum = 0, qaCount = 0;
-        let csatSum = 0, csatCount = 0;
-        let totalConvs = 0;
-        let totalRespTime = 0, respTimeCount = 0;
-
-        activeTables.forEach(tableId => {
-          const rows = document.querySelectorAll(`#${tableId} tbody tr`);
-          rows.forEach(row => {
-            const qaVal = parseFloat(row.querySelector('.qaTotal')?.value) || 0;
-            const csatVal = parseFloat(row.querySelector('.csat')?.value) || 0;
-            const convs = parseInt(row.querySelector('.convReplied')?.value) || 0;
-            const respTime = parseFloat(row.querySelector('.avgResponseTime')?.value) || 0;
-
-            if (qaVal > 0) { qaSum += qaVal; qaCount++; }
-            if (csatVal > 0) { csatSum += csatVal; csatCount++; }
-            if (respTime > 0) { totalRespTime += respTime; respTimeCount++; }
-            totalConvs += convs;
-          });
-        });
-
-        document.getElementById('kpi-qa1').innerText = qaCount ? Math.round(qaSum / qaCount) : '0';
-        document.getElementById('kpi-qa2').innerText = csatCount ? Math.round(csatSum / csatCount) : '0';
-        document.getElementById('kpi-total').innerText = totalConvs.toLocaleString();
-        document.getElementById('kpi-daily').innerText = respTimeCount ? (totalRespTime / respTimeCount).toFixed(1) + ' min' : '0 min';
-      }
     }
 
-    // MULTI-METRIC GROUPED CHART GENERATION
-    function renderTableChart(tableId) {
-      const chartCanvasId = tableId.replace('table-', 'chart-');
-      const ctx = document.getElementById(chartCanvasId);
-      if (!ctx) return;
+    function renderRecommendations() {
+        const container = document.getElementById('recommendationsContainer');
+        const month = getActiveMonth();
+        const week = getActiveWeek();
 
-      const groupOption = document.getElementById('chartMetricSelect').value;
-      const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+        let maxVol = 0;
+        let peakHour = 9;
 
-      const labels = [];
-      const datasetsMap = [];
-
-      rows.forEach(row => {
-        const nameInput = row.querySelector('.cell-input-name');
-        const name = nameInput ? nameInput.value : 'Agent';
-        labels.push(name);
-      });
-
-      if (currentTab === 'phones') {
-        if (groupOption === 'group1') {
-          const qa1Data = [], qa2Data = [], avgQaData = [];
-          rows.forEach(r => {
-            qa1Data.push(parseFloat(r.querySelector('.qa1')?.value) || 0);
-            qa2Data.push(parseFloat(r.querySelector('.qa2')?.value) || 0);
-            avgQaData.push(parseFloat(r.querySelector('.avg-qa')?.innerText) || 0);
-          });
-          datasetsMap.push({ label: 'QA 1 Score', data: qa1Data, backgroundColor: '#ebbd31' });
-          datasetsMap.push({ label: 'QA 2 Score', data: qa2Data, backgroundColor: '#38bdf8' });
-          datasetsMap.push({ label: 'AVG QA Score', data: avgQaData, backgroundColor: '#34d399' });
-        } else if (groupOption === 'group2') {
-          const inData = [], outData = [], totData = [], avgDData = [];
-          rows.forEach(r => {
-            inData.push(parseFloat(r.querySelector('.inbound')?.value) || 0);
-            outData.push(parseFloat(r.querySelector('.outbound')?.value) || 0);
-            totData.push(parseFloat(r.querySelector('.total-calls')?.innerText) || 0);
-            avgDData.push(parseFloat(r.querySelector('.avg-daily')?.innerText) || 0);
-          });
-          datasetsMap.push({ label: 'Inbound Calls', data: inData, backgroundColor: '#38bdf8' });
-          datasetsMap.push({ label: 'Outbound Calls', data: outData, backgroundColor: '#818cf8' });
-          datasetsMap.push({ label: 'Total Calls', data: totData, backgroundColor: '#ebbd31' });
-          datasetsMap.push({ label: 'AVG. Calls/Day', data: avgDData, backgroundColor: '#34d399' });
-        } else {
-          const abndData = [], decData = [], missData = [];
-          rows.forEach(r => {
-            abndData.push(parseFloat(r.querySelector('.abandon')?.value) || 0);
-            decData.push(parseFloat(r.querySelector('.declined')?.value) || 0);
-            missData.push(parseFloat(r.querySelector('.missed')?.value) || 0);
-          });
-          datasetsMap.push({ label: 'Abnd Hold', data: abndData, backgroundColor: '#f87171' });
-          datasetsMap.push({ label: 'Declined Calls', data: decData, backgroundColor: '#fb923c' });
-          datasetsMap.push({ label: 'Missed Calls', data: missData, backgroundColor: '#f43f5e' });
-        }
-      } else {
-        if (groupOption === 'group1') {
-          const qaTotData = [];
-          rows.forEach(r => qaTotData.push(parseFloat(r.querySelector('.qaTotal')?.value) || 0));
-          datasetsMap.push({ label: 'QA Total', data: qaTotData, backgroundColor: '#ebbd31' });
-        } else if (groupOption === 'group2') {
-          const convData = [], csatData = [], dsatData = [], respData = [];
-          rows.forEach(r => {
-            convData.push(parseFloat(r.querySelector('.convReplied')?.value) || 0);
-            csatData.push(parseFloat(r.querySelector('.csat')?.value) || 0);
-            dsatData.push(parseFloat(r.querySelector('.dsat')?.value) || 0);
-            respData.push(parseFloat(r.querySelector('.avgResponseTime')?.value) || 0);
-          });
-          datasetsMap.push({ label: 'Conversations Replied', data: convData, backgroundColor: '#38bdf8' });
-          datasetsMap.push({ label: 'CSAT Score', data: csatData, backgroundColor: '#34d399' });
-          datasetsMap.push({ label: 'DSAT Score', data: dsatData, backgroundColor: '#f87171' });
-          datasetsMap.push({ label: 'Avg First Resp Time (m)', data: respData, backgroundColor: '#a78bfa' });
-        } else {
-          const gData = [], bData = [], tData = [], slaData = [];
-          rows.forEach(r => {
-            gData.push(parseFloat(r.querySelector('.surveyGood')?.value) || 0);
-            bData.push(parseFloat(r.querySelector('.surveyBad')?.value) || 0);
-            tData.push(parseFloat(r.querySelector('.totalSurveys')?.innerText) || 0);
-            slaData.push(parseFloat(r.querySelector('.slaMissed')?.value) || 0);
-          });
-          datasetsMap.push({ label: 'Survey Good', data: gData, backgroundColor: '#34d399' });
-          datasetsMap.push({ label: 'Survey Bad', data: bData, backgroundColor: '#f87171' });
-          datasetsMap.push({ label: 'Total Surveys', data: tData, backgroundColor: '#ebbd31' });
-          datasetsMap.push({ label: 'SLA Missed', data: slaData, backgroundColor: '#fb923c' });
-        }
-      }
-
-      if (chartInstances[chartCanvasId]) {
-        chartInstances[chartCanvasId].destroy();
-      }
-
-      chartInstances[chartCanvasId] = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: datasetsMap.map(ds => ({
-            label: ds.label,
-            data: ds.data,
-            backgroundColor: ds.backgroundColor,
-            borderRadius: 3
-          }))
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              labels: { color: '#94a3b8', font: { size: 10, weight: '600' } }
+        for (let h = 0; h < 24; h++) {
+            let v = volumeDataCombined[h] ? volumeDataCombined[h].tot : 0;
+            if (v > maxVol) {
+                maxVol = v;
+                peakHour = h;
             }
-          },
-          scales: {
-            x: {
-              ticks: { color: '#94a3b8', font: { size: 9 } },
-              grid: { color: 'rgba(235, 189, 49, 0.15)' }
+        }
+
+        let peakSlot = hourlySlots.find(s => s.h24 === peakHour);
+        let timeLabel = peakSlot ? peakSlot.time12 : "Peak Hour";
+
+        container.innerHTML = `
+            <div class="recommendation-card">
+                <h3>Peak-Hour Shift &amp; Meal Staggering (${month} - ${week})</h3>
+                <p>For <b>${month} (${week})</b>, overall call volume peaks around <b>${timeLabel}</b> with an average volume of <b>${maxVol.toFixed(1)} calls/hour</b>. Overlapping lunches and breaks reduce available phone capacity during key morning windows. Staggering meal schedules into smaller shifts is essential to maintain queue SLA.</p>
+            </div>
+            <div class="recommendation-card">
+                <h3>Cross-Queue Reinforcement &amp; Flex Staffing</h3>
+                <p>When demand spikes above capacity in <i>${month} - ${week}</i>, activate cross-skilling protocols so that agents from non-phone or lower-volume teams support phone queues during high-demand hours.</p>
+            </div>
+        `;
+    }
+
+    function initCharts() {
+        const ctx1 = document.getElementById('volumeCapacityChart').getContext('2d');
+        volumeCapacityChartInstance = new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: hourlySlots.map(s => s.time12),
+                datasets: [
+                    {
+                        label: 'Total Call Volume',
+                        data: [],
+                        borderColor: '#ffb703',
+                        backgroundColor: 'rgba(255, 183, 3, 0.25)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Available Phone Capacity',
+                        data: [],
+                        borderColor: '#ffffff',
+                        borderDash: [5, 5],
+                        borderWidth: 2,
+                        fill: false
+                    }
+                ]
             },
-            y: {
-              beginAtZero: true,
-              ticks: { color: '#94a3b8', font: { size: 9 } },
-              grid: { color: 'rgba(235, 189, 49, 0.15)' }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#ffb703' }, position: 'top' } },
+                scales: { 
+                    y: { 
+                        beginAtZero: true, 
+                        grid: { color: 'rgba(255, 183, 3, 0.4)', lineWidth: 1.5 },
+                        ticks: { color: '#ffffff' }
+                    },
+                    x: {
+                        grid: { color: 'rgba(255, 183, 3, 0.4)', lineWidth: 1.5 },
+                        ticks: { color: '#ffffff' }
+                    }
+                }
             }
-          }
+        });
+
+        const ctx2 = document.getElementById('deptDistributionChart').getContext('2d');
+        deptDistributionChartInstance = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: depts,
+                datasets: [
+                    { label: 'Total Headcount', data: [], backgroundColor: '#0b2545', borderColor: '#ffb703', borderWidth: 1.5 },
+                    { label: 'Away Agents in Peak Hour (1:00 PM)', data: [], backgroundColor: '#ffb703', borderColor: '#ffffff', borderWidth: 1.5 }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#ffb703' }, position: 'top' } },
+                scales: { 
+                    y: { 
+                        beginAtZero: true, 
+                        grid: { color: 'rgba(255, 183, 3, 0.4)', lineWidth: 1.5 },
+                        ticks: { color: '#ffffff' }
+                    },
+                    x: {
+                        grid: { color: 'rgba(255, 183, 3, 0.4)', lineWidth: 1.5 },
+                        ticks: { color: '#ffffff' }
+                    }
+                }
+            }
+        });
+    }
+
+    function updateCharts() {
+        const aht = parseFloat(document.getElementById('ahtInput').value) || 5;
+        const occ = (parseFloat(document.getElementById('occInput').value) || 85) / 100;
+        const callsPerHourPerAgent = (60 / aht) * occ;
+
+        const volumeData = [];
+        const capacityData = [];
+
+        hourlySlots.forEach(slot => {
+            const v = volumeDataCombined[slot.h24] ? volumeDataCombined[slot.h24].tot : 0;
+            const phoneAway = hourlyDataPattern[slot.h24]["OBS - Phones"] ? hourlyDataPattern[slot.h24]["OBS - Phones"].length : 0;
+            const phoneAvail = Math.max(0, deptRosterCounts["OBS - Phones"] - phoneAway);
+            const callCapacity = Math.round(phoneAvail * callsPerHourPerAgent);
+
+            volumeData.push(v);
+            capacityData.push(callCapacity);
+        });
+
+        volumeCapacityChartInstance.data.datasets[0].data = volumeData;
+        volumeCapacityChartInstance.data.datasets[1].data = capacityData;
+        volumeCapacityChartInstance.update();
+
+        const totalHeadcounts = depts.map(d => deptRosterCounts[d]);
+        const peakAway = depts.map(d => (hourlyDataPattern[13][d] ? hourlyDataPattern[13][d].length : 0));
+
+        deptDistributionChartInstance.data.datasets[0].data = totalHeadcounts;
+        deptDistributionChartInstance.data.datasets[1].data = peakAway;
+        deptDistributionChartInstance.update();
+    }
+
+    function renderSavedPeriodsList() {
+        const container = document.getElementById('savedPeriodsContainer');
+        container.innerHTML = '';
+
+        let count = 0;
+        for (let monthKey in multiPeriodVolumeDB) {
+            for (let weekKey in multiPeriodVolumeDB[monthKey]) {
+                const store = multiPeriodVolumeDB[monthKey][weekKey];
+                let hasData = false;
+                for (let k in store) {
+                    if (Object.keys(store[k]).length > 0) { hasData = true; break; }
+                }
+
+                if (hasData) {
+                    count++;
+                    const origMonth = monthKey.replace(/_/g, ' ');
+                    const origWeek = weekKey.replace(/_/g, ' ');
+
+                    const chip = document.createElement('div');
+                    chip.className = 'saved-week-chip';
+                    chip.innerHTML = `
+                        <span><b>${origMonth}</b> - ${origWeek}</span>
+                        <button onclick="loadSavedPeriodToModal('${monthKey}', '${weekKey}')" title="Load to Edit">✏️</button>
+                        <button class="btn-del-period" onclick="deleteSavedPeriod('${monthKey}', '${weekKey}')" title="Delete">✕</button>
+                    `;
+                    container.appendChild(chip);
+                }
+            }
         }
-      });
+
+        if (count === 0) {
+            container.innerHTML = `<span style="font-size:0.8rem; color:#aaa;">No periods saved yet.</span>`;
+        }
     }
 
-    function updateAllCharts() {
-      const allTableIds = ['table-gua-col', 'table-pan', 'table-mx-phones', 'table-cases-gua', 'table-cases-mx'];
-      allTableIds.forEach(id => renderTableChart(id));
-    }
-
-    function showToast(msg = 'Data Saved Successfully!') {
-      const t = document.getElementById('toast');
-      document.getElementById('toast-text').innerText = msg;
-      t.style.display = 'block';
-      setTimeout(() => {
-        t.style.display = 'none';
-      }, 2500);
-    }
-
-    function changePeriod() {
-      loadWeekFromFirebase();
-    }
-
-    function filterTables() {
-      const q = document.getElementById('searchInput').value.toLowerCase();
-      const rows = document.querySelectorAll('tbody tr');
-      rows.forEach(r => {
-        const text = r.innerText.toLowerCase();
-        r.style.display = text.includes(q) ? '' : 'none';
-      });
-    }
-
-    function initAllTables() {
-      updateMetricSelectOptions();
-      loadWeekFromFirebase();
-    }
-
-    window.onload = () => {
-      initAllTables();
+    window.loadSavedPeriodToModal = function(mKey, wKey) {
+        if (rawTextsDB[mKey] && rawTextsDB[mKey][wKey]) {
+            const raw = rawTextsDB[mKey][wKey];
+            document.getElementById('volumeText_obs').value = raw.obs || '';
+            document.getElementById('volumeText_ins').value = raw.ins || '';
+            document.getElementById('volumeText_eld').value = raw.eld || '';
+            document.getElementById('volumeText_ll').value = raw.ll || '';
+            document.getElementById('volumeText_tfx').value = raw.tfx || '';
+        }
     };
-  </script>
+
+    window.deleteSavedPeriod = function(mKey, wKey) {
+        if (multiPeriodVolumeDB[mKey] && multiPeriodVolumeDB[mKey][wKey]) {
+            delete multiPeriodVolumeDB[mKey][wKey];
+            remove(ref(db, `wfm_data/multiPeriodVolumeDB/${mKey}/${wKey}`));
+        }
+        if (rawTextsDB[mKey] && rawTextsDB[mKey][wKey]) {
+            delete rawTextsDB[mKey][wKey];
+            remove(ref(db, `wfm_data/rawTextsDB/${mKey}/${wKey}`));
+        }
+        loadActivePeriodVolume();
+        renderAllUI();
+        renderSavedPeriodsList();
+    };
+
+    function requireAuth(callback) {
+        if (isAuthenticated) {
+            callback();
+        } else {
+            pendingAction = callback;
+            document.getElementById('authPasswordInput').value = '';
+            document.getElementById('authErrorMsg').style.display = 'none';
+            document.getElementById('authModal').classList.add('active');
+        }
+    }
+
+    function setupEventListeners() {
+        document.getElementById('monthSelect').addEventListener('change', () => {
+            loadActivePeriodVolume();
+            renderAllUI();
+            broadcastNavChange(getActiveMonth(), getActiveWeek());
+        });
+        document.getElementById('weekSelect').addEventListener('change', () => {
+            loadActivePeriodVolume();
+            renderAllUI();
+            broadcastNavChange(getActiveMonth(), getActiveWeek());
+        });
+
+        document.getElementById('slicerContainer').addEventListener('click', (e) => {
+            if (!e.target.classList.contains('btn-slicer')) return;
+            const dept = e.target.getAttribute('data-dept');
+            const allBtn = document.querySelector('.btn-slicer[data-dept="ALL"]');
+
+            if (dept === 'ALL') {
+                selectedDepts.clear();
+                selectedDepts.add('ALL');
+                document.querySelectorAll('.btn-slicer').forEach(btn => btn.classList.remove('active'));
+                allBtn.classList.add('active');
+            } else {
+                if (selectedDepts.has('ALL')) {
+                    selectedDepts.delete('ALL');
+                    allBtn.classList.remove('active');
+                }
+
+                if (selectedDepts.has(dept)) {
+                    selectedDepts.delete(dept);
+                    e.target.classList.remove('active');
+                } else {
+                    selectedDepts.add(dept);
+                    e.target.classList.add('active');
+                }
+
+                if (selectedDepts.size === 0) {
+                    selectedDepts.add('ALL');
+                    allBtn.classList.add('active');
+                }
+            }
+            renderScheduleTable();
+        });
+
+        document.getElementById('ahtInput').addEventListener('input', () => {
+            renderComparisonTable();
+            updateCharts();
+        });
+        document.getElementById('occInput').addEventListener('input', () => {
+            renderComparisonTable();
+            updateCharts();
+        });
+
+        document.getElementById('btnCloseAuth').addEventListener('click', () => {
+            document.getElementById('authModal').classList.remove('active');
+        });
+        document.getElementById('btnSubmitAuth').addEventListener('click', verifyAuthPassword);
+        document.getElementById('authPasswordInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') verifyAuthPassword();
+        });
+
+        document.getElementById('btnOpenImport').addEventListener('click', () => {
+            document.getElementById('importMonthSelect').value = getActiveMonth();
+            document.getElementById('importWeekSelect').value = getActiveWeek();
+            renderSavedPeriodsList();
+            document.getElementById('importModal').classList.add('active');
+        });
+        document.getElementById('btnCloseImport').addEventListener('click', () => {
+            document.getElementById('importModal').classList.remove('active');
+        });
+        document.getElementById('btnCancelImport').addEventListener('click', () => {
+            document.getElementById('importModal').classList.remove('active');
+        });
+        document.getElementById('btnApplyImport').addEventListener('click', processTeamTabsData);
+
+        document.getElementById('teamImportTabs').addEventListener('click', (e) => {
+            if (!e.target.classList.contains('tab-btn')) return;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            e.target.classList.add('active');
+            const targetTab = e.target.getAttribute('data-tab');
+            document.getElementById(targetTab).classList.add('active');
+        });
+
+        document.getElementById('btnOpenMgmt').addEventListener('click', () => {
+            requireAuth(() => { openManagementModal(); });
+        });
+        document.getElementById('btnCloseMgmt').addEventListener('click', () => {
+            document.getElementById('mgmtModal').classList.remove('active');
+        });
+        document.getElementById('btnCloseMgmtFooter').addEventListener('click', () => {
+            document.getElementById('mgmtModal').classList.remove('active');
+        });
+        document.getElementById('mgmtDeptSelect').addEventListener('change', renderMgmtAgentsTable);
+        
+        document.getElementById('btnAddNewAgentForm').addEventListener('click', () => { openAgentForm(); });
+        document.getElementById('btnCancelAgentForm').addEventListener('click', () => {
+            document.getElementById('agentFormCard').style.display = 'none';
+        });
+        document.getElementById('btnSaveAgent').addEventListener('click', saveAgentForm);
+    }
+
+    function verifyAuthPassword() {
+        const input = document.getElementById('authPasswordInput').value;
+        if (input === 'management2026!') {
+            isAuthenticated = true;
+            document.getElementById('authModal').classList.remove('active');
+            if (pendingAction) {
+                pendingAction();
+                pendingAction = null;
+            }
+        } else {
+            document.getElementById('authErrorMsg').style.display = 'block';
+        }
+    }
+
+    // MULTI-DAY PARSER MAPS TO 24 HOURLY INTERVALS FOR DASHBOARD TABLES/CHARTS
+    function parsePastedTable(rawText) {
+        if (!rawText || !rawText.trim()) return {};
+        const result = {};
+
+        const timeRegex = /(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)/gi;
+        const matches = [];
+        let match;
+
+        while ((match = timeRegex.exec(rawText)) !== null) {
+            matches.push({
+                timeStr: match[1],
+                index: match.index,
+                endIndex: match.index + match[1].length
+            });
+        }
+
+        if (matches.length === 0) return result;
+
+        const hourlyAccumulator = {};
+
+        for (let i = 0; i < matches.length; i++) {
+            const current = matches[i];
+            const nextIndex = (i + 1 < matches.length) ? matches[i + 1].index : rawText.length;
+            const numSegment = rawText.substring(current.endIndex, nextIndex).trim();
+
+            let h24 = -1;
+            let hourMatch = current.timeStr.match(/(\d{1,2}):?(\d{2})?:?(\d{2})?\s*(AM|PM)?/i);
+            if (hourMatch) {
+                let h = parseInt(hourMatch[1], 10);
+                let pm = hourMatch[4] && hourMatch[4].toUpperCase() === 'PM';
+                let am = hourMatch[4] && hourMatch[4].toUpperCase() === 'AM';
+                if (pm && h < 12) h += 12;
+                if (am && h === 12) h = 0;
+                if (h >= 0 && h < 24) h24 = h;
+            }
+
+            if (h24 !== -1) {
+                let digits = numSegment.split(/[\t\s\n,]+/).map(v => parseFloat(v)).filter(v => !isNaN(v));
+                if (digits.length === 0 && numSegment.length > 0) {
+                    let dMatch = numSegment.match(/\d+/g);
+                    if (dMatch) digits = dMatch.map(v => parseFloat(v));
+                }
+
+                let ans = digits[0] || 0;
+                let abQ = digits[1] || 0;
+                let abCSAT = digits[2] || 0;
+                let abH = digits[3] || digits[4] || 0;
+
+                if (!hourlyAccumulator[h24]) {
+                    hourlyAccumulator[h24] = { ansSum: 0, abQSum: 0, abCSATSum: 0, abHSum: 0, count: 0 };
+                }
+
+                hourlyAccumulator[h24].ansSum += ans;
+                hourlyAccumulator[h24].abQSum += abQ;
+                hourlyAccumulator[h24].abCSATSum += abCSAT;
+                hourlyAccumulator[h24].abHSum += abH;
+                hourlyAccumulator[h24].count += 1;
+            }
+        }
+
+        for (let h in hourlyAccumulator) {
+            let item = hourlyAccumulator[h];
+            let cnt = item.count || 1;
+            let avgAns = item.ansSum / cnt;
+            let avgAbQ = item.abQSum / cnt;
+            let avgCSAT = item.abCSATSum / cnt;
+            let avgAbH = item.abHSum / cnt;
+
+            result[h] = {
+                ans: avgAns,
+                abQ: avgAbQ,
+                abCSAT: avgCSAT,
+                abH: avgAbH,
+                tot: avgAns + avgAbQ + avgCSAT + avgAbH
+            };
+        }
+
+        return result;
+    }
+
+    function processTeamTabsData() {
+        const targetMonth = document.getElementById('importMonthSelect').value;
+        const targetWeek = document.getElementById('importWeekSelect').value;
+
+        const monthKey = cleanKey(targetMonth);
+        const weekKey = cleanKey(targetWeek);
+
+        if (!multiPeriodVolumeDB[monthKey]) multiPeriodVolumeDB[monthKey] = {};
+        if (!multiPeriodVolumeDB[monthKey][weekKey]) {
+            multiPeriodVolumeDB[monthKey][weekKey] = { obs: {}, ins: {}, eld: {}, ll: {}, tfx: {} };
+        }
+
+        if (!rawTextsDB[monthKey]) rawTextsDB[monthKey] = {};
+        if (!rawTextsDB[monthKey][weekKey]) rawTextsDB[monthKey][weekKey] = {};
+
+        const periodStore = multiPeriodVolumeDB[monthKey][weekKey];
+        const rawStore = rawTextsDB[monthKey][weekKey];
+
+        const inputs = {
+            'obs': document.getElementById('volumeText_obs').value,
+            'ins': document.getElementById('volumeText_ins').value,
+            'eld': document.getElementById('volumeText_eld').value,
+            'll':  document.getElementById('volumeText_ll').value,
+            'tfx': document.getElementById('volumeText_tfx').value
+        };
+
+        Object.keys(inputs).forEach(key => {
+            if (inputs[key] && inputs[key].trim().length > 0) {
+                rawStore[key] = inputs[key];
+                periodStore[key] = parsePastedTable(inputs[key]);
+            }
+        });
+
+        document.getElementById('monthSelect').value = targetMonth;
+        document.getElementById('weekSelect').value = targetWeek;
+
+        loadActivePeriodVolume();
+        renderAllUI();
+
+        saveVolumeDBToFirebase();
+        saveRawTextsToFirebase();
+        broadcastNavChange(targetMonth, targetWeek);
+
+        document.getElementById('importModal').classList.remove('active');
+    }
+
+    function openManagementModal() {
+        document.getElementById('mgmtModal').classList.add('active');
+        renderMgmtAgentsTable();
+    }
+
+    function renderMgmtAgentsTable() {
+        const selectedDept = document.getElementById('mgmtDeptSelect').value;
+        const tbody = document.getElementById('mgmtAgentsTableBody');
+        tbody.innerHTML = '';
+
+        const deptAgents = masterAgentsDB.filter(ag => ag.dept === selectedDept);
+
+        if (deptAgents.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#aaa;">No agents registered in this department.</td></tr>`;
+            return;
+        }
+
+        deptAgents.forEach(ag => {
+            const tr = document.createElement('tr');
+            tr.className = 'agent-row-draggable';
+            tr.setAttribute('draggable', 'true');
+            tr.setAttribute('data-agent-id', ag.id);
+
+            let hoursBadges = [];
+            if (ag.hours) {
+                for (let idx in ag.hours) {
+                    let slot = agentSlots15Min.find(s => s.idx == idx);
+                    let timeLabel = slot ? slot.time12 : `${idx}`;
+                    hoursBadges.push(`<span class="badge-act">${timeLabel}: ${ag.hours[idx]}</span>`);
+                }
+            }
+            let hoursStr = hoursBadges.length > 0 ? hoursBadges.join(' ') : '<span style="color:#aaa;">No scheduled away hours</span>';
+
+            tr.innerHTML = `
+                <td><span class="drag-handle">☰</span></td>
+                <td><b>${ag.name}</b></td>
+                <td><span class="badge-dept">${ag.dept}</span></td>
+                <td>${hoursStr}</td>
+                <td>
+                    <div class="action-btns">
+                        <button class="btn btn-outline btn-sm" onclick="editAgentPrompt(${ag.id})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteAgentPrompt(${ag.id})">Delete</button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        initDragAndDrop();
+    }
+
+    // DRAG AND DROP ENGINE FOR AGENT REORDERING
+    function initDragAndDrop() {
+        const tbody = document.getElementById('mgmtAgentsTableBody');
+        const rows = tbody.querySelectorAll('.agent-row-draggable');
+
+        rows.forEach(row => {
+            row.addEventListener('dragstart', (e) => {
+                row.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', row.getAttribute('data-agent-id'));
+            });
+
+            row.addEventListener('dragend', () => {
+                row.classList.remove('dragging');
+                saveNewAgentOrder();
+            });
+        });
+
+        tbody.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const draggingRow = tbody.querySelector('.dragging');
+            const afterElement = getDragAfterElement(tbody, e.clientY);
+            if (afterElement == null) {
+                tbody.appendChild(draggingRow);
+            } else {
+                tbody.insertBefore(draggingRow, afterElement);
+            }
+        });
+    }
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.agent-row-draggable:not(.dragging)')];
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    function saveNewAgentOrder() {
+        const tbody = document.getElementById('mgmtAgentsTableBody');
+        const selectedDept = document.getElementById('mgmtDeptSelect').value;
+        const rows = tbody.querySelectorAll('.agent-row-draggable');
+
+        const newDeptAgents = [];
+        rows.forEach(row => {
+            const id = parseInt(row.getAttribute('data-agent-id'), 10);
+            const ag = masterAgentsDB.find(a => a.id === id);
+            if (ag) newDeptAgents.push(ag);
+        });
+
+        // Reinsert ordered agents back into master DB
+        const otherAgents = masterAgentsDB.filter(a => a.dept !== selectedDept);
+        masterAgentsDB = [...otherAgents, ...newDeptAgents];
+
+        recountRosterFromMasterDB();
+        syncPatternFromMasterDB();
+        saveAgentsDBToFirebase();
+        renderAllUI();
+    }
+
+    window.editAgentPrompt = function(agentId) {
+        requireAuth(() => { openAgentForm(agentId); });
+    };
+
+    window.deleteAgentPrompt = function(agentId) {
+        requireAuth(() => {
+            const ag = masterAgentsDB.find(a => a.id === agentId);
+            if (ag) {
+                masterAgentsDB = masterAgentsDB.filter(a => a.id !== agentId);
+                recountRosterFromMasterDB();
+                syncPatternFromMasterDB();
+                saveAgentsDBToFirebase();
+                renderMgmtAgentsTable();
+            }
+        });
+    };
+
+    function openAgentForm(agentId = null) {
+        const card = document.getElementById('agentFormCard');
+        card.style.display = 'block';
+        
+        const chipsContainer = document.getElementById('hourChipsContainer');
+        chipsContainer.innerHTML = '';
+
+        const currentDept = document.getElementById('mgmtDeptSelect').value;
+
+        if (agentId) {
+            const ag = masterAgentsDB.find(a => a.id === agentId);
+            document.getElementById('agentFormTitle').textContent = 'Edit Agent & Schedule (15-Min Intervals)';
+            document.getElementById('editAgentId').value = ag.id;
+            document.getElementById('agentNameInput').value = ag.name;
+            document.getElementById('agentDeptInput').value = ag.dept;
+
+            agentSlots15Min.forEach(slot => {
+                const isChecked = ag.hours && ag.hours[slot.idx] !== undefined;
+                const actValue = (ag.hours && ag.hours[slot.idx]) || "Break 1";
+                
+                const div = document.createElement('div');
+                div.className = 'chip-checkbox';
+                div.innerHTML = `
+                    <input type="checkbox" value="${slot.idx}" ${isChecked ? 'checked' : ''} onchange="toggleActivitySelect(this, ${slot.idx})">
+                    <span>${slot.time12}</span>
+                    <select id="act_select_${slot.idx}" style="font-size:0.7rem; ${isChecked ? '' : 'display:none;'}">
+                        <option value="Break 1" ${actValue === 'Break 1' ? 'selected' : ''}>Break 1</option>
+                        <option value="Lunch" ${actValue === 'Lunch' ? 'selected' : ''}>Lunch</option>
+                        <option value="Break 2" ${actValue === 'Break 2' ? 'selected' : ''}>Break 2</option>
+                    </select>
+                `;
+                chipsContainer.appendChild(div);
+            });
+
+        } else {
+            document.getElementById('agentFormTitle').textContent = 'Add New Agent (15-Min Intervals)';
+            document.getElementById('editAgentId').value = '';
+            document.getElementById('agentNameInput').value = '';
+            document.getElementById('agentDeptInput').value = currentDept;
+
+            agentSlots15Min.forEach(slot => {
+                const div = document.createElement('div');
+                div.className = 'chip-checkbox';
+                div.innerHTML = `
+                    <input type="checkbox" value="${slot.idx}" onchange="toggleActivitySelect(this, ${slot.idx})">
+                    <span>${slot.time12}</span>
+                    <select id="act_select_${slot.idx}" style="font-size:0.7rem; display:none;">
+                        <option value="Break 1">Break 1</option>
+                        <option value="Lunch">Lunch</option>
+                        <option value="Break 2">Break 2</option>
+                    </select>
+                `;
+                chipsContainer.appendChild(div);
+            });
+        }
+    }
+
+    window.toggleActivitySelect = function(checkbox, hour) {
+        const select = document.getElementById(`act_select_${hour}`);
+        if (select) select.style.display = checkbox.checked ? 'inline-block' : 'none';
+    };
+
+    function saveAgentForm() {
+        const idVal = document.getElementById('editAgentId').value;
+        const name = document.getElementById('agentNameInput').value.trim();
+        const dept = document.getElementById('agentDeptInput').value;
+
+        if (!name) return;
+
+        const hoursObj = {};
+        const checkboxes = document.querySelectorAll('#hourChipsContainer input[type="checkbox"]:checked');
+        checkboxes.forEach(cb => {
+            const idx = parseInt(cb.value, 10);
+            const select = document.getElementById(`act_select_${idx}`);
+            hoursObj[idx] = select ? select.value : "Break 1";
+        });
+
+        if (idVal) {
+            const ag = masterAgentsDB.find(a => a.id == idVal);
+            if (ag) {
+                ag.name = name;
+                ag.dept = dept;
+                ag.hours = hoursObj;
+            }
+        } else {
+            const newId = masterAgentsDB.length > 0 ? Math.max(...masterAgentsDB.map(a => a.id)) + 1 : 1;
+            masterAgentsDB.push({ id: newId, name: name, dept: dept, hours: hoursObj });
+        }
+
+        recountRosterFromMasterDB();
+        syncPatternFromMasterDB();
+        saveAgentsDBToFirebase();
+        renderMgmtAgentsTable();
+        document.getElementById('agentFormCard').style.display = 'none';
+    }
+</script>
+
 </body>
 </html>
