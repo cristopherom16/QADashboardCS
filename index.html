@@ -525,7 +525,7 @@
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
                   <th class="p-2 min-w-[120px]">Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
-                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA Total</th><th class="p-2 text-center col-num">Convs</th><th class="p-2 text-center col-num">Resp Time</th><th class="p-2 text-center col-num">SLA Missed</th><th class="p-2 text-center col-num">CSAT</th><th class="p-2 text-center col-num">DSAT</th><th class="p-2 text-center col-num">Good</th><th class="p-2 text-center col-num">Bad</th><th class="p-2 text-center col-num">Total Surv</th>
+                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA Total</th><th class="p-2 text-center col-num">Convs</th><th class="p-2 text-center col-aht">Resp Time</th><th class="p-2 text-center col-num">SLA Missed</th><th class="p-2 text-center col-num">CSAT</th><th class="p-2 text-center col-num">DSAT</th><th class="p-2 text-center col-num">Good</th><th class="p-2 text-center col-num">Bad</th><th class="p-2 text-center col-num">Total Surv</th>
                   <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center text-[#ebbd31] min-w-[140px]">Resolution</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[55px]">Actions</th>
                 </tr>
               </thead>
@@ -554,7 +554,7 @@
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
                   <th class="p-2 min-w-[120px]">Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
-                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA Total</th><th class="p-2 text-center col-num">Convs</th><th class="p-2 text-center col-num">Resp Time</th><th class="p-2 text-center col-num">SLA Missed</th><th class="p-2 text-center col-num">CSAT</th><th class="p-2 text-center col-num">DSAT</th><th class="p-2 text-center col-num">Good</th><th class="p-2 text-center col-num">Bad</th><th class="p-2 text-center col-num">Total Surv</th>
+                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA Total</th><th class="p-2 text-center col-num">Convs</th><th class="p-2 text-center col-aht">Resp Time</th><th class="p-2 text-center col-num">SLA Missed</th><th class="p-2 text-center col-num">CSAT</th><th class="p-2 text-center col-num">DSAT</th><th class="p-2 text-center col-num">Good</th><th class="p-2 text-center col-num">Bad</th><th class="p-2 text-center col-num">Total Surv</th>
                   <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center text-[#ebbd31] min-w-[140px]">Resolution</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[55px]">Actions</th>
                 </tr>
               </thead>
@@ -872,7 +872,7 @@
     // CONDITIONAL FORMATTING FUNCTIONS
     function applyConditionalFormatting(input, type) {
       if (!input) return;
-      const val = parseFloat(input.innerText || input.value) || 0;
+      const val = parseFloat((input.innerText || input.value).toString().replace('%', '')) || 0;
       input.classList.remove('cond-green', 'cond-yellow', 'cond-orange', 'cond-red');
 
       if (type === 'qa') {
@@ -902,7 +902,7 @@
       } else {
         select.innerHTML = `
           <option value="group1">1. QA Performance (QA Total)</option>
-          <option value="group2">2. Case Activity & CSAT/DSAT (Conversations, CSAT, DSAT & First Response Mins)</option>
+          <option value="group2">2. Case Activity & CSAT/DSAT (Conversations, CSAT, DSAT & First Response Time)</option>
           <option value="group3">3. Surveys & SLA Misses (Good, Bad & Total Surveys)</option>
         `;
       }
@@ -1062,6 +1062,12 @@
       updateAgentCount(tableId);
     }
 
+    function formatPercentVal(val) {
+      if (val === undefined || val === null || val === '') return '0%';
+      let strVal = val.toString().trim().replace('%', '');
+      return (strVal === '' || isNaN(strVal)) ? '0%' : `${strVal}%`;
+    }
+
     function appendCasesRowToTable(tableId, agent = ["New Agent", "Task", "Branch", "Leader", "Schedule"]) {
       const tbody = document.querySelector(`#${tableId} tbody`);
       const tr = document.createElement('tr');
@@ -1070,6 +1076,9 @@
       const actionPlan = agent[13] || 'N/A';
       const resolutionVal = agent[14] || 'N/A';
       const commentText = agent[15] || '';
+
+      const csatFormatted = formatPercentVal(agent[9]);
+      const dsatFormatted = formatPercentVal(agent[10]);
 
       tr.innerHTML = `
         <td class="p-1"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="renderTableChart('${tableId}')"></td>
@@ -1080,10 +1089,10 @@
         
         <td class="p-1 text-center col-qa"><input type="number" value="${agent[5] || 0}" min="0" max="100" class="cell-input qaTotal font-bold" oninput="updateCasesCalculations(this)"></td>
         <td class="p-1 text-center col-num"><input type="number" value="${agent[6] || 0}" class="cell-input convReplied font-semibold text-white" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center col-num"><input type="number" value="${agent[7] || 0}" class="cell-input avgResponseTime" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-1 text-center col-aht"><input type="text" value="${agent[7] || '0:00:00'}" class="cell-input text-center font-mono text-[11px] aht-input avgResponseTime" oninput="updateCasesCalculations(this)"></td>
         <td class="p-1 text-center col-num"><input type="number" value="${agent[8] || 0}" class="cell-input slaMissed" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center col-num"><input type="number" value="${agent[9] || 0}" class="cell-input csat text-emerald-400 font-bold" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center col-num"><input type="number" value="${agent[10] || 0}" class="cell-input dsat text-rose-400 font-bold" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-1 text-center col-num"><input type="text" value="${csatFormatted}" class="cell-input csat text-emerald-400 font-bold" onfocus="handlePercentFocus(this)" onblur="handlePercentBlur(this)" oninput="updateCasesCalculations(this)"></td>
+        <td class="p-1 text-center col-num"><input type="text" value="${dsatFormatted}" class="cell-input dsat text-rose-400 font-bold" onfocus="handlePercentFocus(this)" onblur="handlePercentBlur(this)" oninput="updateCasesCalculations(this)"></td>
         <td class="p-1 text-center col-num"><input type="number" value="${agent[11] || 0}" class="cell-input surveyGood" oninput="updateCasesCalculations(this)"></td>
         <td class="p-1 text-center col-num"><input type="number" value="${agent[12] || 0}" class="cell-input surveyBad" oninput="updateCasesCalculations(this)"></td>
         <td class="p-1 text-center font-bold text-white totalSurveys col-num">${(parseInt(agent[11]||0) + parseInt(agent[12]||0))}</td>
@@ -1126,6 +1135,16 @@
 
       // Apply conditional formatting for Cases
       applyConditionalFormatting(tr.querySelector('.qaTotal'), 'qa');
+    }
+
+    function handlePercentFocus(input) {
+      let rawVal = input.value.replace('%', '').trim();
+      input.value = rawVal;
+      setTimeout(() => { input.select(); }, 50);
+    }
+
+    function handlePercentBlur(input) {
+      input.value = formatPercentVal(input.value);
     }
 
     // MANEJO DE GUARDADO Y CARGA DE NOTAS GENERALES DEL MES / SEMANA EN FIREBASE
@@ -1227,8 +1246,8 @@
         ahtScore = agentRow.querySelector('.aht-input')?.value || '00:00:00';
       } else {
         qaScore = parseFloat(agentRow.querySelector('.qaTotal')?.value) || 0;
-        const respTime = parseFloat(agentRow.querySelector('.avgResponseTime')?.value) || 0;
-        ahtScore = `${respTime} min (Avg Response)`;
+        const respTime = agentRow.querySelector('.avgResponseTime')?.value || '0:00:00';
+        ahtScore = `${respTime} (Avg Response)`;
       }
 
       document.getElementById('agent-dept').innerText = isPhone ? 'Customer Support - Phones' : 'Customer Support - Cases';
@@ -1518,27 +1537,24 @@
         let qaSum = 0, qaCount = 0;
         let csatSum = 0, csatCount = 0;
         let totalConvs = 0;
-        let totalRespTime = 0, respTimeCount = 0;
 
         activeTables.forEach(tableId => {
           const rows = document.querySelectorAll(`#${tableId} tbody tr`);
           rows.forEach(row => {
             const qaVal = parseFloat(row.querySelector('.qaTotal')?.value) || 0;
-            const csatVal = parseFloat(row.querySelector('.csat')?.value) || 0;
+            const csatVal = parseFloat((row.querySelector('.csat')?.value || '0').replace('%', '')) || 0;
             const convs = parseInt(row.querySelector('.convReplied')?.value) || 0;
-            const respTime = parseFloat(row.querySelector('.avgResponseTime')?.value) || 0;
 
             if (qaVal > 0) { qaSum += qaVal; qaCount++; }
             if (csatVal > 0) { csatSum += csatVal; csatCount++; }
-            if (respTime > 0) { totalRespTime += respTime; respTimeCount++; }
             totalConvs += convs;
           });
         });
 
         document.getElementById('kpi-qa1').innerText = qaCount ? Math.round(qaSum / qaCount) : '0';
-        document.getElementById('kpi-qa2').innerText = csatCount ? Math.round(csatSum / csatCount) : '0';
+        document.getElementById('kpi-qa2').innerText = csatCount ? Math.round(csatSum / csatCount) + '%' : '0%';
         document.getElementById('kpi-total').innerText = totalConvs.toLocaleString();
-        document.getElementById('kpi-daily').innerText = respTimeCount ? (totalRespTime / respTimeCount).toFixed(1) + ' min' : '0 min';
+        document.getElementById('kpi-daily').innerText = totalConvs ? Math.round(totalConvs / 5) : '0';
       }
     }
 
@@ -1600,17 +1616,15 @@
           rows.forEach(r => qaTotData.push(parseFloat(r.querySelector('.qaTotal')?.value) || 0));
           datasetsMap.push({ label: 'QA Total', data: qaTotData, backgroundColor: '#ebbd31' });
         } else if (groupOption === 'group2') {
-          const convData = [], csatData = [], dsatData = [], respData = [];
+          const convData = [], csatData = [], dsatData = [];
           rows.forEach(r => {
             convData.push(parseFloat(r.querySelector('.convReplied')?.value) || 0);
-            csatData.push(parseFloat(r.querySelector('.csat')?.value) || 0);
-            dsatData.push(parseFloat(r.querySelector('.dsat')?.value) || 0);
-            respData.push(parseFloat(r.querySelector('.avgResponseTime')?.value) || 0);
+            csatData.push(parseFloat((r.querySelector('.csat')?.value || '0').replace('%', '')) || 0);
+            dsatData.push(parseFloat((r.querySelector('.dsat')?.value || '0').replace('%', '')) || 0);
           });
           datasetsMap.push({ label: 'Conversations Replied', data: convData, backgroundColor: '#38bdf8' });
-          datasetsMap.push({ label: 'CSAT Score', data: csatData, backgroundColor: '#34d399' });
-          datasetsMap.push({ label: 'DSAT Score', data: dsatData, backgroundColor: '#f87171' });
-          datasetsMap.push({ label: 'Avg First Resp Time (m)', data: respData, backgroundColor: '#a78bfa' });
+          datasetsMap.push({ label: 'CSAT Score (%)', data: csatData, backgroundColor: '#34d399' });
+          datasetsMap.push({ label: 'DSAT Score (%)', data: dsatData, backgroundColor: '#f87171' });
         } else {
           const gData = [], bData = [], tData = [], slaData = [];
           rows.forEach(r => {
