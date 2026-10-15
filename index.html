@@ -554,7 +554,7 @@
               <thead class="bg-[#141824] text-slate-300 uppercase font-semibold">
                 <tr>
                   <th class="p-2 min-w-[120px]">Name</th><th class="p-2 cell-task">Task</th><th class="p-2 cell-branch">Branch</th><th class="p-2 cell-leaders">Leaders</th><th class="p-2 cell-schedule">Schedule</th>
-                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA Total</th><th class="p-2 text-center col-num">Convs</th><th class="p-2 text-center col-aht">Resp Time</th><th class="p-2 text-center col-num">SLA Missed</th><th class="p-2 text-center col-num">CSAT</th><th class="p-2 text-center col-num">DSAT</th><th class="p-2 text-center col-num">Good</th><th class="p-2 text-center col-num">Bad</th><th class="p-2 text-center col-num">Total Surv</th>
+                  <th class="p-2 text-center text-[#ebbd31] col-qa">QA 1</th><th class="p-2 text-center text-[#ebbd31] col-qa">QA 2</th><th class="p-2 text-center text-[#ebbd31] col-qa">AVG QA</th><th class="p-2 text-center col-num">Convs</th><th class="p-2 text-center col-aht">Resp Time</th><th class="p-2 text-center col-num">SLA Missed</th><th class="p-2 text-center col-num">CSAT</th><th class="p-2 text-center col-num">DSAT</th><th class="p-2 text-center col-num">Good</th><th class="p-2 text-center col-num">Bad</th><th class="p-2 text-center col-num">Total Surv</th>
                   <th class="p-2 text-center text-[#ebbd31] min-w-[100px]">Action Plan</th><th class="p-2 text-center text-[#ebbd31] min-w-[140px]">Resolution</th><th class="p-2 text-center min-w-[130px]">Comments</th><th class="p-2 text-center min-w-[55px]">Actions</th>
                 </tr>
               </thead>
@@ -901,7 +901,7 @@
         `;
       } else {
         select.innerHTML = `
-          <option value="group1">1. QA Performance (QA Total)</option>
+          <option value="group1">1. QA Performance (QA Total / QA 1 vs QA 2 vs AVG QA)</option>
           <option value="group2">2. Case Activity & CSAT/DSAT (Conversations, CSAT, DSAT & First Response Time)</option>
           <option value="group3">3. Surveys & SLA Misses (Good, Bad & Total Surveys)</option>
         `;
@@ -1073,68 +1073,150 @@
       const tr = document.createElement('tr');
       tr.className = "hover:bg-slate-800/40 transition-colors";
 
-      const actionPlan = agent[13] || 'N/A';
-      const resolutionVal = agent[14] || 'N/A';
-      const commentText = agent[15] || '';
+      const isMxCases = tableId === 'table-cases-mx';
 
-      const csatFormatted = formatPercentVal(agent[9]);
-      const dsatFormatted = formatPercentVal(agent[10]);
+      if (isMxCases) {
+        const qa1 = parseFloat(agent[5]) || 0;
+        const qa2 = parseFloat(agent[6]) || 0;
+        const avgQa = (qa1 > 0 && qa2 > 0) ? Math.round((qa1 + qa2) / 2) : Math.round(qa1 || qa2 || 0);
 
-      tr.innerHTML = `
-        <td class="p-1"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="renderTableChart('${tableId}')"></td>
-        <td class="p-1"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text cell-task text-slate-300"></td>
-        <td class="p-1"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text cell-branch text-slate-300"></td>
-        <td class="p-1"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text cell-leaders text-slate-300"></td>
-        <td class="p-1"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text cell-schedule text-slate-400 text-[10px]"></td>
-        
-        <td class="p-1 text-center col-qa"><input type="number" value="${agent[5] || 0}" min="0" max="100" class="cell-input qaTotal font-bold" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center col-num"><input type="number" value="${agent[6] || 0}" class="cell-input convReplied font-semibold text-white" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center col-aht"><input type="text" value="${agent[7] || '0:00:00'}" class="cell-input text-center font-mono text-[11px] aht-input avgResponseTime" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center col-num"><input type="number" value="${agent[8] || 0}" class="cell-input slaMissed" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center col-num"><input type="text" value="${csatFormatted}" class="cell-input csat text-emerald-400 font-bold" onfocus="handlePercentFocus(this)" onblur="handlePercentBlur(this)" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center col-num"><input type="text" value="${dsatFormatted}" class="cell-input dsat text-rose-400 font-bold" onfocus="handlePercentFocus(this)" onblur="handlePercentBlur(this)" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center col-num"><input type="number" value="${agent[11] || 0}" class="cell-input surveyGood" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center col-num"><input type="number" value="${agent[12] || 0}" class="cell-input surveyBad" oninput="updateCasesCalculations(this)"></td>
-        <td class="p-1 text-center font-bold text-white totalSurveys col-num">${(parseInt(agent[11]||0) + parseInt(agent[12]||0))}</td>
+        const convs = agent[7] || 0;
+        const respTime = agent[8] || '0:00:00';
+        const slaMissed = agent[9] || 0;
+        const csatFormatted = formatPercentVal(agent[10]);
+        const dsatFormatted = formatPercentVal(agent[11]);
+        const surveyGood = parseInt(agent[12]||0);
+        const surveyBad = parseInt(agent[13]||0);
+        const totalSurv = surveyGood + surveyBad;
 
-        <td class="p-1 text-center">
-          <select class="cell-input action-plan-select text-[#ebbd31] font-medium text-[10px]" onchange="renderResolutionCell(this)">
-            <option value="N/A" ${actionPlan === 'N/A' ? 'selected' : ''}>N/A</option>
-            <option value="Coaching" ${actionPlan === 'Coaching' ? 'selected' : ''}>Coaching</option>
-            <option value="Feedback" ${actionPlan === 'Feedback' ? 'selected' : ''}>Feedback</option>
-            <option value="Accountability Session" ${actionPlan === 'Accountability Session' ? 'selected' : ''}>Accountability Session</option>
-            <option value="Disciplinary Action" ${actionPlan === 'Disciplinary Action' ? 'selected' : ''}>Disciplinary Action</option>
-          </select>
-        </td>
+        const actionPlan = agent[14] || 'N/A';
+        const resolutionVal = agent[15] || 'N/A';
+        const commentText = agent[16] || '';
 
-        <td class="p-1 text-center td-resolution min-w-[140px]"></td>
+        tr.innerHTML = `
+          <td class="p-1"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="renderTableChart('${tableId}')"></td>
+          <td class="p-1"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text cell-task text-slate-300"></td>
+          <td class="p-1"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text cell-branch text-slate-300"></td>
+          <td class="p-1"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text cell-leaders text-slate-300"></td>
+          <td class="p-1"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text cell-schedule text-slate-400 text-[10px]"></td>
+          
+          <td class="p-1 text-center col-qa"><input type="number" value="${qa1}" min="0" max="100" class="cell-input qa1 font-bold" oninput="updateCasesCalculations(this)"></td>
+          <td class="p-1 text-center col-qa"><input type="number" value="${qa2}" min="0" max="100" class="cell-input qa2 font-bold" oninput="updateCasesCalculations(this)"></td>
+          <td class="p-1 text-center col-qa font-bold text-[#ebbd31] avg-qa">${avgQa}</td>
 
-        <td class="p-1">
-          <div class="comment-container">
-            <textarea placeholder="Add comments..." class="cell-input cell-comment-area text-slate-300" onfocus="handleCommentFocus(this)" oninput="updateCommentPopover(this)">${commentText}</textarea>
-            <div class="comment-popover">${commentText || "Sin comentarios..."}</div>
-          </div>
-        </td>
-        
-        <td class="p-1 text-center">
-          <div class="flex items-center justify-center space-x-1">
-            <button onclick="saveRow(this)" class="text-amber-400 hover:text-amber-300 p-1 transition-colors" title="Save Row">
-              <i class="fa-solid fa-floppy-disk text-xs"></i>
-            </button>
-            <button onclick="deleteAgentRow(this, '${tableId}')" class="text-rose-400 hover:text-rose-300 p-1 transition-colors" title="Delete Agent">
-              <i class="fa-solid fa-trash-can text-xs"></i>
-            </button>
-          </div>
-        </td>
-      `;
+          <td class="p-1 text-center col-num"><input type="number" value="${convs}" class="cell-input convReplied font-semibold text-white" oninput="updateCasesCalculations(this)"></td>
+          <td class="p-1 text-center col-aht"><input type="text" value="${respTime}" class="cell-input text-center font-mono text-[11px] aht-input avgResponseTime" oninput="updateCasesCalculations(this)"></td>
+          <td class="p-1 text-center col-num"><input type="number" value="${slaMissed}" class="cell-input slaMissed" oninput="updateCasesCalculations(this)"></td>
+          <td class="p-1 text-center col-num"><input type="text" value="${csatFormatted}" class="cell-input csat text-emerald-400 font-bold" onfocus="handlePercentFocus(this)" onblur="handlePercentBlur(this)" oninput="updateCasesCalculations(this)"></td>
+          <td class="p-1 text-center col-num"><input type="text" value="${dsatFormatted}" class="cell-input dsat text-rose-400 font-bold" onfocus="handlePercentFocus(this)" onblur="handlePercentBlur(this)" oninput="updateCasesCalculations(this)"></td>
+          <td class="p-1 text-center col-num"><input type="number" value="${surveyGood}" class="cell-input surveyGood" oninput="updateCasesCalculations(this)"></td>
+          <td class="p-1 text-center col-num"><input type="number" value="${surveyBad}" class="cell-input surveyBad" oninput="updateCasesCalculations(this)"></td>
+          <td class="p-1 text-center font-bold text-white totalSurveys col-num">${totalSurv}</td>
 
-      tbody.appendChild(tr);
+          <td class="p-1 text-center">
+            <select class="cell-input action-plan-select text-[#ebbd31] font-medium text-[10px]" onchange="renderResolutionCell(this)">
+              <option value="N/A" ${actionPlan === 'N/A' ? 'selected' : ''}>N/A</option>
+              <option value="Coaching" ${actionPlan === 'Coaching' ? 'selected' : ''}>Coaching</option>
+              <option value="Feedback" ${actionPlan === 'Feedback' ? 'selected' : ''}>Feedback</option>
+              <option value="Accountability Session" ${actionPlan === 'Accountability Session' ? 'selected' : ''}>Accountability Session</option>
+              <option value="Disciplinary Action" ${actionPlan === 'Disciplinary Action' ? 'selected' : ''}>Disciplinary Action</option>
+            </select>
+          </td>
 
-      const selectElem = tr.querySelector('.action-plan-select');
-      if (selectElem) renderResolutionCell(selectElem, resolutionVal);
+          <td class="p-1 text-center td-resolution min-w-[140px]"></td>
 
-      // Apply conditional formatting for Cases
-      applyConditionalFormatting(tr.querySelector('.qaTotal'), 'qa');
+          <td class="p-1">
+            <div class="comment-container">
+              <textarea placeholder="Add comments..." class="cell-input cell-comment-area text-slate-300" onfocus="handleCommentFocus(this)" oninput="updateCommentPopover(this)">${commentText}</textarea>
+              <div class="comment-popover">${commentText || "Sin comentarios..."}</div>
+            </div>
+          </td>
+          
+          <td class="p-1 text-center">
+            <div class="flex items-center justify-center space-x-1">
+              <button onclick="saveRow(this)" class="text-amber-400 hover:text-amber-300 p-1 transition-colors" title="Save Row">
+                <i class="fa-solid fa-floppy-disk text-xs"></i>
+              </button>
+              <button onclick="deleteAgentRow(this, '${tableId}')" class="text-rose-400 hover:text-rose-300 p-1 transition-colors" title="Delete Agent">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            </div>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+
+        const selectElem = tr.querySelector('.action-plan-select');
+        if (selectElem) renderResolutionCell(selectElem, resolutionVal);
+
+        applyConditionalFormatting(tr.querySelector('.qa1'), 'qa');
+        applyConditionalFormatting(tr.querySelector('.qa2'), 'qa');
+        applyConditionalFormatting(tr.querySelector('.avg-qa'), 'qa');
+
+      } else {
+
+        const actionPlan = agent[13] || 'N/A';
+        const resolutionVal = agent[14] || 'N/A';
+        const commentText = agent[15] || '';
+
+        const csatFormatted = formatPercentVal(agent[9]);
+        const dsatFormatted = formatPercentVal(agent[10]);
+
+        tr.innerHTML = `
+          <td class="p-1"><input type="text" value="${agent[0] || 'New Agent'}" class="cell-input cell-input-name text-white font-semibold" oninput="renderTableChart('${tableId}')"></td>
+          <td class="p-1"><input type="text" value="${agent[1] || 'Task'}" class="cell-input cell-input-text cell-task text-slate-300"></td>
+          <td class="p-1"><input type="text" value="${agent[2] || 'Branch'}" class="cell-input cell-input-text cell-branch text-slate-300"></td>
+          <td class="p-1"><input type="text" value="${agent[3] || 'Leader'}" class="cell-input cell-input-text cell-leaders text-slate-300"></td>
+          <td class="p-1"><input type="text" value="${agent[4] || 'Schedule'}" class="cell-input cell-input-text cell-schedule text-slate-400 text-[10px]"></td>
+          
+          <td class="p-1 text-center col-qa"><input type="number" value="${agent[5] || 0}" min="0" max="100" class="cell-input qaTotal font-bold" oninput="updateCasesCalculations(this)"></td>
+          <td class="p-1 text-center col-num"><input type="number" value="${agent[6] || 0}" class="cell-input convReplied font-semibold text-white" oninput="updateCasesCalculations(this)"></td>
+          <td class="p-1 text-center col-aht"><input type="text" value="${agent[7] || '0:00:00'}" class="cell-input text-center font-mono text-[11px] aht-input avgResponseTime" oninput="updateCasesCalculations(this)"></td>
+          <td class="p-1 text-center col-num"><input type="number" value="${agent[8] || 0}" class="cell-input slaMissed" oninput="updateCasesCalculations(this)"></td>
+          <td class="p-1 text-center col-num"><input type="text" value="${csatFormatted}" class="cell-input csat text-emerald-400 font-bold" onfocus="handlePercentFocus(this)" onblur="handlePercentBlur(this)" oninput="updateCasesCalculations(this)"></td>
+          <td class="p-1 text-center col-num"><input type="text" value="${dsatFormatted}" class="cell-input dsat text-rose-400 font-bold" onfocus="handlePercentFocus(this)" onblur="handlePercentBlur(this)" oninput="updateCasesCalculations(this)"></td>
+          <td class="p-1 text-center col-num"><input type="number" value="${agent[11] || 0}" class="cell-input surveyGood" oninput="updateCasesCalculations(this)"></td>
+          <td class="p-1 text-center col-num"><input type="number" value="${agent[12] || 0}" class="cell-input surveyBad" oninput="updateCasesCalculations(this)"></td>
+          <td class="p-1 text-center font-bold text-white totalSurveys col-num">${(parseInt(agent[11]||0) + parseInt(agent[12]||0))}</td>
+
+          <td class="p-1 text-center">
+            <select class="cell-input action-plan-select text-[#ebbd31] font-medium text-[10px]" onchange="renderResolutionCell(this)">
+              <option value="N/A" ${actionPlan === 'N/A' ? 'selected' : ''}>N/A</option>
+              <option value="Coaching" ${actionPlan === 'Coaching' ? 'selected' : ''}>Coaching</option>
+              <option value="Feedback" ${actionPlan === 'Feedback' ? 'selected' : ''}>Feedback</option>
+              <option value="Accountability Session" ${actionPlan === 'Accountability Session' ? 'selected' : ''}>Accountability Session</option>
+              <option value="Disciplinary Action" ${actionPlan === 'Disciplinary Action' ? 'selected' : ''}>Disciplinary Action</option>
+            </select>
+          </td>
+
+          <td class="p-1 text-center td-resolution min-w-[140px]"></td>
+
+          <td class="p-1">
+            <div class="comment-container">
+              <textarea placeholder="Add comments..." class="cell-input cell-comment-area text-slate-300" onfocus="handleCommentFocus(this)" oninput="updateCommentPopover(this)">${commentText}</textarea>
+              <div class="comment-popover">${commentText || "Sin comentarios..."}</div>
+            </div>
+          </td>
+          
+          <td class="p-1 text-center">
+            <div class="flex items-center justify-center space-x-1">
+              <button onclick="saveRow(this)" class="text-amber-400 hover:text-amber-300 p-1 transition-colors" title="Save Row">
+                <i class="fa-solid fa-floppy-disk text-xs"></i>
+              </button>
+              <button onclick="deleteAgentRow(this, '${tableId}')" class="text-rose-400 hover:text-rose-300 p-1 transition-colors" title="Delete Agent">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            </div>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+
+        const selectElem = tr.querySelector('.action-plan-select');
+        if (selectElem) renderResolutionCell(selectElem, resolutionVal);
+
+        applyConditionalFormatting(tr.querySelector('.qaTotal'), 'qa');
+      }
     }
 
     function handlePercentFocus(input) {
@@ -1241,7 +1323,7 @@
       let qaScore = 0;
       let ahtScore = '00:00:00';
 
-      if (isPhone) {
+      if (isPhone || agentRow.querySelector('.avg-qa')) {
         qaScore = parseFloat(agentRow.querySelector('.avg-qa')?.innerText) || 0;
         ahtScore = agentRow.querySelector('.aht-input')?.value || '00:00:00';
       } else {
@@ -1376,13 +1458,15 @@
       activeTables.forEach(tableId => {
         const rows = document.querySelectorAll(`#${tableId} tbody tr`);
         payload[tableId] = [];
+        const isMxCases = tableId === 'table-cases-mx';
         
         rows.forEach(row => {
           const inputs = row.querySelectorAll('input:not(.res-val):not(.res-date):not(.res-text), select:not(.res-opt), textarea:not(.res-val):not(.res-text)');
           const agentArr = [];
+          const actionPlanIdx = isMxCases ? 14 : 13;
           inputs.forEach((ip, idx) => {
             agentArr.push(ip.value);
-            if (idx === 13) {
+            if (idx === actionPlanIdx) {
               agentArr.push(getResolutionValue(row));
             }
           });
@@ -1490,6 +1574,15 @@
 
     function updateCasesCalculations(input) {
       const tr = input.closest('tr');
+      
+      const qa1 = parseFloat(tr.querySelector('.qa1')?.value) || 0;
+      const qa2 = parseFloat(tr.querySelector('.qa2')?.value) || 0;
+      if (tr.querySelector('.avg-qa')) {
+        const avgQa = (qa1 > 0 && qa2 > 0) ? Math.round((qa1 + qa2) / 2) : Math.round(qa1 || qa2 || 0);
+        tr.querySelector('.avg-qa').innerText = avgQa;
+        applyConditionalFormatting(tr.querySelector('.avg-qa'), 'qa');
+      }
+
       const good = parseInt(tr.querySelector('.surveyGood')?.value) || 0;
       const bad = parseInt(tr.querySelector('.surveyBad')?.value) || 0;
       const total = good + bad;
@@ -1497,6 +1590,8 @@
       if (tr.querySelector('.totalSurveys')) tr.querySelector('.totalSurveys').innerText = total;
 
       // Apply conditional formatting for Cases
+      applyConditionalFormatting(tr.querySelector('.qa1'), 'qa');
+      applyConditionalFormatting(tr.querySelector('.qa2'), 'qa');
       applyConditionalFormatting(tr.querySelector('.qaTotal'), 'qa');
 
       calculateGlobalKPIs();
@@ -1541,7 +1636,7 @@
         activeTables.forEach(tableId => {
           const rows = document.querySelectorAll(`#${tableId} tbody tr`);
           rows.forEach(row => {
-            const qaVal = parseFloat(row.querySelector('.qaTotal')?.value) || 0;
+            const qaVal = parseFloat(row.querySelector('.qaTotal')?.value || row.querySelector('.avg-qa')?.innerText) || 0;
             const csatVal = parseFloat((row.querySelector('.csat')?.value || '0').replace('%', '')) || 0;
             const convs = parseInt(row.querySelector('.convReplied')?.value) || 0;
 
@@ -1612,9 +1707,21 @@
         }
       } else {
         if (groupOption === 'group1') {
-          const qaTotData = [];
-          rows.forEach(r => qaTotData.push(parseFloat(r.querySelector('.qaTotal')?.value) || 0));
-          datasetsMap.push({ label: 'QA Total', data: qaTotData, backgroundColor: '#ebbd31' });
+          if (tableId === 'table-cases-mx') {
+            const qa1Data = [], qa2Data = [], avgQaData = [];
+            rows.forEach(r => {
+              qa1Data.push(parseFloat(r.querySelector('.qa1')?.value) || 0);
+              qa2Data.push(parseFloat(r.querySelector('.qa2')?.value) || 0);
+              avgQaData.push(parseFloat(r.querySelector('.avg-qa')?.innerText) || 0);
+            });
+            datasetsMap.push({ label: 'QA 1 Score', data: qa1Data, backgroundColor: '#ebbd31' });
+            datasetsMap.push({ label: 'QA 2 Score', data: qa2Data, backgroundColor: '#38bdf8' });
+            datasetsMap.push({ label: 'AVG QA Score', data: avgQaData, backgroundColor: '#34d399' });
+          } else {
+            const qaTotData = [];
+            rows.forEach(r => qaTotData.push(parseFloat(r.querySelector('.qaTotal')?.value) || 0));
+            datasetsMap.push({ label: 'QA Total', data: qaTotData, backgroundColor: '#ebbd31' });
+          }
         } else if (groupOption === 'group2') {
           const convData = [], csatData = [], dsatData = [];
           rows.forEach(r => {
